@@ -1,0 +1,6 @@
+CREATE TABLE status (
+    status_id VARCHAR(10) PRIMARY KEY,
+    status_name VARCHAR(50) NOT NULL,
+    entity_name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
