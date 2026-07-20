@@ -14,11 +14,8 @@ public class Status {
     @Column(name = "status_id")
     private String statusId;
 
-    @Column(name = "status_name", nullable = false)
-    private String statusName;
-
-    @Column(name = "entity_name", nullable = false)
-    private String entityName;
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -43,20 +40,12 @@ public class Status {
         this.statusId = statusId;
     }
 
-    public String getStatusName() {
-        return statusName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -1,6 +1,9 @@
 package com.example.mom.entity;
 
+import com.example.mom.config.CustomIdGenerator;
 import jakarta.persistence.*;
+import org.hibernate.annotations.IdGeneratorType;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,10 +22,6 @@ public class Users {
 
     @Column(name = "password", nullable = false)
     private String password;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Roles roles;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "authority_id", nullable = false)
@@ -68,14 +67,6 @@ public class Users {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Roles getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Roles roles) {
-        this.roles = roles;
     }
 
     public AuthorityProfiles getAuthorityProfiles() {

@@ -18,16 +18,12 @@ public class AuthorityProfilesServiceImpl implements AuthorityProfilesService{
     public AuthorityProfiles saveAuthority(AuthorityProfiles authorityProfiles) {
 
         String lastId = authorityProfilesRepo.findLastAuthorityId();
-
         int nextId = 0;
-
         if (lastId != null) {
             nextId = Integer.parseInt(lastId) + 1;
         }
-
         authorityProfiles.setAuthorityId(String.format("%03d", nextId));
         authorityProfiles.setCreatedAt(LocalDateTime.now());
-
         return authorityProfilesRepo.save(authorityProfiles);
     }
 }

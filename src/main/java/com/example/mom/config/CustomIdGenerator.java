@@ -1,25 +1,47 @@
 package com.example.mom.config;
 
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.id.IdentifierGenerator;
+import com.example.mom.entity.AuthorityProfiles;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
+@Service
+public class CustomIdGenerator {
 
-public class CustomIdGenerator implements IdentifierGenerator {
+    private final JdbcTemplate jdbcTemplate;
 
-    @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object object) {
+    public CustomIdGenerator(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
-        String lastId = (String) session.createNativeQuery(
-                        "SELECT role_id FROM roles ORDER BY role_id DESC LIMIT 1")
-                .getSingleResult();
+    public String generateUserId(AuthorityProfiles authority) {
 
-        int nextId = 0;
+        Long nextValue = jdbcTemplate.queryForObject(
+                "SELECT nextval('user_seq')",
+                Long.class
+        );
 
-        if (lastId != null) {
-            nextId = Integer.parseInt(lastId) + 1;
-        }
+        String authorityId = authority.getAuthorityId();
+        String authorityNumber = authorityId.substring(authorityId.length() - 1);
+        return String.format("U%sA%04d", authorityNumber, nextValue);
+    }
 
-        return String.format("%04d", nextId);
+    public String generateNotebookId() {
+
+        Long nextValue = jdbcTemplate.queryForObject(
+                "SELECT nextval('notebook_seq')",
+                Long.class
+        );
+
+        return String.format("NA%04d", nextValue);
+    }
+
+    public String generatePageId() {
+
+        Long nextValue = jdbcTemplate.queryForObject(
+                "SELECT nextval('page_seq')",
+                Long.class
+        );
+
+        return String.format("PA%04d", nextValue);
     }
 }

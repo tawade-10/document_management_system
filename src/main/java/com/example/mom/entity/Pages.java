@@ -18,8 +18,11 @@ public class Pages {
     private String title;
 
     @Lob
-    @Column(name = "html_content", nullable = false)
-    private String htmlContent;
+    @Column(name = "page_content", nullable = false)
+    private String pageContent;
+
+    @Column(name = "participants", nullable = false)
+    private String participants;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id", nullable = false)
@@ -68,13 +71,13 @@ public class Pages {
         this.title = title;
     }
 
-    public String getHtmlContent() {
-        return htmlContent;
-    }
+    public String getPageContent() { return pageContent; }
 
-    public void setHtmlContent(String htmlContent) {
-        this.htmlContent = htmlContent;
-    }
+    public void setPageContent(String pageContent) { this.pageContent = pageContent; }
+
+    public String getParticipants() { return participants; }
+
+    public void setParticipants(String participants) { this.participants = participants; }
 
     public Status getStatus() {
         return status;

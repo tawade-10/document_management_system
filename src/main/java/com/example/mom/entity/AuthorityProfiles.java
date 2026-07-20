@@ -14,8 +14,8 @@ public class AuthorityProfiles {
     @Column(name = "authority_id", length = 10)
     private String authorityId;
 
-    @Column(name = "profile_name", nullable = false, unique = true, length = 100)
-    private String profileName;
+    @Column(name = "authority_name", nullable = false, unique = true, length = 100)
+    private String authorityName;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -31,13 +31,9 @@ public class AuthorityProfiles {
         this.authorityId = authorityId;
     }
 
-    public String getProfileName() {
-        return profileName;
-    }
+    public String getAuthorityName() { return authorityName; }
 
-    public void setProfileName(String profileName) {
-        this.profileName = profileName;
-    }
+    public void setAuthorityName(String authorityName) { this.authorityName = authorityName; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
