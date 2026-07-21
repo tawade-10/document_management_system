@@ -29,7 +29,7 @@ public class NotebooksController {
     @GetMapping
     public ResponseEntity<List<NotebooksResponseDto>> getAllNotebooks(){
         List<NotebooksResponseDto> allNotebooks = notebooksFacade.getAllNotebooks();
-        return new ResponseEntity<>(allNotebooks, HttpStatus.CREATED);
+        return ResponseEntity.ok(allNotebooks);
     }
 
     @GetMapping("/{notebookId}")
@@ -42,6 +42,12 @@ public class NotebooksController {
     public ResponseEntity<NotebooksResponseDto> updateNotebook(@PathVariable String notebookId, @RequestBody NotebooksRequestDto notebooksRequestDto){
         NotebooksResponseDto notebookById = notebooksFacade.updateNotebook(notebookId,notebooksRequestDto);
         return ResponseEntity.ok(notebookById);
+    }
+
+    @PutMapping("/updateNotebookStatus/{notebookId}")
+    public ResponseEntity<NotebooksResponseDto> updateNotebookStatus(@PathVariable String notebookId){
+        NotebooksResponseDto updatedNotebookStatus = notebooksFacade.updateNotebookStatus(notebookId);
+        return ResponseEntity.ok(updatedNotebookStatus);
     }
 
 }

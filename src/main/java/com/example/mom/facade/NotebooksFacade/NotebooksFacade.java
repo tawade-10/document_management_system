@@ -15,4 +15,6 @@ public interface NotebooksFacade {
     NotebooksResponseDto getNotebookById(String notebookId);
 
     NotebooksResponseDto updateNotebook(String notebookId, NotebooksRequestDto notebooksRequestDto);
+
+    NotebooksResponseDto updateNotebookStatus(String notebookId);
 }

@@ -17,8 +17,7 @@ public class Pages {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @Lob
-    @Column(name = "page_content", nullable = false)
+    @Column(name = "page_content", nullable = false, columnDefinition = "TEXT")
     private String pageContent;
 
     @Column(name = "participants", nullable = false)
@@ -43,7 +42,7 @@ public class Pages {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name = "published_at")

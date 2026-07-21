@@ -1,4 +1,4 @@
-package com.example.mom.service.AuthService;
+package com.example.mom.service.Auth;
 
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;

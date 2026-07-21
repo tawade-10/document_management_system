@@ -5,7 +5,7 @@ import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.CustomUserDetails;
 import com.example.mom.entity.LoginResponse;
-import com.example.mom.service.AuthService.AuthService;
+import com.example.mom.service.Auth.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

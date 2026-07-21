@@ -16,12 +16,15 @@ public class UsersCreationResponseDto {
 
     private LocalDateTime createdAt;
 
+    private String status;
+
     public UsersCreationResponseDto(Users users) {
         this.userId = users.getUserId();
         this.userName = users.getUserName();
         this.email = users.getEmail();
         this.authorityName = users.getAuthorityProfiles().getAuthorityName();
         this.createdAt = users.getCreatedAt();
+        this.status = users.getStatus().getStatusId();
     }
 
     public String getUserId() {
@@ -62,5 +65,13 @@ public class UsersCreationResponseDto {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

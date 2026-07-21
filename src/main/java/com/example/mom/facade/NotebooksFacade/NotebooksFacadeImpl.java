@@ -35,4 +35,9 @@ public class NotebooksFacadeImpl implements NotebooksFacade{
     public NotebooksResponseDto updateNotebook(String notebookId, NotebooksRequestDto notebooksRequestDto) {
         return notebooksService.updateNotebook(notebookId,notebooksRequestDto);
     }
+
+    @Override
+    public NotebooksResponseDto updateNotebookStatus(String notebookId) {
+        return notebooksService.updateNotebookStatus(notebookId);
+    }
 }

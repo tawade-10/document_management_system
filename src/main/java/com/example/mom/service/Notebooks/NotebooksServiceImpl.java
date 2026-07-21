@@ -101,4 +101,27 @@ public class NotebooksServiceImpl implements NotebooksService{
 
         return new NotebooksResponseDto(updatedNotebook);
     }
+
+    @Override
+    public NotebooksResponseDto updateNotebookStatus(String notebookId) {
+
+        Notebooks notebook = notebooksRepo.findById(notebookId)
+                .orElseThrow(() -> new RuntimeException("Notebook Not found"));
+
+        Status currentStatus = notebook.getStatus();
+
+        if ("NAC".equals(currentStatus.getStatusId())) {
+            Status archivedStatus = statusRepo.findById("NAR")
+                    .orElseThrow(() -> new RuntimeException("Archived status not found"));
+            notebook.setStatus(archivedStatus);
+            notebook.setUpdatedAt(LocalDateTime.now());
+        } else {
+            Status activeStatus = statusRepo.findById("NAC")
+                    .orElseThrow(() -> new RuntimeException("Active status not found"));
+            notebook.setStatus(activeStatus);
+            notebook.setUpdatedAt(LocalDateTime.now());
+        }
+        Notebooks savedNotebook = notebooksRepo.save(notebook);
+        return new NotebooksResponseDto(savedNotebook);
+    }
 }

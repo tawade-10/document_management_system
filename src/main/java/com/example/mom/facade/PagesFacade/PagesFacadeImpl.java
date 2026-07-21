@@ -18,4 +18,14 @@ public class PagesFacadeImpl implements PagesFacade{
     public PagesResponseDto createPage(PagesRequestDto pagesRequestDto) {
         return pagesService.createPage(pagesRequestDto);
     }
+
+    @Override
+    public PagesResponseDto publishPage(PagesRequestDto pagesRequestDto) {
+        return pagesService.publishPage(pagesRequestDto);
+    }
+
+    @Override
+    public PagesResponseDto archivePage(String pageId) {
+        return pagesService.archivePage(pageId);
+    }
 }
