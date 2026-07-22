@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/pages")
 public class PagesController {
@@ -24,16 +26,57 @@ public class PagesController {
         return new ResponseEntity<>(createdPage, HttpStatus.CREATED);
     }
 
-    @PostMapping("/publish")
-    public ResponseEntity<PagesResponseDto> publishPage(@Valid @RequestBody PagesRequestDto pagesRequestDto){
-        PagesResponseDto publishedPage = pagesFacade.publishPage(pagesRequestDto);
-        return new ResponseEntity<>(publishedPage, HttpStatus.CREATED);
+    @GetMapping
+    public ResponseEntity<List<PagesResponseDto>> getAllPages(){
+        List<PagesResponseDto> allPages = pagesFacade.getAllPages();
+        return ResponseEntity.ok(allPages);
     }
 
-    @PutMapping("/updatePageStatus/{pageId}")
+    @GetMapping("/{pageId}")
+    public ResponseEntity<PagesResponseDto> getPageById(@PathVariable String pageId){
+        PagesResponseDto pageById = pagesFacade.getPageById(pageId);
+        return ResponseEntity.ok(pageById);
+    }
+
+    @PutMapping("/updatePageDetails/{pageId}")
+    public ResponseEntity<PagesResponseDto> editPageDetails(@PathVariable String pageId, @Valid @RequestBody PagesRequestDto pagesRequestDto){
+        PagesResponseDto editedPage = pagesFacade.editPageDetails(pageId, pagesRequestDto);
+        return ResponseEntity.ok(editedPage);
+    }
+
+    @PutMapping("/publish/{pageId}")
+    public ResponseEntity<PagesResponseDto> publishPage(@PathVariable String pageId, @Valid @RequestBody PagesRequestDto pagesRequestDto){
+        PagesResponseDto publishedPage = pagesFacade.publishPage(pageId, pagesRequestDto);
+        return ResponseEntity.ok(publishedPage);
+    }
+
+    @PutMapping("/archive/{pageId}")
     public ResponseEntity<PagesResponseDto> archivePage(@PathVariable String pageId){
         PagesResponseDto archivedPage = pagesFacade.archivePage(pageId);
-        return new ResponseEntity<>(archivedPage, HttpStatus.CREATED);
+        return ResponseEntity.ok(archivedPage);
     }
 
+    @GetMapping("/published")
+    public ResponseEntity<List<PagesResponseDto>> getPublishedPages(){
+        List<PagesResponseDto> allPublishedPages = pagesFacade.getPublishedPages();
+        return ResponseEntity.ok(allPublishedPages);
+    }
+
+    @GetMapping("/archived")
+    public ResponseEntity<List<PagesResponseDto>> getArchivedPages(){
+        List<PagesResponseDto> allArchivedPages = pagesFacade.getArchivedPages();
+        return ResponseEntity.ok(allArchivedPages);
+    }
+
+    @PutMapping("/{pageId}/notebook/{notebookId}")
+    public ResponseEntity<PagesResponseDto> mapPageToNotebook(@PathVariable String pageId, @PathVariable String notebookId){
+        PagesResponseDto mappedPage = pagesFacade.mapPageToNotebook(pageId, notebookId);
+        return ResponseEntity.ok(mappedPage);
+    }
+
+    @GetMapping("/{notebookId}/pages")
+    public ResponseEntity<List<PagesResponseDto>> getAllPagesByNotebook(@PathVariable String notebookId){
+        List<PagesResponseDto> allPagesByNotebook = pagesFacade.getAllPagesByNotebook(notebookId);
+        return ResponseEntity.ok(allPagesByNotebook);
+    }
 }

@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 
 public class PagesResponseDto {
 
+    private String pageId;
+
     private String title;
 
     private String participants;
@@ -21,7 +23,10 @@ public class PagesResponseDto {
 
     private String status;
 
+    private String notebookId;
+
     public PagesResponseDto(Pages pages) {
+        this.pageId = pages.getPageId();
         this.title = pages.getTitle();
         this.participants = pages.getParticipants();
         this.createdBy = pages.getCreatedBy().getUserName();
@@ -29,9 +34,20 @@ public class PagesResponseDto {
         this.updatedAt = pages.getUpdatedAt();
         this.pageContent = pages.getPageContent();
         this.status = pages.getStatus().getStatusId();
+        this.notebookId = pages.getNotebooks() != null
+                ? pages.getNotebooks().getNotebookId()
+                : null;
     }
 
     public PagesResponseDto() {
+    }
+
+    public String getPageId() {
+        return pageId;
+    }
+
+    public void setPageId(String pageId) {
+        this.pageId = pageId;
     }
 
     public String getTitle() {
@@ -88,5 +104,13 @@ public class PagesResponseDto {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getNotebookId() {
+        return notebookId;
+    }
+
+    public void setNotebookId(String notebookId) {
+        this.notebookId = notebookId;
     }
 }
