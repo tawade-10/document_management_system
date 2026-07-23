@@ -9,7 +9,7 @@ public interface PagesService {
 
     PagesResponseDto createPage(PagesRequestDto pagesRequestDto);
 
-    List<PagesResponseDto> getAllPages();
+    List<PagesResponseDto> getAllPages(String sortBy, String sortDir);
 
     PagesResponseDto getPageById(String pageId);
 

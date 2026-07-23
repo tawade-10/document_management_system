@@ -4,6 +4,9 @@ import com.example.mom.entity.Pages;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PagesResponseDto {
 
@@ -11,7 +14,7 @@ public class PagesResponseDto {
 
     private String title;
 
-    private String participants;
+    private List<String> participants;
 
     private String createdBy;
 
@@ -28,7 +31,11 @@ public class PagesResponseDto {
     public PagesResponseDto(Pages pages) {
         this.pageId = pages.getPageId();
         this.title = pages.getTitle();
-        this.participants = pages.getParticipants();
+        this.participants = pages.getParticipants() == null
+                ? new ArrayList<>()
+                : Arrays.stream(pages.getParticipants().split(","))
+                .map(String::trim)
+                .toList();
         this.createdBy = pages.getCreatedBy().getUserName();
         this.createdAt = pages.getCreatedAt();
         this.updatedAt = pages.getUpdatedAt();
@@ -58,11 +65,11 @@ public class PagesResponseDto {
         this.title = title;
     }
 
-    public String getParticipants() {
+    public List<String> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(String participants) {
+    public void setParticipants(List<String> participants) {
         this.participants = participants;
     }
 

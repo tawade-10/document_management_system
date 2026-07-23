@@ -29,9 +29,6 @@ public class Status {
     @OneToMany(mappedBy = "status", fetch = FetchType.LAZY)
     private List<Pages> pages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "previousStatus", fetch = FetchType.LAZY)
-    private List<Pages> previousStatusPages = new ArrayList<>();
-
     public String getStatusId() {
         return statusId;
     }
@@ -78,13 +75,5 @@ public class Status {
 
     public void setPages(List<Pages> pages) {
         this.pages = pages;
-    }
-
-    public List<Pages> getPreviousStatusPages() {
-        return previousStatusPages;
-    }
-
-    public void setPreviousStatusPages(List<Pages> previousStatusPages) {
-        this.previousStatusPages = previousStatusPages;
     }
 }

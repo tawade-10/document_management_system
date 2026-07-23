@@ -22,8 +22,8 @@ public class PagesFacadeImpl implements PagesFacade{
     }
 
     @Override
-    public List<PagesResponseDto> getAllPages() {
-        return pagesService.getAllPages();
+    public List<PagesResponseDto> getAllPages(String sortBy, String sortDir) {
+        return pagesService.getAllPages(sortBy, sortDir);
     }
 
     @Override

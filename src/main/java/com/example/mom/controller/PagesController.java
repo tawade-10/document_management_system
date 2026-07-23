@@ -27,8 +27,8 @@ public class PagesController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PagesResponseDto>> getAllPages(){
-        List<PagesResponseDto> allPages = pagesFacade.getAllPages();
+    public ResponseEntity<List<PagesResponseDto>> getAllPages(@RequestParam String sortBy, @RequestParam String sortDir){
+        List<PagesResponseDto> allPages = pagesFacade.getAllPages(sortBy,sortDir);
         return ResponseEntity.ok(allPages);
     }
 

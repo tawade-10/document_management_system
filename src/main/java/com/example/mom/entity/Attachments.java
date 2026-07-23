@@ -13,23 +13,27 @@ public class Attachments {
     private String attachmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id", nullable = false)
+    @JoinColumn(name = "page_id", nullable =false)
     private Pages pages;
 
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
 
-    @Column(name = "file_type", nullable = false, length = 50)
+    @Column(name = "file_type", nullable = false, length = 100)
     private String fileType;
 
     @Column(name = "file_path", nullable = false, length = 500)
     private String filePath;
 
-    @Column(name = "file_size")
+    @Column(name = "file_size", nullable = false)
     private Long fileSize;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private Users createdBy;
+
+    @Column(name = "uploaded_at", nullable = false, updatable = false)
+    private LocalDateTime uploadedAt;
 
     public String getAttachmentId() {
         return attachmentId;
@@ -79,11 +83,19 @@ public class Attachments {
         this.fileSize = fileSize;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public Users getCreatedBy() {
+        return createdBy;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedBy(Users createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public void setUploadedAt(LocalDateTime uploadedAt) {
+        this.uploadedAt = uploadedAt;
     }
 }

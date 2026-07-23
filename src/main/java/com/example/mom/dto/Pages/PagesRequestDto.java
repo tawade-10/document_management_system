@@ -1,14 +1,17 @@
 package com.example.mom.dto.Pages;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+
+import java.util.List;
 
 public class PagesRequestDto {
 
     @NotBlank(message = "Title cannot be empty")
     private String title;
 
-    @NotBlank(message = "Participants cannot be empty")
-    private String participants;
+    @NotEmpty(message = "Please add at least one participant")
+    private List<String> participants;
 
     @NotBlank(message = "Page content cannot be empty")
     private String pageContent;
@@ -21,11 +24,11 @@ public class PagesRequestDto {
         this.title = title;
     }
 
-    public String getParticipants() {
+    public List<String> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(String participants) {
+    public void setParticipants(List<String> participants) {
         this.participants = participants;
     }
 

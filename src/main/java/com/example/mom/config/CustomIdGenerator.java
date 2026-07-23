@@ -44,4 +44,14 @@ public class CustomIdGenerator {
 
         return String.format("PA%04d", nextValue);
     }
+
+    public String generateAttachmentId() {
+
+        Long nextValue = jdbcTemplate.queryForObject(
+                "SELECT nextval('attachment_seq')",
+                Long.class
+        );
+
+        return String.format("AA%04d", nextValue);
+    }
 }

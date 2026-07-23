@@ -20,16 +20,12 @@ public class Pages {
     @Column(name = "page_content", nullable = false, columnDefinition = "TEXT")
     private String pageContent;
 
-    @Column(name = "participants", nullable = false)
+    @Column(name = "participants", nullable = false, columnDefinition = "TEXT")
     private String participants;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id", nullable = false)
     private Status status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "previous_status_id")
-    private Status previousStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "notebook_id")
@@ -74,9 +70,13 @@ public class Pages {
 
     public void setPageContent(String pageContent) { this.pageContent = pageContent; }
 
-    public String getParticipants() { return participants; }
+    public String getParticipants() {
+        return participants;
+    }
 
-    public void setParticipants(String participants) { this.participants = participants; }
+    public void setParticipants(String participants) {
+        this.participants = participants;
+    }
 
     public Status getStatus() {
         return status;
@@ -84,14 +84,6 @@ public class Pages {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public Status getPreviousStatus() {
-        return previousStatus;
-    }
-
-    public void setPreviousStatus(Status previousStatus) {
-        this.previousStatus = previousStatus;
     }
 
     public Notebooks getNotebooks() {

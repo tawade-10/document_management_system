@@ -1,11 +1,16 @@
 package com.example.mom.service.Email;
 
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
 @Service
-public class EmailServiceImpl implements EmailService{
+public class EmailServiceImpl{
 
     private final JavaMailSender javaMailSender;
 
@@ -13,13 +18,21 @@ public class EmailServiceImpl implements EmailService{
         this.javaMailSender = javaMailSender;
     }
 
-    @Override
-    public void sendSimpleMessage(String to, String subject, String text) {
+    public void sendSimpleMessage(String to, String subject, String text, String attachment) throws MessagingException {
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message,true);
+        mimeMessageHelper.setFrom("tawadeshubham10@gmail.com");
+        mimeMessageHelper.setTo(to);
+        mimeMessageHelper.setText(text);
+        mimeMessageHelper.setSubject(subject);
+
+        if (attachment != null && !attachment.isBlank()) {
+            FileSystemResource file = new FileSystemResource(new File(attachment));
+            mimeMessageHelper.addAttachment(file.getFilename(), file);
+        }
+
+        System.out.println("Mail with attachment sent successfully");
 
         javaMailSender.send(message);
     }

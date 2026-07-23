@@ -13,6 +13,8 @@ public interface NotebooksService {
 
     NotebooksResponseDto getNotebookById(String notebookId);
 
+    List<NotebooksResponseDto> getArchivedNotebooks();
+
     NotebooksResponseDto updateNotebook(String notebookId, NotebooksRequestDto notebooksRequestDto);
 
     NotebooksResponseDto updateNotebookStatus(String notebookId);

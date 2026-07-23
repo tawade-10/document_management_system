@@ -32,6 +32,11 @@ public class NotebooksFacadeImpl implements NotebooksFacade{
     }
 
     @Override
+    public List<NotebooksResponseDto> getArchivedNotebooks() {
+        return notebooksService.getArchivedNotebooks();
+    }
+
+    @Override
     public NotebooksResponseDto updateNotebook(String notebookId, NotebooksRequestDto notebooksRequestDto) {
         return notebooksService.updateNotebook(notebookId,notebooksRequestDto);
     }

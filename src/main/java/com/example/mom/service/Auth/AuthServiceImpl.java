@@ -11,7 +11,8 @@ import com.example.mom.repository.AuthorityProfilesRepo;
 import com.example.mom.repository.PasswordResetTokenRepo;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
-import com.example.mom.service.Email.EmailService;
+import com.example.mom.service.Email.EmailServiceImpl;
+import jakarta.mail.MessagingException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +34,17 @@ public class AuthServiceImpl implements AuthService{
 
     private final PasswordResetTokenRepo passwordResetTokenRepo;
 
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UsersRepo usersRepo, StatusRepo statusRepo, AuthorityProfilesRepo authorityProfilesRepo, CustomIdGenerator customIdGenerator, PasswordResetTokenRepo passwordResetTokenRepo, EmailService emailService, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UsersRepo usersRepo, StatusRepo statusRepo, AuthorityProfilesRepo authorityProfilesRepo, CustomIdGenerator customIdGenerator, PasswordResetTokenRepo passwordResetTokenRepo, EmailServiceImpl emailServiceImpl, PasswordEncoder passwordEncoder) {
         this.usersRepo = usersRepo;
         this.statusRepo = statusRepo;
         this.authorityProfilesRepo = authorityProfilesRepo;
         this.customIdGenerator = customIdGenerator;
         this.passwordResetTokenRepo = passwordResetTokenRepo;
-        this.emailService = emailService;
+        this.emailServiceImpl = emailServiceImpl;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -105,11 +106,16 @@ public class AuthServiceImpl implements AuthService{
 
         String resetLink = "http://localhost:5173/reset-password?token=" + token;
 
-        emailService.sendSimpleMessage(
-                user.getEmail(),
-                "Reset Your Password",
-                "Click the link to reset password:\n" + resetLink
-        );
+        try {
+            emailServiceImpl.sendSimpleMessage(
+                    user.getEmail(),
+                    "Reset Your Password",
+                    "Click the link to reset password:\n" + resetLink,
+                    null
+            );
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
 
         return "Reset link sent to your email.";
     }

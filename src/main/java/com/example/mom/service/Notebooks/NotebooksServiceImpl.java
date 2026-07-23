@@ -3,7 +3,9 @@ package com.example.mom.service.Notebooks;
 import com.example.mom.config.CustomIdGenerator;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
+import com.example.mom.dto.Pages.PagesResponseDto;
 import com.example.mom.entity.Notebooks;
+import com.example.mom.entity.Pages;
 import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.NotebooksRepo;
@@ -85,6 +87,14 @@ public class NotebooksServiceImpl implements NotebooksService{
                 .orElseThrow(() -> new RuntimeException("Notebook Not found"));
 
         return new NotebooksResponseDto(notebook);
+    }
+
+    @Override
+    public List<NotebooksResponseDto> getArchivedNotebooks() {
+
+        List<Notebooks> archivedNotebooks = notebooksRepo.findByStatus_StatusId("NAR");
+
+        return archivedNotebooks.stream().map(NotebooksResponseDto::new).collect(Collectors.toList());
     }
 
     @Override

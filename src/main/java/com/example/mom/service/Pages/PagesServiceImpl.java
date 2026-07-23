@@ -11,6 +11,7 @@ import com.example.mom.repository.NotebooksRepo;
 import com.example.mom.repository.PagesRepo;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ public class PagesServiceImpl implements PagesService{
 
         pages.setPageId(customIdGenerator.generatePageId());
         pages.setTitle(pagesRequestDto.getTitle());
-        pages.setParticipants(pagesRequestDto.getParticipants());
+        pages.setParticipants(String.join(",", pagesRequestDto.getParticipants()));
         pages.setCreatedBy(users);
         pages.setCreatedAt(LocalDateTime.now());
         pages.setPageContent(pagesRequestDto.getPageContent());
@@ -73,8 +74,14 @@ public class PagesServiceImpl implements PagesService{
     }
 
     @Override
-    public List<PagesResponseDto> getAllPages() {
-        List<Pages> pages = pagesRepo.findAll();
+    public List<PagesResponseDto> getAllPages(String sortBy, String sortDir) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc")
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC,
+                sortBy
+        );
+        List<Pages> pages = pagesRepo.findAll(sort);
         return pages.stream().map(PagesResponseDto::new).collect(Collectors.toList());
     }
 
@@ -90,15 +97,17 @@ public class PagesServiceImpl implements PagesService{
     @Override
     public PagesResponseDto editPageDetails(String pageId, PagesRequestDto pagesRequestDto) {
 
-        Pages page = pagesRepo.findById(pageId)
+        Pages pages = pagesRepo.findById(pageId)
                 .orElseThrow(() -> new RuntimeException("Page Not found"));
 
-        page.setTitle(pagesRequestDto.getTitle());
-        page.setParticipants(pagesRequestDto.getParticipants());
-        page.setUpdatedAt(LocalDateTime.now());
-        page.setPageContent(pagesRequestDto.getPageContent());
+        pages.setTitle(pagesRequestDto.getTitle());
+        pages.setParticipants(
+                String.join(",", pagesRequestDto.getParticipants())
+        );
+        pages.setUpdatedAt(LocalDateTime.now());
+        pages.setPageContent(pagesRequestDto.getPageContent());
 
-        Pages editedPage = pagesRepo.save(page);
+        Pages editedPage = pagesRepo.save(pages);
 
         return new PagesResponseDto(editedPage);
     }

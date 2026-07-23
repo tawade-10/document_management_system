@@ -38,6 +38,12 @@ public class NotebooksController {
         return ResponseEntity.ok(notebookById);
     }
 
+    @GetMapping("/archived")
+    public ResponseEntity<List<NotebooksResponseDto>> getArchivedNotebooks(){
+        List<NotebooksResponseDto> archivedNotebooks = notebooksFacade.getArchivedNotebooks();
+        return ResponseEntity.ok(archivedNotebooks);
+    }
+
     @PutMapping("/{notebookId}")
     public ResponseEntity<NotebooksResponseDto> updateNotebook(@PathVariable String notebookId, @RequestBody NotebooksRequestDto notebooksRequestDto){
         NotebooksResponseDto notebookById = notebooksFacade.updateNotebook(notebookId,notebooksRequestDto);
