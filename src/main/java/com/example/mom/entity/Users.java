@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.IdGeneratorType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -36,6 +38,9 @@ public class Users {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "attachedBy")
+    private List<Attachments> attachments = new ArrayList<>();
 
     public String getUserId() {
         return userId;
@@ -99,5 +104,13 @@ public class Users {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<Attachments> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<Attachments> attachments) {
+        this.attachments = attachments;
     }
 }

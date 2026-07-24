@@ -2,13 +2,13 @@ package com.example.mom.dto.Attachments;
 
 public class AttachmentsRequestDto {
 
-    private String fileId;
+    private String pageId;
 
-    public String getFileId() {
-        return fileId;
+    public String getPageId() {
+        return pageId;
     }
 
-    public void setFileId(String fileId) {
-        this.fileId = fileId;
+    public void setPageId(String pageId) {
+        this.pageId = pageId;
     }
 }

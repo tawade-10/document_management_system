@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/notebooks/**").authenticated()
                         .requestMatchers("/api/pages/**").authenticated()
+                        .requestMatchers("/api/attachments/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

@@ -29,11 +29,11 @@ public class Attachments {
     private Long fileSize;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private Users createdBy;
+    @JoinColumn(name = "attached_by", nullable = false)
+    private Users attachedBy;
 
-    @Column(name = "uploaded_at", nullable = false, updatable = false)
-    private LocalDateTime uploadedAt;
+    @Column(name = "attached_at", nullable = false, updatable = false)
+    private LocalDateTime attachedAt;
 
     public String getAttachmentId() {
         return attachmentId;
@@ -83,19 +83,19 @@ public class Attachments {
         this.fileSize = fileSize;
     }
 
-    public Users getCreatedBy() {
-        return createdBy;
+    public Users getAttachedBy() {
+        return attachedBy;
     }
 
-    public void setCreatedBy(Users createdBy) {
-        this.createdBy = createdBy;
+    public void setAttachedBy(Users attachedBy) {
+        this.attachedBy = attachedBy;
     }
 
-    public LocalDateTime getUploadedAt() {
-        return uploadedAt;
+    public LocalDateTime getAttachedAt() {
+        return attachedAt;
     }
 
-    public void setUploadedAt(LocalDateTime uploadedAt) {
-        this.uploadedAt = uploadedAt;
+    public void setAttachedAt(LocalDateTime attachedAt) {
+        this.attachedAt = attachedAt;
     }
 }

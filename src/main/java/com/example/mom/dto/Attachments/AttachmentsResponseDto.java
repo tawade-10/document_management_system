@@ -7,19 +7,21 @@ import java.time.LocalDateTime;
 public class AttachmentsResponseDto {
 
     private String attachmentId;
+    private String pageId;
     private String fileName;
     private String fileType;
     private Long fileSize;
-    private String createdBy;
-    private LocalDateTime uploadedAt;
+    private String attachedBy;
+    private LocalDateTime attachedAt;
 
     public AttachmentsResponseDto(Attachments attachment) {
         this.attachmentId = attachment.getAttachmentId();
+        this.pageId = attachment.getPages().getPageId();
         this.fileName = attachment.getFileName();
         this.fileType = attachment.getFileType();
         this.fileSize = attachment.getFileSize();
-        this.createdBy = attachment.getCreatedBy().getUserName();
-        this.uploadedAt = attachment.getUploadedAt();
+        this.attachedBy = attachment.getAttachedBy().getUserName();
+        this.attachedAt = attachment.getAttachedAt();
     }
 
     public String getAttachmentId() {
@@ -28,6 +30,14 @@ public class AttachmentsResponseDto {
 
     public void setAttachmentId(String attachmentId) {
         this.attachmentId = attachmentId;
+    }
+
+    public String getPageId() {
+        return pageId;
+    }
+
+    public void setPageId(String pageId) {
+        this.pageId = pageId;
     }
 
     public String getFileName() {
@@ -54,19 +64,19 @@ public class AttachmentsResponseDto {
         this.fileSize = fileSize;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getAttachedBy() {
+        return attachedBy;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setAttachedBy(String attachedBy) {
+        this.attachedBy = attachedBy;
     }
 
-    public LocalDateTime getUploadedAt() {
-        return uploadedAt;
+    public LocalDateTime getAttachedAt() {
+        return attachedAt;
     }
 
-    public void setUploadedAt(LocalDateTime uploadedAt) {
-        this.uploadedAt = uploadedAt;
+    public void setAttachedAt(LocalDateTime attachedAt) {
+        this.attachedAt = attachedAt;
     }
 }

@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+        import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/attachments")
@@ -20,7 +20,7 @@ public class AttachmentsController {
         this.attachmentsFacade = attachmentsFacade;
     }
 
-    @PostMapping("/{pageId}/attachments")
+    @PostMapping("/{pageId}")
     public ResponseEntity<AttachmentsResponseDto> uploadAttachment(@PathVariable String pageId, @RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(attachmentsFacade.uploadAttachment(pageId, file));
     }
