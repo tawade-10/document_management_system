@@ -1,5 +1,6 @@
 package com.example.mom.facade.UsersFacade;
 
+import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.service.Users.UsersService;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,11 @@ public class UsersFacadeImpl implements UsersFacade{
     @Override
     public UsersCreationResponseDto getUserById(String userId) {
         return usersService.getUserById(userId);
+    }
+
+    @Override
+    public UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto) {
+        return usersService.updateUserDetails(userId, usersCreationRequestDto);
     }
 
     @Override

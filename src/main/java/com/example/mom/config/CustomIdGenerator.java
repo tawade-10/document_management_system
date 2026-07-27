@@ -15,14 +15,26 @@ public class CustomIdGenerator {
 
     public String generateUserId(AuthorityProfiles authority) {
 
-        Long nextValue = jdbcTemplate.queryForObject(
+        Long globalCounter = jdbcTemplate.queryForObject(
                 "SELECT nextval('user_seq')",
                 Long.class
         );
 
-        String authorityId = authority.getAuthorityId();
-        String authorityNumber = authorityId.substring(authorityId.length() - 1);
-        return String.format("U%sA%04d", authorityNumber, nextValue);
+        String authorityDigit = authority.getAuthorityId()
+                .substring(authority.getAuthorityId().length() - 1);
+
+        long adjusted = globalCounter;
+
+        int seriesIndex = (int) ((adjusted - 1) / 9999);
+
+        char series = (char) ('A' + seriesIndex);
+
+        int number = (int) (((adjusted - 1) % 9999) + 1);
+
+        return String.format("U%s%c%04d",
+                authorityDigit,
+                series,
+                number);
     }
 
     public String generateNotebookId() {

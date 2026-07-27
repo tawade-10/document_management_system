@@ -42,27 +42,32 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/notebooks/**").authenticated()
-                        .requestMatchers("/api/pages/**").authenticated()
-                        .requestMatchers("/api/attachments/**").authenticated()
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password"
+                        ).permitAll()
+                        .requestMatchers("/api/auth/register")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN")
+                        .requestMatchers("/api/users/**")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN")
+                        .requestMatchers("/api/notebooks/**")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
+                        .requestMatchers("/api/pages/**")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
+                        .requestMatchers("/api/attachments/**")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
-    @Bean
-    public GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults("");
-    }
-
+    
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);

@@ -1,5 +1,6 @@
 package com.example.mom.service.Users;
 
+import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
@@ -36,6 +37,20 @@ public class UsersServiceImpl implements UsersService{
                 .orElseThrow(() -> new RuntimeException("User Not found"));
 
         return new UsersCreationResponseDto(user);
+    }
+
+    @Override
+    public UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto) {
+
+        Users user = usersRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User Not found"));
+
+        user.setUserName(usersCreationRequestDto.getUserName());
+        user.setEmail(usersCreationRequestDto.getEmail());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        Users updatedUser = usersRepo.save(user);
+        return new UsersCreationResponseDto(updatedUser);
     }
 
     @Override

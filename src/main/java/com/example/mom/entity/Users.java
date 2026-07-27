@@ -1,8 +1,6 @@
 package com.example.mom.entity;
 
-import com.example.mom.config.CustomIdGenerator;
 import jakarta.persistence.*;
-import org.hibernate.annotations.IdGeneratorType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "authority_id", nullable = false)
     private AuthorityProfiles authorityProfiles;
 

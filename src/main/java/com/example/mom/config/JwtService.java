@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -23,28 +24,37 @@ public class JwtService {
 
     private String secretKey = "";
 
-    public JwtService(){
-        try{
+    public JwtService() {
+        try {
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
             SecretKey sk = keyGen.generateKey();
             secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        }catch (NoSuchAlgorithmException e){
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String generateToken(CustomUserDetails users) {
+    public String generateToken(CustomUserDetails userDetails) {
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userName", users.getUsers().getUserName());
-        claims.put("authority", users.getUsers().getAuthorityProfiles().getAuthorityId());
+
+        claims.put("userId", userDetails.getUsers().getUserId());
+        claims.put("userName", userDetails.getUsers().getUserName());
+
+        claims.put(
+                "authorities",
+                userDetails.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()
+        );
 
         long expirationMillis = System.currentTimeMillis() + (1000L * 60 * 60 * 30);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(users.getUsers().getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setSubject(userDetails.getUsername()) // Email
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(expirationMillis))
                 .signWith(getKey())
                 .compact();
@@ -59,7 +69,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    private <T> T extractClaim(String token, Function<Claims,T> claimResolver) {
+    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
         final Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
     }
@@ -73,8 +83,8 @@ public class JwtService {
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String userName = extractUserName(token);
-        return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String username = extractUserName(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -82,6 +92,6 @@ public class JwtService {
     }
 
     private Date extractExpiration(String token) {
-        return extractClaim(token,Claims::getExpiration);
+        return extractClaim(token, Claims::getExpiration);
     }
 }

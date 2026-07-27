@@ -9,6 +9,4 @@ import java.util.Optional;
 
 @Repository
 public interface StatusRepo extends JpaRepository<Status, String> {
-
-    Status findStatusByPageId(Pages page);
 }

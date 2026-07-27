@@ -18,12 +18,12 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void triggerEmail() throws MessagingException {
-        emailServiceImpl.sendSimpleMessage("tawadeshubham10@gmail.com",
-                "This is Body",
-                "This is mail attachment",
-                "/Users/Shubham Tawade/Downloads/SHUBHAM TAWADE RESUME.pdf");
-    }
+//    @EventListener(ApplicationReadyEvent.class)
+//    public void triggerEmail() throws MessagingException {
+//        emailServiceImpl.sendSimpleMessage("tawadeshubham10@gmail.com",
+//                "This is Body",
+//                "This is mail attachment",
+//                "/Users/Shubham Tawade/Downloads/SHUBHAM TAWADE RESUME.pdf");
+//    }
 
 }
