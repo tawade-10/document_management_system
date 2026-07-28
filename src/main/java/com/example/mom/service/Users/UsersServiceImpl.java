@@ -6,6 +6,8 @@ import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,10 +42,18 @@ public class UsersServiceImpl implements UsersService{
     }
 
     @Override
-    public UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto) {
+    public UsersCreationResponseDto updateUserDetails(UsersCreationRequestDto usersCreationRequestDto) {
 
-        Users user = usersRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User Not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users user = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
 
         user.setUserName(usersCreationRequestDto.getUserName());
         user.setEmail(usersCreationRequestDto.getEmail());
@@ -56,8 +66,16 @@ public class UsersServiceImpl implements UsersService{
     @Override
     public UsersCreationResponseDto updateUserStatus(String userId) {
 
-        Users user = usersRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User Not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users user = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
 
         if (user.getStatus().getStatusId().equals("UAC")) {
             Status inactiveStatus = statusRepo.findById("UIA")

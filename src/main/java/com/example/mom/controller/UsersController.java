@@ -20,25 +20,28 @@ public class UsersController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROOT_ADMIN','ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsersCreationResponseDto>> getAllUsers(){
         List<UsersCreationResponseDto> allUsers = usersFacade.getAllUsers();
         return ResponseEntity.ok(allUsers);
     }
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsersCreationResponseDto> getUserById(@PathVariable String userId){
         UsersCreationResponseDto userById = usersFacade.getUserById(userId);
         return ResponseEntity.ok(userById);
     }
 
-    @PutMapping("/update/{userId}")
-    public ResponseEntity<UsersCreationResponseDto> updateUserDetails(@PathVariable String userId, @RequestBody UsersCreationRequestDto usersCreationRequestDto){
-        UsersCreationResponseDto updatedUserDetails = usersFacade.updateUserDetails(userId,usersCreationRequestDto);
+    @PutMapping("/update")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UsersCreationResponseDto> updateUserDetails(@RequestBody UsersCreationRequestDto usersCreationRequestDto){
+        UsersCreationResponseDto updatedUserDetails = usersFacade.updateUserDetails(usersCreationRequestDto);
         return ResponseEntity.ok(updatedUserDetails);
     }
 
-    @PutMapping("/updateUserStatus/{userId}")
+    @PutMapping("/updateStatus/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsersCreationResponseDto> updateUserStatus(@PathVariable String userId){
         UsersCreationResponseDto updatedUserStatus = usersFacade.updateUserStatus(userId);
         return ResponseEntity.ok(updatedUserStatus);

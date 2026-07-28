@@ -1,6 +1,7 @@
 package com.example.mom.service.Pages;
 
 import com.example.mom.config.CustomIdGenerator;
+import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.dto.Pages.PagesRequestDto;
 import com.example.mom.dto.Pages.PagesResponseDto;
 import com.example.mom.entity.Notebooks;
@@ -86,6 +87,25 @@ public class PagesServiceImpl implements PagesService{
     }
 
     @Override
+    public List<PagesResponseDto> getPagesByUser(String sortBy, String sortDir) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users user = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        List<Pages> pages = pagesRepo.findByCreatedBy(user);
+
+        return pages.stream().map(PagesResponseDto::new).toList();
+    }
+
+    @Override
     public PagesResponseDto getPageById(String pageId) {
 
         Pages page = pagesRepo.findById(pageId)
@@ -97,17 +117,28 @@ public class PagesServiceImpl implements PagesService{
     @Override
     public PagesResponseDto editPageDetails(String pageId, PagesRequestDto pagesRequestDto) {
 
-        Pages pages = pagesRepo.findById(pageId)
-                .orElseThrow(() -> new RuntimeException("Page Not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        pages.setTitle(pagesRequestDto.getTitle());
-        pages.setParticipants(
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Cannot update Page Details!"));
+
+        page.setTitle(pagesRequestDto.getTitle());
+        page.setParticipants(
                 String.join(",", pagesRequestDto.getParticipants())
         );
-        pages.setUpdatedAt(LocalDateTime.now());
-        pages.setPageContent(pagesRequestDto.getPageContent());
+        page.setUpdatedAt(LocalDateTime.now());
+        page.setPageContent(pagesRequestDto.getPageContent());
 
-        Pages editedPage = pagesRepo.save(pages);
+        Pages editedPage = pagesRepo.save(page);
 
         return new PagesResponseDto(editedPage);
     }
@@ -115,16 +146,27 @@ public class PagesServiceImpl implements PagesService{
     @Override
     public PagesResponseDto publishPage(String pageId, PagesRequestDto pagesRequestDto) {
 
-        Pages pages = pagesRepo.findById(pageId)
-                .orElseThrow(() -> new RuntimeException("Page Not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Cannot publish Page!"));
 
         Status status = statusRepo.findById("PPB")
                 .orElseThrow(() -> new RuntimeException("Invalid Status!"));
 
-        pages.setStatus(status);
-        pages.setPublishedAt(LocalDateTime.now());
+        page.setStatus(status);
+        page.setPublishedAt(LocalDateTime.now());
 
-        Pages savedPages = pagesRepo.save(pages);
+        Pages savedPages = pagesRepo.save(page);
 
         return new PagesResponseDto(savedPages);
     }
@@ -132,8 +174,19 @@ public class PagesServiceImpl implements PagesService{
     @Override
     public PagesResponseDto archivePage(String pageId) {
 
-        Pages page = pagesRepo.findById(pageId)
-                .orElseThrow(() -> new RuntimeException("Page not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Cannot Archive Page!"));
 
         String currentStatus = page.getStatus().getStatusId();
 
@@ -163,6 +216,28 @@ public class PagesServiceImpl implements PagesService{
     }
 
     @Override
+    public List<PagesResponseDto> getPublishedPagesByUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Status publishedStatus = statusRepo.findById("PPB")
+                .orElseThrow(() -> new RuntimeException("Published status not found"));
+
+        List<Pages> pages = pagesRepo.findByCreatedByAndStatus(loggedInUser, publishedStatus);
+
+        return pages.stream().map(PagesResponseDto::new).toList();
+    }
+
+    @Override
     public List<PagesResponseDto> getArchivedPages() {
 
         List<Pages> archivedPages = pagesRepo.findByStatus_StatusIdIn(List.of("PSA", "PPA"));
@@ -171,23 +246,65 @@ public class PagesServiceImpl implements PagesService{
     }
 
     @Override
+    public List<PagesResponseDto> getArchivedPagesByUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Status savedArchivedStatus = statusRepo.findById("PSA")
+                .orElseThrow(() -> new RuntimeException("Saved Archived status not found"));
+
+        Status publishedArchivedStatus = statusRepo.findById("PPA")
+                .orElseThrow(() -> new RuntimeException("Published Archived status not found"));
+
+        List<Pages> pages = pagesRepo.findByCreatedByAndStatusIn(
+                loggedInUser,
+                List.of(savedArchivedStatus, publishedArchivedStatus)
+        );
+
+        return pages.stream().map(PagesResponseDto::new).toList();
+    }
+
+    @Override
     public PagesResponseDto mapPageToNotebook(String pageId, String notebookId) {
 
-        Notebooks notebook = notebooksRepo.findById(notebookId)
-                .orElseThrow(() -> new RuntimeException("Notebook not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Pages page = pagesRepo.findById(pageId)
-                .orElseThrow(() -> new RuntimeException("Page not found"));
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Notebooks notebook = notebooksRepo.findByNotebookIdAndCreatedBy(notebookId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Notebook not found or access denied."));
+
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Page not found or access denied."));
 
         String status = page.getStatus().getStatusId();
 
-        if ("PSV".equals(status) || "PSA".equals(status)){
+        if ("PSA".equals(status)) {
             throw new RuntimeException("Archived pages cannot be mapped to a notebook.");
         }
 
         page.setNotebooks(notebook);
-        Pages mappedToNotebook = pagesRepo.save(page);
-        return new PagesResponseDto(mappedToNotebook);
+        page.setUpdatedAt(LocalDateTime.now());
+
+        Pages mappedPage = pagesRepo.save(page);
+
+        return new PagesResponseDto(mappedPage);
     }
 
     @Override
@@ -197,5 +314,4 @@ public class PagesServiceImpl implements PagesService{
 
         return pages.stream().map(PagesResponseDto::new).toList();
     }
-
 }

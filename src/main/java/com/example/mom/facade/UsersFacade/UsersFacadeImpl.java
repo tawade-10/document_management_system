@@ -27,8 +27,8 @@ public class UsersFacadeImpl implements UsersFacade{
     }
 
     @Override
-    public UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto) {
-        return usersService.updateUserDetails(userId, usersCreationRequestDto);
+    public UsersCreationResponseDto updateUserDetails(UsersCreationRequestDto usersCreationRequestDto) {
+        return usersService.updateUserDetails(usersCreationRequestDto);
     }
 
     @Override

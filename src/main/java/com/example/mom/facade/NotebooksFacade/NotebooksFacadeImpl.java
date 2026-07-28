@@ -27,13 +27,23 @@ public class NotebooksFacadeImpl implements NotebooksFacade{
     }
 
     @Override
+    public List<NotebooksResponseDto> getNotebooksByUser() {
+        return notebooksService.getNotebooksByUser();
+    }
+
+    @Override
     public NotebooksResponseDto getNotebookById(String notebookId) {
         return notebooksService.getNotebookById(notebookId);
     }
 
     @Override
-    public List<NotebooksResponseDto> getArchivedNotebooks() {
-        return notebooksService.getArchivedNotebooks();
+    public List<NotebooksResponseDto> getAllArchivedNotebooks() {
+        return notebooksService.getAllArchivedNotebooks();
+    }
+
+    @Override
+    public List<NotebooksResponseDto> getArchivedNotebooksByUser() {
+        return notebooksService.getArchivedNotebooksByUser();
     }
 
     @Override

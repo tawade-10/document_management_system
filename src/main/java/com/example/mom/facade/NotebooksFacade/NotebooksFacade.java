@@ -12,9 +12,13 @@ public interface NotebooksFacade {
 
     List<NotebooksResponseDto> getAllNotebooks();
 
+    List<NotebooksResponseDto> getNotebooksByUser();
+
     NotebooksResponseDto getNotebookById(String notebookId);
 
-    List<NotebooksResponseDto> getArchivedNotebooks();
+    List<NotebooksResponseDto> getAllArchivedNotebooks();
+
+    List<NotebooksResponseDto> getArchivedNotebooksByUser();
 
     NotebooksResponseDto updateNotebook(String notebookId, NotebooksRequestDto notebooksRequestDto);
 

@@ -27,6 +27,11 @@ public class PagesFacadeImpl implements PagesFacade{
     }
 
     @Override
+    public List<PagesResponseDto> getPagesByUser(String sortBy, String sortDir) {
+        return pagesService.getPagesByUser(sortBy,sortDir);
+    }
+
+    @Override
     public PagesResponseDto getPageById(String pageId) {
         return pagesService.getPageById(pageId);
     }
@@ -52,8 +57,18 @@ public class PagesFacadeImpl implements PagesFacade{
     }
 
     @Override
+    public List<PagesResponseDto> getPublishedPagesByUser() {
+        return pagesService.getPublishedPagesByUser();
+    }
+
+    @Override
     public List<PagesResponseDto> getArchivedPages() {
         return pagesService.getArchivedPages();
+    }
+
+    @Override
+    public List<PagesResponseDto> getArchivedPagesByUser() {
+        return pagesService.getArchivedPagesByUser();
     }
 
     @Override

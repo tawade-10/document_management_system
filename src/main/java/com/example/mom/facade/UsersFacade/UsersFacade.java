@@ -11,7 +11,7 @@ public interface UsersFacade {
 
     UsersCreationResponseDto getUserById(String userId);
 
-    UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto);
+    UsersCreationResponseDto updateUserDetails(UsersCreationRequestDto usersCreationRequestDto);
 
     UsersCreationResponseDto updateUserStatus(String userId);
 }

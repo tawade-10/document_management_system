@@ -3,9 +3,7 @@ package com.example.mom.service.Notebooks;
 import com.example.mom.config.CustomIdGenerator;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
-import com.example.mom.dto.Pages.PagesResponseDto;
 import com.example.mom.entity.Notebooks;
-import com.example.mom.entity.Pages;
 import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.NotebooksRepo;
@@ -55,7 +53,7 @@ public class NotebooksServiceImpl implements NotebooksService{
         Status activeStatus = statusRepo.findById("NAC")
                 .orElseThrow(() -> new RuntimeException("Invalid Status!"));
 
-        Optional<Notebooks> existingNotebookByName = notebooksRepo.findByName(notebooksRequestDto.getName());
+        Optional<Notebooks> existingNotebookByName = notebooksRepo.findByNameAndCreatedBy(notebooksRequestDto.getName(), users);
         if (existingNotebookByName.isPresent()) {
             return new NotebooksResponseDto(existingNotebookByName.get());
         }
@@ -81,6 +79,25 @@ public class NotebooksServiceImpl implements NotebooksService{
     }
 
     @Override
+    public List<NotebooksResponseDto> getNotebooksByUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users user = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        List<Notebooks> notebooks = notebooksRepo.findByCreatedBy(user);
+
+        return notebooks.stream().map(NotebooksResponseDto::new).toList();
+    }
+
+    @Override
     public NotebooksResponseDto getNotebookById(String notebookId) {
 
         Notebooks notebook = notebooksRepo.findById(notebookId)
@@ -90,7 +107,7 @@ public class NotebooksServiceImpl implements NotebooksService{
     }
 
     @Override
-    public List<NotebooksResponseDto> getArchivedNotebooks() {
+    public List<NotebooksResponseDto> getAllArchivedNotebooks() {
 
         List<Notebooks> archivedNotebooks = notebooksRepo.findByStatus_StatusId("NAR");
 
@@ -98,10 +115,47 @@ public class NotebooksServiceImpl implements NotebooksService{
     }
 
     @Override
+    public List<NotebooksResponseDto> getArchivedNotebooksByUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users user = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Status archivedStatus = statusRepo.findById("NAR")
+                .orElseThrow(() -> new RuntimeException("Archived status not found"));
+
+        List<Notebooks> notebooks = notebooksRepo.findByCreatedByAndStatus(user, archivedStatus);
+
+        return notebooks.stream().map(NotebooksResponseDto::new).toList();
+    }
+
+    @Override
     public NotebooksResponseDto updateNotebook(String notebookId, NotebooksRequestDto notebooksRequestDto) {
 
-        Notebooks notebook = notebooksRepo.findById(notebookId)
-                .orElseThrow(() -> new RuntimeException("Notebook Not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Notebooks notebook = notebooksRepo.findByNotebookIdAndCreatedBy(notebookId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Cannot update Notebook Details!"));
+
+        if ("NAR".equals(notebook.getStatus().getStatusId())) {
+            throw new RuntimeException("Archived notebooks cannot be edited.");
+        }
 
         notebook.setName(notebooksRequestDto.getName());
         notebook.setDescription(notebooksRequestDto.getDescription());
@@ -115,22 +169,33 @@ public class NotebooksServiceImpl implements NotebooksService{
     @Override
     public NotebooksResponseDto updateNotebookStatus(String notebookId) {
 
-        Notebooks notebook = notebooksRepo.findById(notebookId)
-                .orElseThrow(() -> new RuntimeException("Notebook Not found"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Status currentStatus = notebook.getStatus();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
 
-        if ("NAC".equals(currentStatus.getStatusId())) {
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Notebooks notebook = notebooksRepo.findByNotebookIdAndCreatedBy(notebookId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Cannot Archive/Unarchive notebook!"));
+
+        if ("NAC".equals(notebook.getStatus().getStatusId())) {
             Status archivedStatus = statusRepo.findById("NAR")
                     .orElseThrow(() -> new RuntimeException("Archived status not found"));
             notebook.setStatus(archivedStatus);
-            notebook.setUpdatedAt(LocalDateTime.now());
-        } else {
+        } else if ("NAR".equals(notebook.getStatus().getStatusId())) {
             Status activeStatus = statusRepo.findById("NAC")
                     .orElseThrow(() -> new RuntimeException("Active status not found"));
             notebook.setStatus(activeStatus);
-            notebook.setUpdatedAt(LocalDateTime.now());
+        } else {
+            throw new RuntimeException("Invalid notebook status");
         }
+        notebook.setUpdatedAt(LocalDateTime.now());
+
         Notebooks savedNotebook = notebooksRepo.save(notebook);
         return new NotebooksResponseDto(savedNotebook);
     }

@@ -10,6 +10,7 @@ CREATE TABLE users (
     CONSTRAINT fk_users_authority
         FOREIGN KEY (authority_id)
         REFERENCES authority_profiles(authority_id),
+
     CONSTRAINT fk_users_status
         FOREIGN KEY (status_id)
         REFERENCES status(status_id)

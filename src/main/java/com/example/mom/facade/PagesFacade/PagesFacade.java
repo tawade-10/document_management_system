@@ -12,6 +12,8 @@ public interface PagesFacade {
 
     List<PagesResponseDto> getAllPages(String sortBy, String sortDir);
 
+    List<PagesResponseDto> getPagesByUser(String sortBy, String sortDir);
+
     PagesResponseDto getPageById(String pageId);
 
     PagesResponseDto editPageDetails(String pageId, @Valid PagesRequestDto pagesRequestDto);
@@ -22,7 +24,11 @@ public interface PagesFacade {
 
     List<PagesResponseDto> getPublishedPages();
 
+    List<PagesResponseDto> getPublishedPagesByUser();
+
     List<PagesResponseDto> getArchivedPages();
+
+    List<PagesResponseDto> getArchivedPagesByUser();
 
     PagesResponseDto mapPageToNotebook(String pageId, String notebookId);
 

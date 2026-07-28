@@ -44,9 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-                        .requestMatchers(
+                                "/v3/api-docs/**",
                                 "/api/auth/login",
                                 "/api/auth/forgot-password",
                                 "/api/auth/reset-password"
@@ -56,9 +54,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**")
                         .hasAnyRole("ROOT_ADMIN", "ADMIN")
                         .requestMatchers("/api/notebooks/**")
-                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER", "SUPER_USER")
                         .requestMatchers("/api/pages/**")
-                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER", "SUPER_USER")
                         .requestMatchers("/api/attachments/**")
                         .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
                         .anyRequest().authenticated()
