@@ -6,6 +6,7 @@ import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.CustomUserDetails;
 import com.example.mom.entity.LoginResponse;
 import com.example.mom.service.Auth.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -63,5 +64,10 @@ public class AuthFacadeImpl implements AuthFacade{
     @Override
     public String resetPassword(String token, String newPassword) {
         return authService.resetPassword(token,newPassword);
+    }
+
+    @Override
+    public Object logoutCustomer(HttpServletRequest request) {
+        return authService.logoutCustomer(request);
     }
 }

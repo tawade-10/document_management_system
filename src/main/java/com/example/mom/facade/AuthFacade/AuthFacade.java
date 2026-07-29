@@ -2,6 +2,7 @@ package com.example.mom.facade.AuthFacade;
 
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 public interface AuthFacade {
@@ -13,4 +14,6 @@ public interface AuthFacade {
     String generateResetToken(String email);
 
     String resetPassword(String token, String newPassword);
+
+    Object logoutCustomer(HttpServletRequest request);
 }

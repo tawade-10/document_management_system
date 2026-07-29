@@ -1,18 +1,15 @@
 package com.example.mom.service.Auth;
 
 import com.example.mom.config.CustomIdGenerator;
+import com.example.mom.config.JwtService;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
-import com.example.mom.entity.AuthorityProfiles;
-import com.example.mom.entity.PasswordResetToken;
-import com.example.mom.entity.Status;
-import com.example.mom.entity.Users;
-import com.example.mom.repository.AuthorityProfilesRepo;
-import com.example.mom.repository.PasswordResetTokenRepo;
-import com.example.mom.repository.StatusRepo;
-import com.example.mom.repository.UsersRepo;
+import com.example.mom.entity.*;
+import com.example.mom.repository.*;
 import com.example.mom.service.Email.EmailServiceImpl;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +35,11 @@ public class AuthServiceImpl implements AuthService{
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UsersRepo usersRepo, StatusRepo statusRepo, AuthorityProfilesRepo authorityProfilesRepo, CustomIdGenerator customIdGenerator, PasswordResetTokenRepo passwordResetTokenRepo, EmailServiceImpl emailServiceImpl, PasswordEncoder passwordEncoder) {
+    private final BlacklistedTokenRepo blacklistedTokenRepo;
+
+    private final JwtService jwtService;
+
+    public AuthServiceImpl(UsersRepo usersRepo, StatusRepo statusRepo, AuthorityProfilesRepo authorityProfilesRepo, CustomIdGenerator customIdGenerator, PasswordResetTokenRepo passwordResetTokenRepo, EmailServiceImpl emailServiceImpl, PasswordEncoder passwordEncoder, BlacklistedTokenRepo blacklistedTokenRepo, JwtService jwtService) {
         this.usersRepo = usersRepo;
         this.statusRepo = statusRepo;
         this.authorityProfilesRepo = authorityProfilesRepo;
@@ -46,6 +47,8 @@ public class AuthServiceImpl implements AuthService{
         this.passwordResetTokenRepo = passwordResetTokenRepo;
         this.emailServiceImpl = emailServiceImpl;
         this.passwordEncoder = passwordEncoder;
+        this.blacklistedTokenRepo = blacklistedTokenRepo;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -138,5 +141,31 @@ public class AuthServiceImpl implements AuthService{
         passwordResetTokenRepo.delete(resetToken);
 
         return "Password reset successful";
+    }
+
+    @Override
+    public String logoutCustomer(HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Authorization token missing");
+        }
+
+        String token = authHeader.substring(7);
+
+        if (blacklistedTokenRepo.existsByToken(token)) {
+            return "Already logged out";
+        }
+
+        BlacklistedToken blacklistedToken = new BlacklistedToken();
+        blacklistedToken.setToken(token);
+        blacklistedToken.setExpiryTime(jwtService.extractExpiration(token)
+                        .toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime());
+        blacklistedTokenRepo.save(blacklistedToken);
+        SecurityContextHolder.clearContext();
+        return "Logged out successfully";
     }
 }
