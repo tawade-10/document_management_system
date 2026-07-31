@@ -1,0 +1,15 @@
+.layout{
+    height:100vh;
+    overflow:hidden;
+}
+
+.layout-content{
+    position:fixed;
+    top:70px;
+    bottom:45px;
+    left:0;
+    right:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:25px;
+}

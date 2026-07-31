@@ -82,6 +82,7 @@ export default function Login() {
                 authority.includes("SUPER_USER")
             ) {
                 storeUserData(data);
+                window.dispatchEvent(new Event("login"));
                 toast.success("Login Successful");
                 navigate("/homepage");
             } else {
@@ -119,6 +120,7 @@ export default function Login() {
              authority.includes("ROOT_ADMIN")
          ) {
              storeUserData(data);
+             window.dispatchEvent(new Event("login"));
              toast.success("Admin Login Successful");
              navigate("/admin");
          } else {

@@ -1,0 +1,106 @@
+.users-table-container {
+    width: 100%;
+    margin-top: 40px;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* ===========================
+   TABLE HEADER
+=========================== */
+
+.table thead {
+    background: #212529;
+    color: #ffffff;
+}
+
+.table thead th {
+    background: #212529 !important;
+    color: #ffffff !important;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+    padding: 16px;
+    border: none;
+    font-size: 15px;
+}
+
+/* Rounded Corners */
+
+.table thead th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.table thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+/* ===========================
+   TABLE BODY
+=========================== */
+
+.table tbody td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 15px;
+    border-color: #e9ecef;
+    font-size: 14px;
+}
+
+.table tbody tr {
+    transition: all 0.25s ease;
+}
+
+.table tbody tr:hover {
+    background: #f8f9fa;
+    transform: scale(1.002);
+}
+
+/* ===========================
+   STATUS BADGES
+=========================== */
+
+.status-badge {
+    display: inline-block;
+    min-width: 95px;
+    padding: 7px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 992px) {
+
+    .users-table-container {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 950px;
+    }
+
+}
