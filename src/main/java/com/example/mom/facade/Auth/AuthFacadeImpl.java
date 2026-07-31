@@ -1,4 +1,4 @@
-package com.example.mom.facade.AuthFacade;
+package com.example.mom.facade.Auth;
 
 import com.example.mom.config.JwtService;
 import com.example.mom.dto.Users.UsersCreationRequestDto;

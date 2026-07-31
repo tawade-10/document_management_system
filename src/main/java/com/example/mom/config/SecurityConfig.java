@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER", "SUPER_USER")
                         .requestMatchers("/api/attachments/**")
                         .hasAnyRole("ROOT_ADMIN", "ADMIN", "USER")
+                        .requestMatchers("/api/search/**")
+                        .hasAnyRole("ROOT_ADMIN", "ADMIN", "SUPER_USER", "USER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

@@ -1,4 +1,4 @@
-package com.example.mom.facade.AttachmentsFacade;
+package com.example.mom.facade.Attachments;
 
 import com.example.mom.dto.Attachments.AttachmentsResponseDto;
 import org.jspecify.annotations.Nullable;

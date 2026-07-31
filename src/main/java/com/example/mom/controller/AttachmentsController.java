@@ -1,11 +1,7 @@
 package com.example.mom.controller;
 
 import com.example.mom.dto.Attachments.AttachmentsResponseDto;
-import com.example.mom.dto.Pages.PagesRequestDto;
-import com.example.mom.dto.Pages.PagesResponseDto;
-import com.example.mom.facade.AttachmentsFacade.AttachmentsFacade;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import com.example.mom.facade.Attachments.AttachmentsFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
         import org.springframework.web.multipart.MultipartFile;

@@ -1,4 +1,4 @@
-package com.example.mom.facade.UsersFacade;
+package com.example.mom.facade.Users;
 
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;

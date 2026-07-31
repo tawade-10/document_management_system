@@ -2,7 +2,7 @@ package com.example.mom.controller;
 
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
-import com.example.mom.facade.NotebooksFacade.NotebooksFacade;
+import com.example.mom.facade.Notebooks.NotebooksFacade;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

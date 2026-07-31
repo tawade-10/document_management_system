@@ -1,4 +1,4 @@
-package com.example.mom.facade.PagesFacade;
+package com.example.mom.facade.Pages;
 
 import com.example.mom.dto.Pages.PagesRequestDto;
 import com.example.mom.dto.Pages.PagesResponseDto;

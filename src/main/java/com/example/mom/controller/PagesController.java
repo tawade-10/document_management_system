@@ -2,7 +2,7 @@ package com.example.mom.controller;
 
 import com.example.mom.dto.Pages.PagesRequestDto;
 import com.example.mom.dto.Pages.PagesResponseDto;
-import com.example.mom.facade.PagesFacade.PagesFacade;
+import com.example.mom.facade.Pages.PagesFacade;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

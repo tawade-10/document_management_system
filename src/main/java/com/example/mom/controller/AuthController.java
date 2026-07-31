@@ -2,7 +2,7 @@ package com.example.mom.controller;
 
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
-import com.example.mom.facade.AuthFacade.AuthFacade;
+import com.example.mom.facade.Auth.AuthFacade;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

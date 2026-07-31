@@ -1,4 +1,4 @@
-package com.example.mom.facade.NotebooksFacade;
+package com.example.mom.facade.Notebooks;
 
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;

@@ -2,7 +2,7 @@ package com.example.mom.controller;
 
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
-import com.example.mom.facade.UsersFacade.UsersFacade;
+import com.example.mom.facade.Users.UsersFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
