@@ -14,7 +14,7 @@ export default function Footer() {
                 <span>Version 1.0.0</span>
             </div>
             <div className="footer-right">
-                <span>© {currentYear} Gain Infotech Pvt. Ltd.</span>
+                <span>© {currentYear}</span>
             </div>
         </footer>
     );

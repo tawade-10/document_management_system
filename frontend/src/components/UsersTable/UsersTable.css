@@ -1,106 +1,102 @@
 .users-table-container {
     width: 100%;
-    margin-top: 40px;
-    overflow-x: auto;
-}
-
-.table {
-    width: 100%;
-    margin-bottom: 0;
-    border-collapse: separate;
-    border-spacing: 0;
+    max-height: 390px;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    margin-top: 50px;
 }
 
-/* ===========================
-   TABLE HEADER
-=========================== */
-
-.table thead {
-    background: #212529;
-    color: #ffffff;
+.users-table-container::-webkit-scrollbar {
+    width: 8px;
 }
 
-.table thead th {
-    background: #212529 !important;
-    color: #ffffff !important;
-    text-align: center;
-    vertical-align: middle;
+.users-table-container::-webkit-scrollbar-thumb {
+    background: #c8c8c8;
+    border-radius: 20px;
+}
+
+.users-table-container::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+.users-table-container table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.users-table-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0d6efd;
+    color: white;
     font-weight: 600;
-    padding: 16px;
-    border: none;
     font-size: 15px;
+    letter-spacing: 0.4px;
+    text-align: center;
+    padding: 14px;
+    border: none;
 }
 
-/* Rounded Corners */
-
-.table thead th:first-child {
-    border-top-left-radius: 12px;
-}
-
-.table thead th:last-child {
-    border-top-right-radius: 12px;
-}
-
-/* ===========================
-   TABLE BODY
-=========================== */
-
-.table tbody td {
+.users-table-container tbody td {
+    padding: 14px;
     text-align: center;
     vertical-align: middle;
-    padding: 15px;
-    border-color: #e9ecef;
     font-size: 14px;
+    border-top: 1px solid #ececec;
 }
 
-.table tbody tr {
-    transition: all 0.25s ease;
+.users-table-container tbody tr:nth-child(even) {
+    background: #fafafa;
 }
 
-.table tbody tr:hover {
-    background: #f8f9fa;
-    transform: scale(1.002);
+.users-table-container tbody tr {
+    transition: background-color 0.25s ease;
+    cursor: pointer;
 }
 
-/* ===========================
-   STATUS BADGES
-=========================== */
+.users-table-container tbody tr:hover {
+    background: #edf5ff;
+}
+
+.users-table-container tbody td:first-child {
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+.users-table-container tbody td:nth-child(2) {
+    font-weight: 500;
+}
+
+.users-table-container tbody td:nth-child(3) {
+    color: #555;
+}
+
+.users-table-container tbody td:nth-child(4) {
+    font-weight: 600;
+    color: #6c63ff;
+}
 
 .status-badge {
     display: inline-block;
-    min-width: 95px;
-    padding: 7px 14px;
+    min-width: 90px;
+    padding: 7px 18px;
     border-radius: 50px;
     font-size: 13px;
     font-weight: 600;
 }
 
-.active {
-    background: #d1fae5;
-    color: #065f46;
+.status-badge.active {
+    background: #d4f5df;
+    color: #0b7d37;
 }
 
-.inactive {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-/* ===========================
-   RESPONSIVE
-=========================== */
-
-@media (max-width: 992px) {
-
-    .users-table-container {
-        overflow-x: auto;
-    }
-
-    .table {
-        min-width: 950px;
-    }
-
+.status-badge.inactive {
+    background: #ffe0e0;
+    color: #d62f2f;
 }

@@ -84,7 +84,7 @@ export default function Login() {
                 storeUserData(data);
                 window.dispatchEvent(new Event("login"));
                 toast.success("Login Successful");
-                navigate("/homepage");
+                navigate("/user-homepage");
             } else {
                 toast.error(
                     "You are not authorized to access the User Portal."

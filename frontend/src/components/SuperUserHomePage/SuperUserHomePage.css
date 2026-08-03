@@ -1,0 +1,200 @@
+.superuser-home{
+    margin-top:50px;
+    padding:25px;
+    min-height:100vh;
+
+}
+
+.table-card{
+    background:#fff;
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    padding:25px;
+}
+
+.table-title{
+    font-size:22px;
+    font-weight:700;
+    color:#003366;
+    margin-bottom:20px;
+}
+
+/* Scroll */
+
+.table-container{
+
+    width:100%;
+
+    max-height:500px;
+
+    overflow-y:auto;
+
+    border:1px solid #e8e8e8;
+
+    border-radius:12px;
+
+}
+
+/* Scrollbar */
+
+.table-container::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+.table-container::-webkit-scrollbar-thumb{
+
+    background:#c9c9c9;
+
+    border-radius:20px;
+
+}
+
+/* Table */
+
+.table{
+
+    width:100%;
+
+    margin:0;
+
+    border-collapse:separate;
+
+    border-spacing:0;
+
+}
+
+.table thead th{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:100;
+
+    background:#0d6efd;
+
+    color:white;
+
+    text-align:center;
+
+    padding:14px;
+
+    border:none;
+
+}
+
+.table tbody td{
+
+    padding:14px;
+
+    text-align:center;
+
+    border-top:1px solid #ececec;
+
+}
+
+.table tbody tr{
+
+    transition:.25s;
+
+}
+
+.table tbody tr:hover{
+
+    background:#edf5ff;
+
+}
+
+/* Alternate */
+
+.table tbody tr:nth-child(even){
+
+    background:#fafafa;
+
+}
+
+/* Type Badge */
+
+.type{
+
+    display:inline-block;
+
+    min-width:90px;
+
+    padding:6px 14px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.notebook{
+
+    background:#d8ecff;
+
+    color:#0d6efd;
+
+}
+
+.page{
+
+    background:#efe2ff;
+
+    color:#6f42c1;
+
+}
+
+/* Status */
+
+.status{
+
+    display:inline-block;
+
+    min-width:90px;
+
+    padding:6px 14px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.active{
+
+    background:#d1f7d6;
+
+    color:#157347;
+
+}
+
+.published{
+
+    background:#d1f7d6;
+
+    color:#157347;
+
+}
+
+.draft{
+
+    background:#fff4cc;
+
+    color:#996c00;
+
+}
+
+.archived{
+
+    background:#ffe2e5;
+
+    color:#c92a2a;
+
+}

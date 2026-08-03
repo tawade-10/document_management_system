@@ -1,0 +1,77 @@
+/* ================= TOGGLE ================= */
+
+.toggle-container{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-right:10px;
+    flex-shrink:0;
+}
+
+.toggle-label{
+    font-size:15px;
+    font-weight:500;
+    color:#d6d6d6;
+    white-space:nowrap;
+    transition:0.3s ease;
+    user-select:none;
+}
+
+.toggle-label.active{
+    color:#ffffff;
+    font-weight:700;
+}
+
+.switch{
+    position:relative;
+    display:inline-block;
+    width:68px;          /* increased width */
+    height:34px;         /* increased height */
+    flex-shrink:0;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    background:#8b8b8b;
+    border-radius:40px;
+    transition:0.35s ease;
+}
+
+.slider::before{
+    content:"";
+    position:absolute;
+    width:28px;
+    height:28px;
+    left:3px;
+    top:3px;
+    background:#fff;
+    border-radius:50%;
+    transition:0.35s ease;
+    box-shadow:0 3px 8px rgba(0,0,0,.25);
+}
+
+/* Blue when ON */
+
+.switch input:checked + .slider{
+    background:#0d6efd;
+}
+
+/* IMPORTANT: 68 - 28 - 6 = 34px */
+
+.switch input:checked + .slider::before{
+    transform:translateX(34px);
+}
+
+/* Small hover effect */
+
+.slider:hover{
+    box-shadow:0 0 8px rgba(255,255,255,.35);
+}

@@ -1,5 +1,6 @@
 package com.example.mom.dto.Pages;
 
+import com.example.mom.entity.Notebooks;
 import com.example.mom.entity.Pages;
 import jakarta.validation.constraints.NotBlank;
 

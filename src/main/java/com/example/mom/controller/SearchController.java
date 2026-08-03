@@ -1,6 +1,8 @@
 package com.example.mom.controller;
 
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
+import com.example.mom.dto.Pages.PagesResponseDto;
+import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.Notebooks;
 import com.example.mom.facade.Search.SearchFacade;
 import org.springframework.http.HttpStatus;
@@ -19,10 +21,22 @@ public class SearchController {
         this.searchFacade = searchFacade;
     }
 
-    @GetMapping("/notebook")
+    @GetMapping("/notebooks")
     public ResponseEntity<List<NotebooksResponseDto>> searchNotebooks(@RequestParam String keyword){
         List<NotebooksResponseDto> searchedNotebooks = searchFacade.searchNotebooks(keyword);
         return new ResponseEntity<>(searchedNotebooks, HttpStatus.OK);
+    }
+
+    @GetMapping("/pages")
+    public ResponseEntity<List<PagesResponseDto>> searchPages(@RequestParam String keyword){
+        List<PagesResponseDto> searchedPages = searchFacade.searchPages(keyword);
+        return new ResponseEntity<>(searchedPages, HttpStatus.OK);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UsersCreationResponseDto>> searchUsers(@RequestParam String keyword){
+        List<UsersCreationResponseDto> searchedUsers = searchFacade.searchUsers(keyword);
+        return new ResponseEntity<>(searchedUsers, HttpStatus.OK);
     }
 
 }
