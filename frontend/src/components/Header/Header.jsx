@@ -28,6 +28,45 @@ export default function Header({
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("userName");
 
+   const authorityString = localStorage.getItem("authority") || "";
+
+   const authorities = authorityString
+       .split(",")
+       .map(role => role.trim().toUpperCase());
+
+   const currentRole =
+       localStorage.getItem("currentRole") || "USER";
+
+   const isAdmin = currentRole === "ADMIN";
+   const isSuperUser = currentRole === "SUPER_USER";
+   const isUser = currentRole === "USER";
+
+    const permissions = {
+
+        canManageUsers:
+            isAdmin,
+
+        canCreateNotebook:
+            isUser || isSuperUser,
+
+        canCreatePage:
+            isUser || isSuperUser,
+
+        canViewPages:
+            isUser || isSuperUser,
+
+        canSort:
+            isUser || isSuperUser,
+
+        canFilter:
+            isUser || isSuperUser,
+
+        canToggleRole:
+            !isAdmin &&
+            authorities.includes("USER")
+
+    };
+
     const hideHeaderRoutes = [
         "/",
         "/forgot-password",
@@ -49,84 +88,116 @@ export default function Header({
                     }
                 }
             );
-
             toast.success("Logged out successfully.");
-
         } catch {
-
             toast.error("Logout failed.");
-
         } finally {
-
             localStorage.clear();
             window.dispatchEvent(new Event("login"));
             navigate("/");
-
         }
     };
 
-    return (
+return (
+    <header className="header">
 
-        <header className="header">
+        {/* LEFT */}
+        <div className="header-left">
 
-            <div className="header-left">
+            <div
+                className="logo"
+                onClick={() => navigate("/homepage")}
+            >
+                MOM Portal
+            </div>
 
-                <div
-                    className="logo"
-                    onClick={() => navigate("/homepage")}
+            {permissions.canManageUsers && (
+                <button
+                    className="header-btn blue"
+                    onClick={() => navigate("/admin/add-user")}
                 >
-                    MOM Portal
-                </div>
+                    Add User
+                </button>
+            )}
 
-                <div className="search-container">
+            {permissions.canCreateNotebook && (
+                <button className="header-btn green">
+                    New Notebook
+                </button>
+            )}
 
-                    <input
-                        className="search-input"
-                        type="text"
-                        placeholder="Search Users..."
-                        value={searchKeyword}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
-                    />
+            {permissions.canCreatePage && (
+                <button className="header-btn green">
+                    New Page
+                </button>
+            )}
 
-                    <FaSearch className="search-icon" />
+            {permissions.canViewPages && (
+                <button className="header-btn orange">
+                    View Pages
+                </button>
+            )}
 
-                </div>
+        </div>
+
+        <div className="header-center">
+
+            <div className="search-container">
+
+                <input
+                    className="search-input"
+                    type="text"
+                    placeholder={
+                        permissions.canManageUsers
+                            ? "Search Users..."
+                            : "Search Notebooks / Pages..."
+                    }
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+
+                <FaSearch className="search-icon" />
 
             </div>
 
-<div className="header-right">
+        </div>
 
-    <button className="header-btn success">
-        📒 New Notebook
-    </button>
+        <div className="header-right">
 
-    <button className="header-btn success">
-        📄 New Page
-    </button>
+            {permissions.canSort && (
+                <button className="header-btn gray">
+                    Sort
+                </button>
+            )}
 
-    <button className="header-btn warning">
-        📑 View Pages
-    </button>
+            {permissions.canFilter && (
+                <button className="header-btn gray">
+                    Filter
+                </button>
+            )}
 
-    <ToggleButton />
+            {permissions.canToggleRole && (
+                <ToggleButton />
+            )}
 
-    <span className="welcome-user">
-        Welcome,&nbsp;<b>{username}</b>
-    </span>
+            <span className="welcome-user">
+                Welcome,&nbsp;<b>{username}</b>
+            </span>
 
-    <CgProfile
-        size={30}
-        className="profile-icon"
-    />
+            <CgProfile
+                size={24}
+                className="profile-icon"
+            />
 
-    <button
-        className="logout-btn"
-        onClick={handleLogout}
-    >
-        Logout
-    </button>
+            <button
+                className="logout-btn"
+                onClick={handleLogout}
+            >
+                Logout
+            </button>
 
-</div>
-        </header>
-    );
-}
+        </div>
+
+    </header>
+);
+   }

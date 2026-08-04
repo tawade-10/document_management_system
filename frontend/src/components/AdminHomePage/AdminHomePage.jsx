@@ -1,20 +1,12 @@
-import React, { useState } from "react";
-import Header from "../Header/Header";
+import React from "react";
+import { useOutletContext } from "react-router-dom";
 import UsersTable from "../UsersTable/UsersTable";
 
 export default function AdminHomePage() {
 
-    const [searchKeyword, setSearchKeyword] = useState("");
+    const { searchKeyword } = useOutletContext();
 
     return (
-        <>
-            <Header
-                searchKeyword={searchKeyword}
-                setSearchKeyword={setSearchKeyword}
-            />
-            <UsersTable
-                searchKeyword={searchKeyword}
-            />
-        </>
+        <UsersTable searchKeyword={searchKeyword} />
     );
 }

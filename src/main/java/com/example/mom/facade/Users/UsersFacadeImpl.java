@@ -3,6 +3,7 @@ package com.example.mom.facade.Users;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.service.Users.UsersService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,8 +18,8 @@ public class UsersFacadeImpl implements UsersFacade{
     }
 
     @Override
-    public List<UsersCreationResponseDto> getAllUsers() {
-        return usersService.getAllUsers();
+    public Page<UsersCreationResponseDto> getAllUsers(int page, int size) {
+        return usersService.getAllUsers(page,size);
     }
 
     @Override

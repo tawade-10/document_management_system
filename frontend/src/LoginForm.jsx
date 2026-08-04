@@ -56,32 +56,54 @@ export default function Login() {
         setErrors({});
     };
 
-    const storeUserData = (data) => {
+    const storeUserData = (data, currentRole) => {
+
+        const authorityString =
+            (data.authorityName || "").toUpperCase().trim();
+
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("userName", data.userName);
         localStorage.setItem("email", data.email);
-        localStorage.setItem("authority", data.authorityName);
+        localStorage.setItem("authority", authorityString);
+        localStorage.setItem("currentRole", currentRole);
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
+
         if (!validate()) return;
+
         try {
             setLoading(true);
+            console.log("Request");
+            console.log({
+                method: "POST",
+                url: `${API_URL}/login`,
+                payload: loginData
+            });
+
             const response = await axios.post(
                 `${API_URL}/login`,
                 loginData
             );
+
+            console.log("Response");
+            console.log({
+                status: response.status,
+                payload: response.data
+            });
+
+            console.groupEnd();
+
             const data = response.data;
-            console.log("Full Response:", data);
-            console.log("Authority:", data.authorityName);
             const authority = (data.authorityName || "").toUpperCase().trim();
+
             if (
                 authority.includes("USER") ||
                 authority.includes("SUPER_USER")
             ) {
-                storeUserData(data);
+                storeUserData(data, "USER");
                 window.dispatchEvent(new Event("login"));
                 toast.success("Login Successful");
                 navigate("/user-homepage");
@@ -90,23 +112,43 @@ export default function Login() {
                     "You are not authorized to access the User Portal."
                 );
             }
+
         } catch (error) {
+
+            console.log("Login API Error");
+
             if (error.response) {
+
+                console.log({
+                    status: error.response.status,
+                    payload: error.response.data
+                });
+
                 toast.error(
                     error.response.data.message ||
                     "Invalid Email or Password"
                 );
+
             } else {
+
+                console.log(error.message);
                 toast.error("Server not responding");
+
             }
+
+            console.groupEnd();
+
         } finally {
             setLoading(false);
         }
     };
 
  const handleAdminLogin = async (e) => {
+
      e.preventDefault();
+
      if (!validate()) return;
+
      try {
          setLoading(true);
          const response = await axios.post(
@@ -114,33 +156,31 @@ export default function Login() {
              loginData
          );
          const data = response.data;
-         const authority = (data.authorityName || "").toUpperCase().trim();
-         if (
-             authority.includes("ADMIN") ||
-             authority.includes("ROOT_ADMIN")
-         ) {
-             storeUserData(data);
+         console.log("Login Response");
+         console.log(data);
+         const authority = (data.authorityName || "")
+             .toUpperCase()
+             .trim();
+         console.log("Authority :", authority);
+         const roles = authority
+             .split(",")
+             .map(role => role.trim());
+         console.log("Roles :", roles);
+         if (roles.includes("ADMIN")) {
+             console.log("ADMIN LOGIN");
+             storeUserData(data,"ADMIN");
              window.dispatchEvent(new Event("login"));
-             toast.success("Admin Login Successful");
              navigate("/admin");
          } else {
-             toast.error(
-                 "You are not authorized to access Admin Control."
-             );
+             console.log("NOT ADMIN");
+             toast.error("You are not authorized to access Admin Control.");
          }
      } catch (error) {
-         if (error.response) {
-             toast.error(
-                 error.response.data.message ||
-                 "Invalid Email or Password"
-             );
-         } else {
-             toast.error("Server not responding");
-         }
+         console.log(error);
      } finally {
          setLoading(false);
      }
-    };
+ };
 
     return (
         <div className="container">

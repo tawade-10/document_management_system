@@ -2,12 +2,11 @@ package com.example.mom.service.Users;
 
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface UsersService {
 
-    List<UsersCreationResponseDto> getAllUsers();
+    Page<UsersCreationResponseDto> getAllUsers(int page, int size);
 
     UsersCreationResponseDto getUserById(String userId);
 

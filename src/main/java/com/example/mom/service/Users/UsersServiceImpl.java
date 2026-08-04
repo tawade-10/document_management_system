@@ -6,13 +6,16 @@ import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 public class UsersServiceImpl implements UsersService{
@@ -27,9 +30,10 @@ public class UsersServiceImpl implements UsersService{
     }
 
     @Override
-    public List<UsersCreationResponseDto> getAllUsers() {
-        List<Users> users = usersRepo.findAll();
-        return users.stream().map(UsersCreationResponseDto::new).collect(Collectors.toList());
+    public Page<UsersCreationResponseDto> getAllUsers(int page, int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Users> usersPage=usersRepo.findAll(pageable);
+        return usersPage.map(UsersCreationResponseDto::new);
     }
 
     @Override
