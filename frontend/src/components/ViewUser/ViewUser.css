@@ -1,0 +1,77 @@
+.view-user-container{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    padding:40px;
+}
+
+.view-user-card{
+    width:500px;
+    background:#fff;
+    border-radius:10px;
+    padding:30px;
+    box-shadow:0 3px 12px rgba(0,0,0,.15);
+}
+
+.view-user-card h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:#003366;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    margin-bottom:18px;
+}
+
+.form-group label{
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+.form-group input{
+    height:40px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    padding:0 10px;
+    background:#f5f5f5;
+}
+
+.button-group{
+    display:flex;
+    justify-content:space-between;
+    margin-top:25px;
+}
+
+.back-btn{
+    background:#6c757d;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.activate-btn{
+    background:#198754;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.deactivate-btn{
+    background:#dc3545;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.loading{
+    text-align:center;
+    margin-top:60px;
+}

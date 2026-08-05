@@ -41,44 +41,23 @@ export default function Footer() {
 
             <div className="footer-center">
 
-                {isAdmin && (
-                    <>
-                        <button className="footer-btn save">
-                            Save User
-                        </button>
-
-                        <button className="footer-btn activate">
-                            Activate
-                        </button>
-
-                        <button className="footer-btn deactivate">
-                            Deactivate
-                        </button>
-
-                        <button className="footer-btn cancel">
-                            Cancel
-                        </button>
-                    </>
-                )}
+{/*                 {isAdmin && ( */}
+{/*                 )} */}
 
                 {isUserPortal && (
                     <>
                         <button className="footer-btn save">
                             Save
                         </button>
-
                         <button className="footer-btn edit">
                             Edit
                         </button>
-
                         <button className="footer-btn publish">
                             Publish
                         </button>
-
                         <button className="footer-btn archive">
                             Archive
                         </button>
-
                         <button className="footer-btn cancel">
                             Cancel
                         </button>

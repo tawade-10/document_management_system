@@ -22,7 +22,7 @@ public class UsersController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UsersCreationResponseDto>> getAllUsers(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="5") int size){
+    public ResponseEntity<Page<UsersCreationResponseDto>> getAllUsers(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int size){
         Page<UsersCreationResponseDto> users=usersFacade.getAllUsers(page,size);
         return ResponseEntity.ok(users);
     }

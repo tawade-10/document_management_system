@@ -25,6 +25,17 @@ export default function Header({
         return () => window.removeEventListener("login", refresh);
     }, []);
 
+    const logButtonEvent = ({ buttonNo, buttonName, request, response, status }) => {
+        console.group(`${buttonNo} - ${buttonName}`);
+        console.log("Request");
+        console.log(request);
+        console.log("Response");
+        console.log(response);
+        console.log("Status Code");
+        console.log(status);
+        console.groupEnd();
+    };
+
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("userName");
 
@@ -42,29 +53,21 @@ export default function Header({
    const isUser = currentRole === "USER";
 
     const permissions = {
-
         canManageUsers:
             isAdmin,
-
         canCreateNotebook:
             isUser || isSuperUser,
-
         canCreatePage:
             isUser || isSuperUser,
-
         canViewPages:
             isUser || isSuperUser,
-
         canSort:
             isUser || isSuperUser,
-
         canFilter:
             isUser || isSuperUser,
-
         canToggleRole:
             !isAdmin &&
             authorities.includes("USER")
-
     };
 
     const hideHeaderRoutes = [
@@ -114,9 +117,24 @@ return (
             {permissions.canManageUsers && (
                 <button
                     className="header-btn blue"
-                    onClick={() => navigate("/admin/add-user")}
+                    onClick={() => {
+                        logButtonEvent({
+                            buttonNo: "HB14",
+                            buttonName: "Create User Button",
+                            request: {
+                                action: "Navigate",
+                                from: location.pathname,
+                                to: "/admin/add-user"
+                            },
+                            response: {
+                                message: "Navigating to Create User Component"
+                            },
+                            status: 200
+                        });
+                        navigate("/admin/create-user");
+                    }}
                 >
-                    Add User
+                    Create User
                 </button>
             )}
 

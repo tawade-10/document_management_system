@@ -20,25 +20,69 @@ export default function ResetPassword() {
 
     const navigate = useNavigate();
 
+    const logButtonEvent = ({buttonNo,buttonName,request,response,status}) => {
+        console.group(`${buttonNo} - ${buttonName}`);
+        console.log("Request");
+        console.log(request);
+        console.log("Response");
+        console.log(response);
+        console.log("Status Code");
+        console.log(status);
+        console.groupEnd();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setMsg("");
-
         if (password !== confirmPassword) {
+            logButtonEvent({
+                buttonNo: "BB12",
+                buttonName: "Reset Password Button",
+                request: {
+                    password,
+                    confirmPassword
+                },
+                response: {
+                    message: "Passwords do not match"
+                },
+                status: 400
+            });
             setMsg("Passwords do not match!");
             return;
         }
 
         setLoading(true);
 
+        const request = {
+            method: "POST",
+            url: `http://localhost:8080/api/auth/reset-password?token=${token}&newPassword=${password}`
+        };
+
         try {
-            await axios.post(`http://localhost:8080/api/auth/reset-password?token=${token}&newPassword=${password}`);
+            const response = await axios.post(request.url);
+            logButtonEvent({
+                buttonNo: "BB12",
+                buttonName: "Reset Password Button",
+                request,
+                response: response.data,
+                status: response.status
+            });
             setMsg("Password reset successful!");
             setTimeout(() => {
                 navigate("/");
-            }, 1500);
+            },1500);
         } catch (error) {
+            logButtonEvent({
+                buttonNo: "BB12",
+                buttonName: "Reset Password Button",
+                request,
+                response:
+                    error.response?.data ||
+                    error.message,
+                status:
+                    error.response?.status ||
+                    500
+            });
             setMsg("Invalid or expired token!");
         } finally {
             setLoading(false);
@@ -71,9 +115,32 @@ export default function ResetPassword() {
                         />
                         <span
                             className="rp-password-icon"
-                            onClick={() =>
-                                setShowPassword(!showPassword)
-                            }
+                            onClick={() => {
+                                const buttonNo =
+                                    showPassword
+                                        ? "BB9"
+                                        : "BB8";
+                                const buttonName =
+                                    showPassword
+                                        ? "Hide New Password Button (Eye Icon)"
+                                        : "Show New Password Button (Eye Icon)";
+                                logButtonEvent({
+                                    buttonNo,
+                                    buttonName,
+                                    request: {
+                                        action: showPassword
+                                            ? "Hide Password"
+                                            : "Show Password"
+                                    },
+                                    response: {
+                                        message: showPassword
+                                            ? "Password Hidden"
+                                            : "Password Visible"
+                                    },
+                                    status: 200
+                                });
+                                setShowPassword(!showPassword);
+                            }}
                         >
                             {showPassword
                                 ? <FaEyeSlash />
@@ -97,9 +164,32 @@ export default function ResetPassword() {
                         />
                         <span
                             className="rp-password-icon"
-                            onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                            }
+                            onClick={() => {
+                                const buttonNo =
+                                    showConfirmPassword
+                                        ? "BB11"
+                                        : "BB10";
+                                const buttonName =
+                                    showConfirmPassword
+                                        ? "Hide Confirm Password Button (Eye Icon)"
+                                        : "Show Confirm Password Button (Eye Icon)";
+                                logButtonEvent({
+                                    buttonNo,
+                                    buttonName,
+                                    request: {
+                                        action: showConfirmPassword
+                                            ? "Hide Password"
+                                            : "Show Password"
+                                    },
+                                    response: {
+                                        message: showConfirmPassword
+                                            ? "Password Hidden"
+                                            : "Password Visible"
+                                    },
+                                    status: 200
+                                });
+                                setShowConfirmPassword(!showConfirmPassword);
+                            }}
                         >
                             {showConfirmPassword
                                 ? <FaEyeSlash />

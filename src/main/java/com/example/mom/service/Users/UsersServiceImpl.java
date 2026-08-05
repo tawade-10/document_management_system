@@ -76,9 +76,7 @@ public class UsersServiceImpl implements UsersService{
             throw new RuntimeException("User not authenticated");
         }
 
-        String email = authentication.getName();
-
-        Users user = usersRepo.findByEmail(email)
+        Users user = usersRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
         if (user.getStatus().getStatusId().equals("UAC")) {

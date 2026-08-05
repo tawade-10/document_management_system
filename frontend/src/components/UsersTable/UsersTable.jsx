@@ -1,77 +1,207 @@
 import React,{useEffect,useState} from "react";
 import axios from "axios";
 import {useLocation,useNavigate} from "react-router-dom";
+import { toast } from "react-toastify";
 import "./UsersTable.css";
 
 export default function UsersTable({searchKeyword}){
 
-    const [users,setUsers]=useState([]);
-    const [loading,setLoading]=useState(true);
-    const [error,setError]=useState("");
-    const [page,setPage]=useState(0);
-    const [totalPages,setTotalPages]=useState(0);
+const [users, setUsers] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+const [page, setPage] = useState(0);
+const [totalPages, setTotalPages] = useState(0);
 
-    const location=useLocation();
-    const navigate=useNavigate();
+const location = useLocation();
+const navigate = useNavigate();
 
-    useEffect(()=>{
-        fetchUsers();
-        if(location.state?.refresh){
-            navigate(location.pathname,{replace:true,state:{}});
-        }
-    },[page,searchKeyword,location.state]);
+useEffect(() => {
+    setPage(0);
+}, [searchKeyword]);
 
-    const fetchUsers=async()=>{
-        try{
-            setLoading(true);
-            setError("");
-            const token=localStorage.getItem("token");
-            let url=`http://localhost:8080/api/users?page=${page}&size=5`;
-            if(searchKeyword.trim()!==""){
-                url=`http://localhost:8080/api/search/users?keyword=${encodeURIComponent(searchKeyword)}`;
-            }
-            console.log({
-                method:"GET",
-                url:url
-            });
-            const response=await axios.get(
-                url,
-                {
-                    headers:{
-                        Authorization:`Bearer ${token}`
-                    }
-                }
-            );
-            console.log(response.data);
-            console.groupEnd();
-            if(searchKeyword.trim()===""){
-                setUsers(response.data.content);
-                setTotalPages(response.data.totalPages);
-            }else{
-                setUsers(response.data);
-                setTotalPages(0);
-            }
-        }catch(error){
-            console.error(error);
-            setError(
-                error.response?.data?.message ||
-                "Unable to fetch users."
-            );
-        }finally{
-            setLoading(false);
-        }
+useEffect(() => {
+
+    fetchUsers();
+
+    if (location.state?.refresh) {
+        navigate(location.pathname, {
+            replace: true,
+            state: {}
+        });
+    }
+
+}, [page, searchKeyword, location.state]);
+
+const logButtonEvent = ({
+    buttonNo,
+    buttonName,
+    request,
+    response,
+    status
+}) => {
+
+    console.group(`${buttonNo} - ${buttonName}`);
+
+    console.log("Request");
+    console.log(request);
+
+    console.log("Response");
+    console.log(response);
+
+    console.log("Status Code");
+    console.log(status);
+
+    console.groupEnd();
+
+};
+
+const PAGE_SIZE = 10;
+
+const fetchUsers = async () => {
+
+    const token = localStorage.getItem("token");
+
+    let url = `http://localhost:8080/api/users?page=${page}&size=${PAGE_SIZE}`;
+
+    const isSearch = searchKeyword.trim() !== "";
+
+    if (isSearch) {
+        url = `http://localhost:8080/api/search/users?keyword=${encodeURIComponent(searchKeyword)}`;
+    }
+
+    const request = {
+        method: "GET",
+        url
     };
 
-    if(loading){
-        return(
+    try {
+
+        setLoading(true);
+        setError("");
+
+        const response = await axios.get(
+            url,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        logButtonEvent({
+            buttonNo: "HB15",
+            buttonName: isSearch
+                ? "Search User Button"
+                : "Load Users",
+            request,
+            response: response.data,
+            status: response.status
+        });
+
+        if (isSearch) {
+
+            setUsers(response.data);
+            setTotalPages(0);
+
+        } else {
+
+            setUsers(response.data.content);
+            setTotalPages(response.data.totalPages);
+
+        }
+
+    } catch (error) {
+
+        logButtonEvent({
+            buttonNo: "HB15",
+            buttonName: isSearch
+                ? "Search User Button"
+                : "Load Users",
+            request,
+            response:
+                error.response?.data ||
+                error.message,
+            status:
+                error.response?.status ||
+                500
+        });
+
+        setError(
+            error.response?.data?.message ||
+            "Unable to fetch users."
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+};
+
+const handleUpdateStatus = async (user) => {
+
+    const token = localStorage.getItem("token");
+
+    const buttonNo =
+        user.status === "UAC"
+            ? "BB20"
+            : "BB19";
+
+    const buttonName =
+        user.status === "UAC"
+            ? "Deactivate User Button"
+            : "Activate User Button";
+
+    const request = {
+        method: "PUT",
+        url: `http://localhost:8080/api/users/updateStatus/${user.userId}`
+    };
+
+    try {
+        const response = await axios.put(
+            request.url,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        logButtonEvent({
+            buttonNo,
+            buttonName,
+            request,
+            response: response.data,
+            status: response.status
+        });
+        fetchUsers();
+    } catch (error) {
+        logButtonEvent({
+            buttonNo,
+            buttonName,
+            request,
+            response:
+                error.response?.data ||
+                error.message,
+            status:
+                error.response?.status ||
+                500
+        });
+        toast.error(error.response?.data?.message ||"Unable to update user status.");
+    }
+};
+
+    if (loading) {
+        return (
             <div className="text-center mt-4">
                 Loading Users...
             </div>
         );
     }
 
-    if(error){
-        return(
+    if (error) {
+        return (
             <div className="text-danger text-center mt-4">
                 {error}
             </div>
@@ -88,16 +218,34 @@ export default function UsersTable({searchKeyword}){
                         <th>Email</th>
                         <th>Authority</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
                     {
                         users.length>0
                         ?
                         users.map(user=>(
-                            <tr key={user.userId}>
+                           <tr
+                               key={user.userId}
+                               style={{ cursor: "pointer" }}
+                               onClick={() => {
+                                   logButtonEvent({
+                                       buttonNo: "BB16",
+                                       buttonName: "User Row Click",
+                                       request: {
+                                           action: "Open User",
+                                           userId: user.userId
+                                       },
+                                       response: {
+                                           message: "Opening View/Edit User",
+                                           userId: user.userId
+                                       },
+                                       status: 200
+                                   });
+                                   navigate(`/admin/view-user/${user.userId}`);
+                               }}
+                           >
                                 <td>{user.userId}</td>
                                 <td>{user.userName}</td>
                                 <td>{user.email}</td>
@@ -121,6 +269,19 @@ export default function UsersTable({searchKeyword}){
                                         }
                                     </span>
                                 </td>
+                                <td>
+                                    <button
+                                        className={
+                                            user.status === "UAC" ? "deactivate-btn" : "activate-btn"
+                                        }
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleUpdateStatus(user);
+                                        }}
+                                    >
+                                        {user.status === "UAC" ? "Deactivate" : "Activate"}
+                                    </button>
+                                </td>
                             </tr>
                         ))
                         :
@@ -133,11 +294,8 @@ export default function UsersTable({searchKeyword}){
                             </td>
                         </tr>
                     }
-
                 </tbody>
-
             </table>
-
             {
                 searchKeyword.trim()==="" &&
                 totalPages>0 &&

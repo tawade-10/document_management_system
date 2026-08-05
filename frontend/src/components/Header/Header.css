@@ -116,23 +116,6 @@
 
 }
 
-/* ===========================
-   RIGHT
-=========================== */
-
-.header-right{
-
-    display:flex;
-    align-items:center;
-
-    gap:8px;
-
-}
-
-/* ===========================
-   COMMON BUTTON
-=========================== */
-
 .header-btn{
 
     height:34px;
@@ -234,20 +217,17 @@
 
 }
 
-/* ===========================
-   PROFILE
-=========================== */
-
 .profile-icon{
-
     color:#fff;
-
     font-size:24px;
-
     cursor:pointer;
-
+    flex-shrink:0;
     transition:.2s;
+}
 
+.profile-icon:hover{
+    color:#ffd54f;
+    transform:scale(1.08);
 }
 
 .profile-icon:hover{
@@ -258,45 +238,25 @@
 
 }
 
-/* ===========================
-   LOGOUT
-=========================== */
-
 .logout-btn{
-
     height:34px;
-
+    min-width:90px;
     padding:0 14px;
-
     border:none;
-    outline:none;
-
     border-radius:6px;
-
     background:#dc3545;
-
     color:#fff;
-
     font-size:12px;
     font-weight:600;
-
     cursor:pointer;
-
+    flex-shrink:0;
     transition:.2s;
-
 }
 
 .logout-btn:hover{
-
     background:#bb2d3b;
-
     transform:translateY(-1px);
-
 }
-
-/* ===========================
-   RESPONSIVE
-=========================== */
 
 @media(max-width:1600px){
 
@@ -349,28 +309,24 @@
 }
 
 @media(max-width:1100px){
-
     .header{
-
+        grid-template-columns:1fr;
+        row-gap:10px;
         height:auto;
-
-        flex-wrap:wrap;
-
         padding:10px;
-
-        gap:10px;
-
     }
-
-    .header-left,
-    .header-center,
-    .header-right{
-
-        width:100%;
-
+    .header-left{
         justify-content:center;
-
+        flex-wrap:wrap;
     }
+    .header-center{
+        justify-content:center;
+    }
+    .header-right{
+        justify-content:flex-end;
+        width:100%;
+    }
+}
 
 .search-container{
     position:relative;
@@ -380,7 +336,9 @@
 .header-right{
     display:flex;
     align-items:center;
-    gap:8px;
+    justify-content:flex-end;
     justify-self:end;
+    gap:8px;
+    width:100%;
 }
 }

@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import {toast} from "react-toastify";
 import {FaUser,FaLock,FaEye,FaEyeSlash} from "react-icons/fa";
 import {MdEmail} from "react-icons/md";
-import "./AddUser.css";
+import "./CreateUser.css";
 
 const API_URL="http://localhost:8080/api/auth";
 
-export default function AddUser(){
+export default function CreateUser(){
 
     const [showPassword,setShowPassword]=useState(false);
     const [showConfirmPassword,setShowConfirmPassword]=useState(false);
@@ -135,7 +135,20 @@ export default function AddUser(){
     return(
         <div className="add-user-container">
             <div className="add-user-card">
-                <h2>Add User</h2>
+                <h2>Create User</h2>
+                <select
+                                    name="authorityId"
+                                    value={formData.authorityId}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Select Authority Profile</option>
+                                    <option value="0001">0001 - ADMIN,SUPER_USER,USER</option>
+                                    <option value="0002">0002 - SUPER_USER,USER</option>
+                                    <option value="0003">0003 - ADMIN</option>
+                                    <option value="0004">0004 - ADMIN,USER</option>
+                                    <option value="0005">0005 - USER</option>
+                                </select>
+                                <span className="error">{errors.authorityId}</span>
                 <div className="input-box">
                     <FaUser/>
                     <input
@@ -186,19 +199,6 @@ export default function AddUser(){
                     </span>
                 </div>
                 <span className="error">{errors.confirmPassword}</span>
-                <select
-                    name="authorityId"
-                    value={formData.authorityId}
-                    onChange={handleChange}
-                >
-                    <option value="">Select Authority Profile</option>
-                    <option value="0001">0001 - ADMIN,SUPER_USER,USER</option>
-                    <option value="0002">0002 - SUPER_USER,USER</option>
-                    <option value="0003">0003 - ADMIN</option>
-                    <option value="0004">0004 - ADMIN,USER</option>
-                    <option value="0005">0005 - USER</option>
-                </select>
-                <span className="error">{errors.authorityId}</span>
                 <div className="button-group">
                     <button
                         type="button"
@@ -212,7 +212,7 @@ export default function AddUser(){
                         className="submit-btn"
                         onClick={handleSubmit}
                     >
-                        Add User
+                        Confirm User Details
                     </button>
                 </div>
             </div>
