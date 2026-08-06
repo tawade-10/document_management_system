@@ -22,8 +22,15 @@ public class UsersController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UsersCreationResponseDto>> getAllUsers(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int size){
-        Page<UsersCreationResponseDto> users=usersFacade.getAllUsers(page,size);
+    public ResponseEntity<Page<UsersCreationResponseDto>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String authority,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "userName") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        Page<UsersCreationResponseDto> users = usersFacade.getAllUsers(page, size, search, authority, status, sortBy, sortDir);
         return ResponseEntity.ok(users);
     }
 

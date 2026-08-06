@@ -39,36 +39,25 @@
 }
 
 .button-group{
-    display:flex;
-    justify-content:space-between;
-    margin-top:25px;
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
 }
 
-.back-btn{
-    background:#6c757d;
-    color:#fff;
-    border:none;
-    padding:10px 20px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.activate-btn{
-    background:#198754;
-    color:#fff;
-    border:none;
-    padding:10px 20px;
-    border-radius:6px;
-    cursor:pointer;
+.activate-btn,
+.deactivate-btn{
+    width: 180px;
+    background: #198754;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin-left: 120px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 .deactivate-btn{
-    background:#dc3545;
-    color:#fff;
-    border:none;
-    padding:10px 20px;
-    border-radius:6px;
-    cursor:pointer;
+    background: #dc3545;
 }
 
 .loading{

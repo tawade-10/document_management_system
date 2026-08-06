@@ -18,8 +18,8 @@ public class UsersFacadeImpl implements UsersFacade{
     }
 
     @Override
-    public Page<UsersCreationResponseDto> getAllUsers(int page, int size) {
-        return usersService.getAllUsers(page,size);
+    public Page<UsersCreationResponseDto> getAllUsers(int page,int size,String search,String authority,String status,String sortBy,String sortDir) {
+        return usersService.getAllUsers(page, size, search, authority, status, sortBy, sortDir);
     }
 
     @Override

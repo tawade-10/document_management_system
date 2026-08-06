@@ -2,10 +2,12 @@ package com.example.mom.service.Auth;
 
 import com.example.mom.config.CustomIdGenerator;
 import com.example.mom.config.JwtService;
+import com.example.mom.config.PasswordGenerator;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.*;
 import com.example.mom.repository.*;
+import com.example.mom.service.Email.EmailService;
 import com.example.mom.service.Email.EmailServiceImpl;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,11 +37,15 @@ public class AuthServiceImpl implements AuthService{
 
     private final PasswordEncoder passwordEncoder;
 
+    private final PasswordGenerator passwordGenerator;
+
     private final BlacklistedTokenRepo blacklistedTokenRepo;
 
     private final JwtService jwtService;
 
-    public AuthServiceImpl(UsersRepo usersRepo, StatusRepo statusRepo, AuthorityProfilesRepo authorityProfilesRepo, CustomIdGenerator customIdGenerator, PasswordResetTokenRepo passwordResetTokenRepo, EmailServiceImpl emailServiceImpl, PasswordEncoder passwordEncoder, BlacklistedTokenRepo blacklistedTokenRepo, JwtService jwtService) {
+    private final EmailService emailService;
+
+    public AuthServiceImpl(UsersRepo usersRepo, StatusRepo statusRepo, AuthorityProfilesRepo authorityProfilesRepo, CustomIdGenerator customIdGenerator, PasswordResetTokenRepo passwordResetTokenRepo, EmailServiceImpl emailServiceImpl, PasswordEncoder passwordEncoder, PasswordGenerator passwordGenerator, BlacklistedTokenRepo blacklistedTokenRepo, JwtService jwtService, EmailService emailService) {
         this.usersRepo = usersRepo;
         this.statusRepo = statusRepo;
         this.authorityProfilesRepo = authorityProfilesRepo;
@@ -47,8 +53,10 @@ public class AuthServiceImpl implements AuthService{
         this.passwordResetTokenRepo = passwordResetTokenRepo;
         this.emailServiceImpl = emailServiceImpl;
         this.passwordEncoder = passwordEncoder;
+        this.passwordGenerator = passwordGenerator;
         this.blacklistedTokenRepo = blacklistedTokenRepo;
         this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -70,17 +78,41 @@ public class AuthServiceImpl implements AuthService{
         AuthorityProfiles authority = authorityProfilesRepo.findById(usersCreationRequestDto.getAuthorityId())
                 .orElseThrow(() -> new RuntimeException("Invalid authority profile"));
 
+        String tempPassword = passwordGenerator.generatePassword();
+
         Users user = new Users();
         user.setUserId(customIdGenerator.generateUserId(authority));
         user.setUserName(usersCreationRequestDto.getUserName());
         user.setEmail(usersCreationRequestDto.getEmail());
-        user.setPassword(usersCreationRequestDto.getPassword());
+        user.setPassword(passwordEncoder.encode(tempPassword));
+
         user.setAuthorityProfiles(authority);
         user.setStatus(activeStatus);
         user.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = usersRepo.save(user);
 
+        try {
+            String subject = "Welcome to MOM Portal";
+            String text =
+                    "Hello " + savedUser.getUserName() + ",\n\n" +
+                            "Your MOM Portal account has been created successfully.\n\n" +
+                            "Username : " + savedUser.getUserName() + "\n" +
+                            "Temporary Password : " + tempPassword + "\n\n" +
+                            "Please use the temporary password to set your new password.\n\n" +
+                            "Reset Password Link:\n" +
+                            "http://localhost:3000/reset-password\n\n" +
+                            "Regards,\n" +
+                            "MOM Team";
+            emailService.sendSimpleMessage(
+                    savedUser.getEmail(),
+                    subject,
+                    text,
+                    null
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return new UsersCreationResponseDto(savedUser);
     }
 

@@ -4,7 +4,7 @@ import {useLocation,useNavigate} from "react-router-dom";
 import { toast } from "react-toastify";
 import "./UsersTable.css";
 
-export default function UsersTable({searchKeyword}){
+export default function UsersTable({searchKeyword,sortBy,sortDir,authorityFilter,statusFilter}) {
 
 const [users, setUsers] = useState([]);
 const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ const navigate = useNavigate();
 
 useEffect(() => {
     setPage(0);
-}, [searchKeyword]);
+}, [searchKeyword,sortBy,sortDir,authorityFilter,statusFilter]);
 
 useEffect(() => {
 
@@ -30,7 +30,7 @@ useEffect(() => {
         });
     }
 
-}, [page, searchKeyword, location.state]);
+}, [page,searchKeyword,sortBy,sortDir,authorityFilter,statusFilter,location.state]);
 
 const logButtonEvent = ({
     buttonNo,
@@ -61,13 +61,22 @@ const fetchUsers = async () => {
 
     const token = localStorage.getItem("token");
 
-    let url = `http://localhost:8080/api/users?page=${page}&size=${PAGE_SIZE}`;
+   let url = `http://localhost:8080/api/users?page=${page}&size=${PAGE_SIZE}`;
 
-    const isSearch = searchKeyword.trim() !== "";
+   if (searchKeyword.trim() !== "") {
+       url += `&search=${encodeURIComponent(searchKeyword)}`;
+   }
 
-    if (isSearch) {
-        url = `http://localhost:8080/api/search/users?keyword=${encodeURIComponent(searchKeyword)}`;
-    }
+   if (authorityFilter.length > 0) {
+       url += `&authority=${encodeURIComponent(authorityFilter.join(","))}`;
+   }
+
+   if (statusFilter.length > 0) {
+       url += `&status=${encodeURIComponent(statusFilter.join(","))}`;
+   }
+
+   url += `&sortBy=${encodeURIComponent(sortBy)}`;
+   url += `&sortDir=${encodeURIComponent(sortDir)}`;
 
     const request = {
         method: "GET",
@@ -90,33 +99,20 @@ const fetchUsers = async () => {
 
         logButtonEvent({
             buttonNo: "HB15",
-            buttonName: isSearch
-                ? "Search User Button"
-                : "Load Users",
+            buttonName: "Load Users",
             request,
             response: response.data,
             status: response.status
         });
 
-        if (isSearch) {
-
-            setUsers(response.data);
-            setTotalPages(0);
-
-        } else {
-
-            setUsers(response.data.content);
-            setTotalPages(response.data.totalPages);
-
-        }
+       setUsers(response.data.content);
+       setTotalPages(response.data.totalPages);
 
     } catch (error) {
 
         logButtonEvent({
             buttonNo: "HB15",
-            buttonName: isSearch
-                ? "Search User Button"
-                : "Load Users",
+            buttonName: "Load Users",
             request,
             response:
                 error.response?.data ||
@@ -296,9 +292,8 @@ const handleUpdateStatus = async (user) => {
                     }
                 </tbody>
             </table>
-            {
-                searchKeyword.trim()==="" &&
-                totalPages>0 &&
+           {
+               totalPages > 0 &&
                 <div className="pagination-container">
 
                     <button
@@ -327,3 +322,4 @@ const handleUpdateStatus = async (user) => {
         </div>
     );
 }
+

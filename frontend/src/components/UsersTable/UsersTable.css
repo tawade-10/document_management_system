@@ -69,21 +69,23 @@
     color: #6c63ff;
 }
 
-.status-badge{
-    display:inline-block;
-    min-width:70px;
-    padding:3px 10px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:600;
+.status-badge {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.status-badge.active{
-    color:#198754 !important;
+.status-badge.active {
+    color: #198754 !important;
 }
 
-.status-badge.inactive{
-    color:#dc3545 !important;
+.status-badge.inactive {
+    color: #dc3545 !important;
 }
 
 .pagination-container{
@@ -147,4 +149,84 @@
 
 .deactivate-btn:hover {
     background: #bb2d3b;
+}
+
+.filter-header{
+    position:relative;
+}
+
+.header-content{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.filter-btn{
+    background:none;
+    border:none;
+    color:white;
+    cursor:pointer;
+    font-size:11px;
+    padding:2px 4px;
+}
+
+.filter-menu{
+    position:absolute;
+    top:100%;
+    right:0;
+    width:180px;
+    background:white;
+    color:black;
+    border:1px solid #d0d0d0;
+    border-radius:6px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+    z-index:9999;
+}
+
+.menu-item{
+    padding:10px;
+    cursor:pointer;
+    text-align:left;
+}
+
+.menu-item:hover{
+    background:#f4f4f4;
+}
+
+.filter-header{
+    position:relative;
+}
+
+.header-content{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.filter-btn{
+
+    border:none;
+
+    background:transparent;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:11px;
+
+    padding:2px;
+
+}
+
+.filter-btn:hover{
+
+    color:#ffe082;
+
 }

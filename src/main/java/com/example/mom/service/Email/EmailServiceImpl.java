@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 
 @Service
-public class EmailServiceImpl {
+public class EmailServiceImpl implements EmailService{
 
     private final JavaMailSender javaMailSender;
 

@@ -1,5 +1,6 @@
 package com.example.mom.controller;
 
+import com.example.mom.dto.Users.LoginRequestDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.facade.Auth.AuthFacade;
@@ -29,8 +30,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody UsersCreationRequestDto usersCreationRequestDto) {
-        Object loginCustomer = authFacade.loginCustomer(usersCreationRequestDto);
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequestDto loginRequestDto) {
+        Object loginCustomer = authFacade.loginCustomer(loginRequestDto);
         return ResponseEntity.ok(loginCustomer);
     }
 

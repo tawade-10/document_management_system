@@ -6,10 +6,12 @@ import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
+import com.example.mom.specification.UsersSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,9 +32,15 @@ public class UsersServiceImpl implements UsersService{
     }
 
     @Override
-    public Page<UsersCreationResponseDto> getAllUsers(int page, int size){
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Users> usersPage=usersRepo.findAll(pageable);
+    public Page<UsersCreationResponseDto> getAllUsers(int page, int size, String search, String authority, String status, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Specification<Users> specification = UsersSpecification.filterUsers(search, authority, status);
+        Page<Users> usersPage = usersRepo.findAll(specification, pageable);
         return usersPage.map(UsersCreationResponseDto::new);
     }
 

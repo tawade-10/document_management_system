@@ -1,5 +1,6 @@
 package com.example.mom.facade.Auth;
 
+import com.example.mom.dto.Users.LoginRequestDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,7 @@ public interface AuthFacade {
 
     UsersCreationResponseDto addUser(@Valid UsersCreationRequestDto usersCreationRequestDto);
 
-    Object loginCustomer(UsersCreationRequestDto usersCreationRequestDto);
+    Object loginCustomer(LoginRequestDto loginRequestDto);
 
     String generateResetToken(String email);
 

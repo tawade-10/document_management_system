@@ -19,6 +19,16 @@ export default function Header({
 
     const [, forceUpdate] = useState(0);
 
+    const [sortBy, setSortBy] = useState("createdAt");
+    const [sortDir, setSortDir] = useState("desc");
+
+    const [authorityFilter, setAuthorityFilter] = useState([]);
+
+    const [statusFilter, setStatusFilter] = useState([]);
+
+    const [showSort, setShowSort] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
+
     useEffect(() => {
         const refresh = () => forceUpdate(prev => prev + 1);
         window.addEventListener("login", refresh);
@@ -36,6 +46,84 @@ export default function Header({
         console.groupEnd();
     };
 
+    const authorityOptions = [
+        "ADMIN",
+        "SUPER_USER",
+        "USER"
+    ];
+
+    const statusOptions = [
+        "UAC",
+        "UIA"
+    ];
+
+    const toggleAuthority = (value) => {
+        if (authorityFilter.includes(value)) {
+            setAuthorityFilter(
+                authorityFilter.filter(
+                    item => item !== value
+                )
+            );
+        } else {
+            setAuthorityFilter([
+                ...authorityFilter,
+                value
+            ]);
+        }
+    };
+
+    const toggleStatus = (value) => {
+        if (statusFilter.includes(value)) {
+            setStatusFilter(
+                statusFilter.filter(
+                    item => item !== value
+                )
+            );
+        } else {
+            setStatusFilter([
+                ...statusFilter,
+                value
+            ]);
+        }
+    };
+
+    const applySort = () => {
+        logButtonEvent({
+            buttonNo: "HB11",
+            buttonName: "Sort Button",
+            request: {
+                sortBy,
+                sortDir
+            },
+            response: {
+                message: "Sorting Applied"
+            },
+            status: 200
+        });
+        setShowSort(false);
+    };
+
+    const applyFilter = () => {
+        logButtonEvent({
+            buttonNo: "HB12",
+            buttonName: "Filter Button",
+            request: {
+                authorityFilter,
+                statusFilter
+            },
+            response: {
+                message: "Filter Applied"
+            },
+            status: 200
+        });
+        setShowFilter(false);
+    };
+
+    const resetFilter = () => {
+        setAuthorityFilter([]);
+        setStatusFilter([]);
+    };
+
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("userName");
 
@@ -45,8 +133,7 @@ export default function Header({
        .split(",")
        .map(role => role.trim().toUpperCase());
 
-   const currentRole =
-       localStorage.getItem("currentRole") || "USER";
+   const currentRole = localStorage.getItem("currentRole") || "USER";
 
    const isAdmin = currentRole === "ADMIN";
    const isSuperUser = currentRole === "SUPER_USER";
@@ -62,9 +149,9 @@ export default function Header({
         canViewPages:
             isUser || isSuperUser,
         canSort:
-            isUser || isSuperUser,
+            isUser || isSuperUser || isAdmin,
         canFilter:
-            isUser || isSuperUser,
+            isUser || isSuperUser || isAdmin,
         canToggleRole:
             !isAdmin &&
             authorities.includes("USER")
@@ -103,17 +190,13 @@ export default function Header({
 
 return (
     <header className="header">
-
-        {/* LEFT */}
         <div className="header-left">
-
             <div
                 className="logo"
                 onClick={() => navigate("/homepage")}
             >
                 MOM Portal
             </div>
-
             {permissions.canManageUsers && (
                 <button
                     className="header-btn blue"
@@ -137,31 +220,24 @@ return (
                     Create User
                 </button>
             )}
-
             {permissions.canCreateNotebook && (
                 <button className="header-btn green">
                     New Notebook
                 </button>
             )}
-
             {permissions.canCreatePage && (
                 <button className="header-btn green">
                     New Page
                 </button>
             )}
-
             {permissions.canViewPages && (
                 <button className="header-btn orange">
                     View Pages
                 </button>
             )}
-
         </div>
-
         <div className="header-center">
-
             <div className="search-container">
-
                 <input
                     className="search-input"
                     type="text"
@@ -173,49 +249,243 @@ return (
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
                 />
-
                 <FaSearch className="search-icon" />
-
             </div>
-
         </div>
+<div className="header-right">
 
-        <div className="header-right">
-
-            {permissions.canSort && (
-                <button className="header-btn gray">
-                    Sort
-                </button>
-            )}
-
-            {permissions.canFilter && (
-                <button className="header-btn gray">
-                    Filter
-                </button>
-            )}
-
-            {permissions.canToggleRole && (
-                <ToggleButton />
-            )}
-
-            <span className="welcome-user">
-                Welcome,&nbsp;<b>{username}</b>
-            </span>
-
-            <CgProfile
-                size={24}
-                className="profile-icon"
-            />
+    {permissions.canSort && (
+        <div className="header-popup-container">
 
             <button
-                className="logout-btn"
-                onClick={handleLogout}
+                className="header-btn gray"
+                onClick={() => {
+                    setShowSort(!showSort);
+                    setShowFilter(false);
+                }}
             >
-                Logout
+                ⬍ Sort
             </button>
 
-        </div>
+            {showSort && (
+                <div className="header-popup">
 
+                    <div className="popup-title">
+                        <span>Sort Users</span>
+                    </div>
+
+                    <div className="popup-body">
+
+                        <div className="popup-section">
+
+                            <label>Sort By</label>
+
+                            <select
+                                value={sortBy}
+                                onChange={(e) =>
+                                    setSortBy(e.target.value)
+                                }
+                            >
+                                <option value="userId">User ID</option>
+                                <option value="userName">User Name</option>
+                                <option value="email">Email</option>
+                                <option value="authorityProfiles.authorityName">
+                                    Authority
+                                </option>
+                                <option value="status.description">
+                                    Status
+                                </option>
+                                <option value="createdAt">
+                                    Created Date
+                                </option>
+                            </select>
+
+                        </div>
+
+                        <div className="popup-section">
+
+                            <label>Order</label>
+
+                            <select
+                                value={sortDir}
+                                onChange={(e) =>
+                                    setSortDir(e.target.value)
+                                }
+                            >
+                                <option value="asc">
+                                    A → Z
+                                </option>
+
+                                <option value="desc">
+                                    Z → A
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div className="popup-buttons">
+
+                        <button
+                            className="apply-btn"
+                            onClick={applySort}
+                        >
+                            Apply
+                        </button>
+
+                        <button
+                            className="cancel-btn"
+                            onClick={() => setShowSort(false)}
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </div>
+            )}
+
+        </div>
+    )}
+
+    {/* FILTER */}
+    {permissions.canFilter && (
+        <div className="header-popup-container">
+
+            <button
+                className="header-btn gray"
+                onClick={() => {
+                    setShowFilter(!showFilter);
+                    setShowSort(false);
+                }}
+            >
+                ⛃ Filter
+            </button>
+
+            {showFilter && (
+
+                <div className="header-popup">
+
+                    <div className="popup-title">
+                        <span>Filter Users</span>
+                    </div>
+
+                    <div className="popup-body">
+
+                        <div className="popup-section">
+
+                            <label>Authorities</label>
+
+                            {authorityOptions.map(authority => (
+
+                                <label
+                                    key={authority}
+                                    className="checkbox-item"
+                                >
+
+                                    <input
+                                        type="checkbox"
+                                        checked={authorityFilter.includes(authority)}
+                                        onChange={() => toggleAuthority(authority)}
+                                    />
+
+                                    <span>{authority}</span>
+
+                                </label>
+
+                            ))}
+
+                        </div>
+
+                        <div className="popup-section">
+
+                            <label>Status</label>
+
+                            {statusOptions.map(status => (
+
+                                <label
+                                    key={status}
+                                    className="checkbox-item"
+                                >
+
+                                    <input
+                                        type="checkbox"
+                                        checked={statusFilter.includes(status)}
+                                        onChange={() => toggleStatus(status)}
+                                    />
+
+                                    <span>
+
+                                        {status === "UAC"
+                                            ? "Active"
+                                            : "Inactive"}
+
+                                    </span>
+
+                                </label>
+
+                            ))}
+
+                        </div>
+
+                    </div>
+
+                    <div className="popup-buttons">
+
+                        <button
+                            className="apply-btn"
+                            onClick={applyFilter}
+                        >
+                            Apply
+                        </button>
+
+                        <button
+                            className="reset-btn"
+                            onClick={resetFilter}
+                        >
+                            Reset
+                        </button>
+
+                        <button
+                            className="cancel-btn"
+                            onClick={() => setShowFilter(false)}
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </div>
+
+            )}
+
+        </div>
+    )}
+
+    {permissions.canToggleRole && (
+        <ToggleButton />
+    )}
+
+    <span className="welcome-user">
+        Welcome,&nbsp;<b>{username}</b>
+    </span>
+
+    <CgProfile
+        size={24}
+        className="profile-icon"
+    />
+
+    <button
+        className="logout-btn"
+        onClick={handleLogout}
+    >
+        Logout
+    </button>
+
+</div>
     </header>
 );
-   }
+}
+

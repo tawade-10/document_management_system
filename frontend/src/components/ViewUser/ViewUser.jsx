@@ -125,15 +125,23 @@ export default function ViewUser() {
                     <label>User Name</label>
                     <input
                         value={user.userName}
-                        readOnly
-                    />
+                        onChange={(e) => setUser({
+                                    ...user,
+                                    userName: e.target.value
+                                  })
+                             }
+                        />
                 </div>
                 <div className="form-group">
                     <label>Email</label>
                     <input
                         value={user.email}
-                        readOnly
-                    />
+                        onChange={(e) => setUser({
+                                    ...user,
+                                    email: e.target.value
+                                  })
+                              }
+                        />
                 </div>
                 <div className="form-group">
                     <label>Authority</label>
@@ -154,12 +162,6 @@ export default function ViewUser() {
                     />
                 </div>
                 <div className="button-group">
-                    <button
-                        className="back-btn"
-                        onClick={() => navigate(-1)}
-                    >
-                        Back
-                    </button>
                     <button
                         className={
                             user.status === "UAC"

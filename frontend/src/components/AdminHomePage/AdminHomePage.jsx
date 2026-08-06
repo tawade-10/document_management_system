@@ -4,9 +4,21 @@ import UsersTable from "../UsersTable/UsersTable";
 
 export default function AdminHomePage() {
 
-    const { searchKeyword } = useOutletContext();
+    const {
+        searchKeyword,
+        sortBy,
+        sortDir,
+        authorityFilter,
+        statusFilter
+    } = useOutletContext();
 
     return (
-        <UsersTable searchKeyword={searchKeyword} />
+        <UsersTable
+            searchKeyword={searchKeyword}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            authorityFilter={authorityFilter}
+            statusFilter={statusFilter}
+        />
     );
 }

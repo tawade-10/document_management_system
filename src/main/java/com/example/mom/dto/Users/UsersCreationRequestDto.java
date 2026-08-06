@@ -12,22 +12,21 @@ public class UsersCreationRequestDto {
     @Email(message = "Invalid Email format")
     private String email;
 
-    @NotBlank(message = "Password cannot be empty")
-    private String password;
-
+    @NotBlank(message = "Authority cannot be empty")
     private String authorityId;
-
-    public UsersCreationRequestDto(String userName, String email, String password, String authorityId) {
-        this.userName = userName;
-        this.email = email;
-        this.password = password;
-        this.authorityId = authorityId;
-    }
 
     public UsersCreationRequestDto() {
     }
 
-    public String getUserName() { return userName; }
+    public UsersCreationRequestDto(String userName, String email, String authorityId) {
+        this.userName = userName;
+        this.email = email;
+        this.authorityId = authorityId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
 
     public void setUserName(String userName) {
         this.userName = userName;
@@ -41,15 +40,11 @@ public class UsersCreationRequestDto {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getAuthorityId() {
+        return authorityId;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setAuthorityId(String authorityId) {
+        this.authorityId = authorityId;
     }
-
-    public String getAuthorityId() { return authorityId; }
-
-    public void setAuthorityId(String authorityId) { this.authorityId = authorityId; }
 }

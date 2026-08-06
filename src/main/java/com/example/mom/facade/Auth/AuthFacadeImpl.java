@@ -1,6 +1,8 @@
 package com.example.mom.facade.Auth;
 
 import com.example.mom.config.JwtService;
+import com.example.mom.dto.Users.LoginRequestDto;
+import com.example.mom.dto.Users.LoginResponseDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.CustomUserDetails;
@@ -19,27 +21,24 @@ public class AuthFacadeImpl implements AuthFacade{
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
-    private final BCryptPasswordEncoder encoder;
 
-    public AuthFacadeImpl(JwtService jwtService, AuthenticationManager authenticationManager, AuthService authService, BCryptPasswordEncoder encoder) {
+    public AuthFacadeImpl(JwtService jwtService, AuthenticationManager authenticationManager, AuthService authService) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.authService = authService;
-        this.encoder = encoder;
     }
 
     @Override
     public UsersCreationResponseDto addUser(UsersCreationRequestDto usersCreationRequestDto) {
-        usersCreationRequestDto.setPassword(encoder.encode(usersCreationRequestDto.getPassword()));
         return authService.addUser(usersCreationRequestDto);
     }
 
     @Override
-    public Object loginCustomer(UsersCreationRequestDto usersCreationRequestDto) {
+    public Object loginCustomer(LoginRequestDto loginRequestDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        usersCreationRequestDto.getEmail(),
-                        usersCreationRequestDto.getPassword()
+                        loginRequestDto.getEmail(),
+                        loginRequestDto.getPassword()
                 )
         );
 

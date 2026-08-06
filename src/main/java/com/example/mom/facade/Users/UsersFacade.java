@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface UsersFacade {
 
-    Page<UsersCreationResponseDto> getAllUsers(int page, int size);
+    Page<UsersCreationResponseDto> getAllUsers(int page, int size, String search, String authority, String status, String sortBy, String sortDir);
 
     UsersCreationResponseDto getUserById(String userId);
 
