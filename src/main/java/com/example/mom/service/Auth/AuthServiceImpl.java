@@ -3,6 +3,7 @@ package com.example.mom.service.Auth;
 import com.example.mom.config.CustomIdGenerator;
 import com.example.mom.config.JwtService;
 import com.example.mom.config.PasswordGenerator;
+import com.example.mom.dto.Passwords.CreatePasswordRequestDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.*;
@@ -76,7 +77,7 @@ public class AuthServiceImpl implements AuthService{
                 .orElseThrow(() -> new RuntimeException("Invalid Status!"));
 
         AuthorityProfiles authority = authorityProfilesRepo.findById(usersCreationRequestDto.getAuthorityId())
-                .orElseThrow(() -> new RuntimeException("Invalid authority profile"));
+                .orElseThrow(() -> new RuntimeException("Invalid Authority Profile!"));
 
         String tempPassword = passwordGenerator.generatePassword();
 
@@ -85,23 +86,32 @@ public class AuthServiceImpl implements AuthService{
         user.setUserName(usersCreationRequestDto.getUserName());
         user.setEmail(usersCreationRequestDto.getEmail());
         user.setPassword(passwordEncoder.encode(tempPassword));
-
         user.setAuthorityProfiles(authority);
         user.setStatus(activeStatus);
         user.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = usersRepo.save(user);
+        passwordResetTokenRepo.deleteByUsers(savedUser);
+
+        String token = UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUsers(savedUser);
+        resetToken.setExpiryTime(LocalDateTime.now().plusMinutes(15));
+
+        passwordResetTokenRepo.save(resetToken);
+
+        String resetLink = "http://localhost:5173/reset-password?token=" + token;
 
         try {
             String subject = "Welcome to MOM Portal";
-            String text =
-                    "Hello " + savedUser.getUserName() + ",\n\n" +
+            String text = "Hello " + savedUser.getUserName() + ",\n\n" +
                             "Your MOM Portal account has been created successfully.\n\n" +
                             "Username : " + savedUser.getUserName() + "\n" +
                             "Temporary Password : " + tempPassword + "\n\n" +
-                            "Please use the temporary password to set your new password.\n\n" +
-                            "Reset Password Link:\n" +
-                            "http://localhost:3000/reset-password\n\n" +
+                            "Please create your own password by visiting the link below.\n\n" +
+                            "http://localhost:5173/create-password\n\n" +
                             "Regards,\n" +
                             "MOM Team";
             emailService.sendSimpleMessage(
@@ -173,6 +183,26 @@ public class AuthServiceImpl implements AuthService{
         passwordResetTokenRepo.delete(resetToken);
 
         return "Password reset successful";
+    }
+
+    @Override
+    @Transactional
+    public String createPassword(CreatePasswordRequestDto requestDto) {
+
+        Users user = usersRepo.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(requestDto.getTemporaryPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid temporary password");
+        }
+
+        user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+
+        usersRepo.save(user);
+
+        passwordResetTokenRepo.deleteByUsers(user);
+
+        return "Password created successfully.";
     }
 
     @Override

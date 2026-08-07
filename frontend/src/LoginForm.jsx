@@ -18,6 +18,7 @@ export default function Login() {
         password: ""
     });
     const [errors, setErrors] = useState({});
+    const [loginError, setLoginError] = useState("");
 
     const logButtonEvent = ({buttonNo,buttonName,request,response,status}) => {
         console.group(`${buttonNo} - ${buttonName}`);
@@ -36,11 +37,11 @@ export default function Login() {
             ...loginData,
             [name]: value
         });
-
         setErrors({
             ...errors,
             [name]: ""
         });
+        setLoginError("");
     };
 
     const validate = () => {
@@ -65,6 +66,7 @@ export default function Login() {
             password: ""
         });
         setErrors({});
+        setLoginError("");
     };
 
     const storeUserData = (data, currentRole) => {
@@ -112,7 +114,7 @@ export default function Login() {
                toast.success("Login Successful");
                navigate("/user-homepage");
            } else {
-               toast.error(
+               setLoginError(
                    "You are not authorized to access the User Portal."
                );
            }
@@ -124,7 +126,7 @@ export default function Login() {
                response: error.response?.data || error.message,
                status: error.response?.status || 500
            });
-           toast.error(error.response?.data?.message ||"Invalid Email or Password");
+           setLoginError(error.response?.data?.message ||"Invalid Email or Password");
        } finally {
            setLoading(false);
        }
@@ -178,7 +180,7 @@ export default function Login() {
                  },
                  status: "AUTHORIZATION FAILED (HTTP Response: 200)"
              });
-             toast.error("You are not authorized to access Admin Control.");
+             setLoginError("You are not authorized to access Admin Control.");
          }
      } catch (error) {
          logButtonEvent({
@@ -188,7 +190,7 @@ export default function Login() {
              response: error.response?.data || error.message,
              status: error.response?.status || 500
          });
-         toast.error(error.response?.data?.message ||"Invalid Email or Password");
+         setLoginError(error.response?.data?.message ||"Invalid Email or Password");
      } finally {
          setLoading(false);
      }
@@ -260,6 +262,11 @@ export default function Login() {
                             {errors.password}
                         </span>
                     }
+                    {loginError && (
+                        <span className="login-error">
+                            {loginError}
+                        </span>
+                    )}
                     <div className="reset-links">
                         <Link
                             to="/forgot-password"
@@ -312,3 +319,4 @@ export default function Login() {
         </div>
     );
 }
+

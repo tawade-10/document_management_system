@@ -7,10 +7,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import ToggleButton from "../ToggleButton/ToggleButton";
 
-export default function Header({
-    searchKeyword = "",
-    setSearchKeyword = () => {}
-}) {
+export default function Header({searchKeyword,setSearchKeyword,sortBy,setSortBy,sortDir,setSortDir,authorityFilter,setAuthorityFilter,statusFilter,setStatusFilter}){
 
     const API_URL = "http://localhost:8080/api/auth";
 
@@ -19,15 +16,20 @@ export default function Header({
 
     const [, forceUpdate] = useState(0);
 
-    const [sortBy, setSortBy] = useState("createdAt");
-    const [sortDir, setSortDir] = useState("desc");
-
-    const [authorityFilter, setAuthorityFilter] = useState([]);
-
-    const [statusFilter, setStatusFilter] = useState([]);
-
     const [showSort, setShowSort] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
+
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate("/homepage");
+        }
+    };
+
+    const handleHome = () => {
+        navigate("/admin");
+    };
 
     useEffect(() => {
         const refresh = () => forceUpdate(prev => prev + 1);
@@ -89,35 +91,35 @@ export default function Header({
 
     const applySort = () => {
         logButtonEvent({
-            buttonNo: "HB11",
-            buttonName: "Sort Button",
-            request: {
+            buttonNo:"HB11",
+            buttonName:"Sort Button",
+            request:{
                 sortBy,
                 sortDir
             },
-            response: {
-                message: "Sorting Applied"
+            response:{
+                message:"Sorting Applied"
             },
-            status: 200
+            status:200
         });
         setShowSort(false);
     };
 
-    const applyFilter = () => {
-        logButtonEvent({
-            buttonNo: "HB12",
-            buttonName: "Filter Button",
-            request: {
-                authorityFilter,
-                statusFilter
-            },
-            response: {
-                message: "Filter Applied"
-            },
-            status: 200
-        });
-        setShowFilter(false);
-    };
+   const applyFilter = () => {
+       logButtonEvent({
+           buttonNo:"HB12",
+           buttonName:"Filter Button",
+           request:{
+               authorityFilter,
+               statusFilter
+           },
+           response:{
+               message:"Filter Applied"
+           },
+           status:200
+       });
+       setShowFilter(false);
+   };
 
     const resetFilter = () => {
         setAuthorityFilter([]);
@@ -191,12 +193,19 @@ export default function Header({
 return (
     <header className="header">
         <div className="header-left">
-            <div
-                className="logo"
-                onClick={() => navigate("/homepage")}
+            <button
+                className="header-btn home-btn"
+                onClick={handleHome}
             >
-                MOM Portal
-            </div>
+                🏠 Home
+            </button>
+
+            <button
+                className="header-btn back-btn"
+                onClick={handleBack}
+            >
+                ← Back
+            </button>
             {permissions.canManageUsers && (
                 <button
                     className="header-btn blue"
@@ -221,12 +230,49 @@ return (
                 </button>
             )}
             {permissions.canCreateNotebook && (
-                <button className="header-btn green">
+                <button
+                    className="header-btn green"
+                    onClick={() => {
+                        logButtonEvent({
+                            buttonNo: "HB21",
+                            buttonName: "Create Notebook Button",
+                            request: {
+                                action: "Navigate",
+                                from: location.pathname,
+                                to: "/user-homepage/create-notebook"
+                            },
+                            response: {
+                                message: "Navigating to Create Notebook Component"
+                            },
+                            status: 200
+                        });
+
+                        navigate("/user-homepage/create-notebook");
+                    }}
+                >
                     New Notebook
                 </button>
             )}
-            {permissions.canCreatePage && (
-                <button className="header-btn green">
+            {permissions.canCreateNotebook && (
+                <button
+                    className="header-btn green"
+                    onClick={() => {
+                        logButtonEvent({
+                            buttonNo: "HB22",
+                            buttonName: "Create Page Button",
+                            request: {
+                                action: "Navigate",
+                                from: location.pathname,
+                                to: "/user-homepage/create-page"
+                            },
+                            response: {
+                                message: "Navigating to Create Page Component"
+                            },
+                            status: 200
+                        });
+                        navigate("/user-homepage/create-page");
+                    }}
+                >
                     New Page
                 </button>
             )}

@@ -2,28 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FaLock, FaEdit } from "react-icons/fa";
 import "./ViewUser.css";
 
 export default function ViewUser() {
 
     const { userId } = useParams();
-    const navigate = useNavigate();
 
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const token = localStorage.getItem("token");
 
-    const logButtonEvent = ({buttonNo, buttonName, request, response, status}) => {
-        console.group(`${buttonNo} - ${buttonName}`);
-        console.log("Request");
-        console.log(request);
-        console.log("Response");
-        console.log(response);
-        console.log("Status Code");
-        console.log(status);
-        console.groupEnd();
-    };
+    const [loading, setLoading] = useState(true);
+
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         fetchUser();
@@ -31,153 +23,178 @@ export default function ViewUser() {
 
     const fetchUser = async () => {
 
-        const request = {
-            method: "GET",
-            url: `http://localhost:8080/api/users/${userId}`
-        };
-
         try {
+
             const response = await axios.get(
-                request.url,
+                `http://localhost:8080/api/users/${userId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 }
             );
-            logButtonEvent({
-                buttonNo: "BB16",
-                buttonName: "User Row Click",
-                request,
-                response: response.data,
-                status: response.status
-            });
+
             setUser(response.data);
-        } catch (error) {
-            logButtonEvent({
-                buttonNo: "BB16",
-                buttonName: "User Row Click",
-                request,
-                response: error.response?.data || error.message,
-                status: error.response?.status || 500
-            });
-            toast.error("Unable to load user.");
-        } finally {
-            setLoading(false);
+
         }
+        catch {
+
+            toast.error("Unable to load user.");
+
+        }
+        finally {
+
+            setLoading(false);
+
+        }
+
     };
 
-    const handleStatus = async () => {
-        const buttonNo = user.status === "UAC" ? "BB20" : "BB19";
-        const buttonName = user.status === "UAC" ? "Deactivate User Button" : "Activate User Button";
-        const request = {
-            method: "PUT",
-            url: `http://localhost:8080/api/users/updateStatus/${user.userId}`
-        };
+    const handleUpdate = async () => {
 
         try {
-            const response = await axios.put(
-                request.url,
-                {},
+
+            await axios.put(
+                `http://localhost:8080/api/users/update`,
+                {
+                    userName: user.userName,
+                    email: user.email
+                },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 }
             );
-            logButtonEvent({
-                buttonNo,
-                buttonName,
-                request,
-                response: response.data,
-                status: response.status
-            });
-            toast.success(response.data.message);
-            fetchUser();
-        } catch (error) {
-            logButtonEvent({
-                buttonNo,
-                buttonName,
-                request,
-                response: error.response?.data || error.message,
-                status: error.response?.status || 500
-            });
-            toast.error(error.response?.data?.message || "Unable to update user.");
+
+            toast.success("User updated successfully.");
+
+            navigate("/admin");
+
         }
+        catch {
+
+            toast.error("Unable to update user.");
+
+        }
+
     };
 
     if (loading) {
-        return <h3 className="loading">Loading User...</h3>;
+
+        return <h2 className="loading">Loading...</h2>;
+
     }
 
     return (
+
         <div className="view-user-container">
+
             <div className="view-user-card">
-                <h2>View User</h2>
+
+                <h2>View / Edit User</h2>
+
+               <div className="form-group">
+
+                   <label>User ID</label>
+
+                   <div className="input-wrapper readonly">
+
+                       <input
+                           value={user.userId}
+                           readOnly
+                       />
+
+                       <FaLock className="field-icon"/>
+
+                   </div>
+
+               </div>
+
                 <div className="form-group">
-                    <label>User ID</label>
-                    <input
-                        value={user.userId}
-                        readOnly
-                    />
-                </div>
-                <div className="form-group">
-                    <label>User Name</label>
-                    <input
-                        value={user.userName}
-                        onChange={(e) => setUser({
-                                    ...user,
-                                    userName: e.target.value
-                                  })
-                             }
+
+                    <label>Authority Profile</label>
+
+                    <div className="input-wrapper readonly">
+
+                        <input
+                            value={user.authorityName}
+                            readOnly
                         />
+
+                        <FaLock className="field-icon"/>
+
+                    </div>
+
                 </div>
+
+               <div className="form-group">
+
+                   <label>User Name</label>
+
+                   <div className="input-wrapper editable">
+
+                       <input
+                           value={user.userName}
+                           onChange={(e)=>
+                               setUser({
+                                   ...user,
+                                   userName:e.target.value
+                               })
+                           }
+                       />
+
+                       <FaEdit className="field-icon"/>
+
+                   </div>
+
+               </div>
+
                 <div className="form-group">
+
                     <label>Email</label>
-                    <input
-                        value={user.email}
-                        onChange={(e) => setUser({
+
+                    <div className="input-wrapper editable">
+
+                        <input
+                            value={user.email}
+                            onChange={(e)=>
+                                setUser({
                                     ...user,
-                                    email: e.target.value
-                                  })
-                              }
+                                    email:e.target.value
+                                })
+                            }
                         />
+
+                        <FaEdit className="field-icon"/>
+
+                    </div>
+
                 </div>
                 <div className="form-group">
-                    <label>Authority</label>
-                    <input
-                        value={user.authorityName}
-                        readOnly
-                    />
-                </div>
-                <div className="form-group">
+
                     <label>Status</label>
-                    <input
-                        value={
-                            user.status === "UAC"
-                                ? "Active"
-                                : "Inactive"
-                        }
-                        readOnly
-                    />
+
+                    <div className="input-wrapper readonly status-box">
+
+                        <input
+                            value={user.status === "UAC" ? "Active" : "Inactive"}
+                            readOnly
+                        />
+
+                        <FaLock className="field-icon"/>
+
+                    </div>
+
                 </div>
-                <div className="button-group">
-                    <button
-                        className={
-                            user.status === "UAC"
-                                ? "deactivate-btn"
-                                : "activate-btn"
-                        }
-                        onClick={handleStatus}
-                    >
-                        {
-                            user.status === "UAC"
-                                ? "Deactivate User"
-                                : "Activate User"
-                        }
-                    </button>
-                </div>
+                <button
+                    className="save-btn"
+                    onClick={handleUpdate}
+                >
+                    Save Changes
+                </button>
             </div>
         </div>
     );
 }
+

@@ -1,5 +1,6 @@
 package com.example.mom.controller;
 
+import com.example.mom.dto.Passwords.CreatePasswordRequestDto;
 import com.example.mom.dto.Users.LoginRequestDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
@@ -44,6 +45,12 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         String response = authFacade.resetPassword(token, newPassword);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/create-password")
+    public ResponseEntity<?> createPassword(@RequestBody CreatePasswordRequestDto requestDto) {
+        String response = authFacade.createPassword(requestDto);
         return ResponseEntity.ok(response);
     }
 

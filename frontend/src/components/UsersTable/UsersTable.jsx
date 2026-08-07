@@ -20,17 +20,14 @@ useEffect(() => {
 }, [searchKeyword,sortBy,sortDir,authorityFilter,statusFilter]);
 
 useEffect(() => {
-
     fetchUsers();
-
-    if (location.state?.refresh) {
-        navigate(location.pathname, {
-            replace: true,
-            state: {}
+    if(location.state?.refresh){
+        navigate(location.pathname,{
+            replace:true,
+            state:{}
         });
     }
-
-}, [page,searchKeyword,sortBy,sortDir,authorityFilter,statusFilter,location.state]);
+},[page,searchKeyword,sortBy,sortDir,authorityFilter,statusFilter,location.state]);
 
 const logButtonEvent = ({
     buttonNo,
@@ -59,19 +56,19 @@ const PAGE_SIZE = 10;
 
 const fetchUsers = async () => {
 
-    const token = localStorage.getItem("token");
+   const token = localStorage.getItem("token");
 
    let url = `http://localhost:8080/api/users?page=${page}&size=${PAGE_SIZE}`;
 
-   if (searchKeyword.trim() !== "") {
+   if(searchKeyword.trim()!==""){
        url += `&search=${encodeURIComponent(searchKeyword)}`;
    }
 
-   if (authorityFilter.length > 0) {
+   if(authorityFilter.length>0){
        url += `&authority=${encodeURIComponent(authorityFilter.join(","))}`;
    }
 
-   if (statusFilter.length > 0) {
+   if(statusFilter.length>0){
        url += `&status=${encodeURIComponent(statusFilter.join(","))}`;
    }
 

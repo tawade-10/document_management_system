@@ -88,18 +88,18 @@ export default function ResetPassword() {
 
             request = {
                 method: "POST",
-                url:
-                    `http://localhost:8080/api/auth/first-login` +
-                    `?email=${email}` +
-                    `&temporaryPassword=${temporaryPassword}` +
-                    `&newPassword=${password}`
+                url: "http://localhost:8080/api/auth/create-password",
+                data: {
+                    temporaryPassword,
+                    newPassword: password
+                }
             };
-
-        }
 
         try {
 
-            const response = await axios.post(request.url);
+            const response = isForgotPassword
+                ? await axios.post(request.url)
+                : await axios.post(request.url, request.data);
 
             logButtonEvent({
                 buttonNo: "BB12",
@@ -357,11 +357,8 @@ export default function ResetPassword() {
                                                 ? "Reset Password"
                                                 : "Create Password"}
                                     </button>
-
                                 </form>
-
                                 {msg && (
-
                                     <p
                                         className={`rp-message ${
                                             msg.toLowerCase().includes("successful")
@@ -371,10 +368,9 @@ export default function ResetPassword() {
                                     >
                                         {msg}
                                     </p>
-
                                 )}
-
                             </div>
                         </div>
                     );
                 }
+            }

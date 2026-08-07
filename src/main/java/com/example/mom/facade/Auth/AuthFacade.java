@@ -1,5 +1,6 @@
 package com.example.mom.facade.Auth;
 
+import com.example.mom.dto.Passwords.CreatePasswordRequestDto;
 import com.example.mom.dto.Users.LoginRequestDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
@@ -15,6 +16,8 @@ public interface AuthFacade {
     String generateResetToken(String email);
 
     String resetPassword(String token, String newPassword);
+
+    String createPassword(CreatePasswordRequestDto requestDto);
 
     Object logoutCustomer(HttpServletRequest request);
 }

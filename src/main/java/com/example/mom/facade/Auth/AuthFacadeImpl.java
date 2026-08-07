@@ -1,6 +1,7 @@
 package com.example.mom.facade.Auth;
 
 import com.example.mom.config.JwtService;
+import com.example.mom.dto.Passwords.CreatePasswordRequestDto;
 import com.example.mom.dto.Users.LoginRequestDto;
 import com.example.mom.dto.Users.LoginResponseDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
@@ -63,6 +64,11 @@ public class AuthFacadeImpl implements AuthFacade{
     @Override
     public String resetPassword(String token, String newPassword) {
         return authService.resetPassword(token,newPassword);
+    }
+
+    @Override
+    public String createPassword(CreatePasswordRequestDto requestDto) {
+        return authService.createPassword(requestDto);
     }
 
     @Override

@@ -49,7 +49,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/auth/login",
                                 "/api/auth/forgot-password",
-                                "/api/auth/reset-password"
+                                "/api/auth/reset-password",
+                                "/api/auth/create-password"
                         ).permitAll()
                         .requestMatchers("/api/auth/register")
                         .hasAnyRole("ROOT_ADMIN", "ADMIN")

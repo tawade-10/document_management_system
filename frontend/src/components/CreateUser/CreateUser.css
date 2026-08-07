@@ -7,98 +7,124 @@
 
 .add-user-container{
     width:100%;
+    height:calc(100vh - 130px);
     display:flex;
     justify-content:center;
     align-items:center;
     overflow:hidden;
-    padding:20px;
 }
 
 .add-user-card{
-    width:450px;
+    width:560px;
     background:#fff;
-    border-radius:12px;
-    padding:25px;
-    box-shadow:0 5px 20px rgba(0,0,0,.15);
+    border-radius:10px;
+    padding:28px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
 }
 
 .add-user-card h2{
     text-align:center;
-    margin-bottom:20px;
-    color:#0f172a;
+    color:#003366;
+    margin-bottom:22px;
 }
 
-.input-box{
+.form-group{
     display:flex;
     align-items:center;
-    border:1px solid #dcdcdc;
-    border-radius:8px;
-    margin-bottom:5px;
-    padding:0 15px;
+    margin-bottom:14px;
 }
 
-.input-box svg{
-    color:#666;
+.form-group label{
+    width:160px;
+    font-size:14px;
+    font-weight:600;
+    color:#333;
 }
 
-.input-box input{
+.input-wrapper{
+    flex:1;
+    position:relative;
+}
+
+.input-wrapper input,
+.input-wrapper select{
     width:100%;
-    border:none;
+    height:42px;
+    border:1px solid #cfcfcf;
+    border-radius:6px;
+    padding:0 42px 0 12px;
+    font-size:14px;
     outline:none;
-    padding:12px;
+    transition:.2s;
+    background:#fff;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus{
+    border-color:#1976d2;
+}
+
+.field-icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#1976d2;
     font-size:15px;
 }
 
-.input-box span{
-    cursor:pointer;
-}
-
-select{
-    width:100%;
-    padding:12px;
-    border-radius:8px;
-    border:1px solid #dcdcdc;
-    margin-top:8px;
-    margin-bottom:5px;
-    outline:none;
-}
-
 .error{
+    margin-left:160px;
+    margin-top:-8px;
+    margin-bottom:10px;
     display:block;
-    color:red;
+    color:#dc3545;
     font-size:12px;
-    margin-bottom:8px;
+}
+
+.note-box{
+    background:#f8f9fa;
+    border:1px solid #d8d8d8;
+    border-radius:6px;
+    padding:12px;
+    font-size:13px;
+    color:#555;
+    margin-top:12px;
+    margin-bottom:18px;
+    line-height:1.5;
 }
 
 .button-group{
     display:flex;
     justify-content:space-between;
-    margin-top:18px;
+    gap:15px;
 }
 
 .reset-btn,
 .submit-btn{
-    width:48%;
-    padding:12px;
+    flex:1;
+    height:44px;
     border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:15px;
+    border-radius:6px;
     color:#fff;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
 }
 
 .reset-btn{
-    background:#64748b;
-}
-
-.submit-btn{
-    background:#2563eb;
+    background:#6c757d;
 }
 
 .reset-btn:hover{
-    background:#475569;
+    background:#5c636a;
+}
+
+.submit-btn{
+    background:#198754;
 }
 
 .submit-btn:hover{
-    background:#1d4ed8;
+    background:#157347;
 }
