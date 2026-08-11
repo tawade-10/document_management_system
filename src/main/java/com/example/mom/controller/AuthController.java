@@ -49,8 +49,8 @@ public class AuthController {
     }
 
     @PostMapping("/create-password")
-    public ResponseEntity<?> createPassword(@RequestBody CreatePasswordRequestDto requestDto) {
-        String response = authFacade.createPassword(requestDto);
+    public ResponseEntity<?> createPassword(@RequestParam String token, @RequestBody CreatePasswordRequestDto requestDto) {
+        String response = authFacade.createPassword(token, requestDto);
         return ResponseEntity.ok(response);
     }
 

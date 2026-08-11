@@ -3,12 +3,20 @@ package com.example.mom.service.Notebooks;
 import com.example.mom.config.CustomIdGenerator;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
+import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.Notebooks;
 import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.NotebooksRepo;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
+import com.example.mom.specification.NotebooksSpecification;
+import com.example.mom.specification.UsersSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -73,9 +81,16 @@ public class NotebooksServiceImpl implements NotebooksService{
     }
 
     @Override
-    public List<NotebooksResponseDto> getAllNotebooks() {
-        List<Notebooks> notebooks = notebooksRepo.findAll();
-        return notebooks.stream().map(NotebooksResponseDto::new).collect(Collectors.toList());
+    public Page<NotebooksResponseDto> getAllNotebooks(int page, int size, String search, String authority, String status, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Specification<Notebooks> specification = NotebooksSpecification.filterNotebooks(search, authority, status);
+        Page<Notebooks> notebooksPage = notebooksRepo.findAll(specification, pageable);
+        return notebooksPage.map(NotebooksResponseDto::new);
     }
 
     @Override

@@ -5,11 +5,13 @@ import com.example.mom.entity.Pages;
 import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface NotebooksRepo extends JpaRepository<Notebooks,String> {
+public interface NotebooksRepo extends JpaRepository<Notebooks,String>,
+        JpaSpecificationExecutor<Notebooks> {
 
     List<Notebooks> findByStatus_StatusId(String statusId);
 

@@ -1,130 +1,497 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Poppins,sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Poppins, sans-serif;
 }
 
-.add-user-container{
-    width:100%;
-    height:calc(100vh - 130px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
+.add-user-container {
+
+    width: 100%;
+    height: calc(100vh - 130px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    overflow: hidden;
 }
 
-.add-user-card{
-    width:560px;
-    background:#fff;
-    border-radius:10px;
-    padding:28px;
-    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+/* =========================================
+   CARD
+========================================= */
+
+.add-user-card {
+
+    width: 560px;
+
+    max-width: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #e3e8ee;
+
+    border-radius: 12px;
+
+    padding: 24px 30px 25px;
+
+    box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.12);
 }
 
-.add-user-card h2{
-    text-align:center;
-    color:#003366;
-    margin-bottom:22px;
+
+/* =========================================
+   FORM HEADER
+========================================= */
+
+.form-header {
+
+    text-align: center;
+
+    margin-bottom: 18px;
 }
 
-.form-group{
-    display:flex;
-    align-items:center;
-    margin-bottom:14px;
+.form-header h2 {
+
+    color: #003366;
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    margin-bottom: 4px;
 }
 
-.form-group label{
-    width:160px;
-    font-size:14px;
-    font-weight:600;
-    color:#333;
+.form-header p {
+
+    color: #777;
+
+    font-size: 12px;
+
+    line-height: 1.4;
 }
 
-.input-wrapper{
-    flex:1;
-    position:relative;
+
+/* =========================================
+   FORM GROUP
+========================================= */
+
+.form-group {
+
+    display: flex;
+
+    align-items: center;
+
+    margin-bottom: 2px;
 }
+
+.form-group label {
+
+    width: 155px;
+
+    flex-shrink: 0;
+
+    color: #333;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   INPUT WRAPPER
+========================================= */
+
+.input-wrapper {
+
+    flex: 1;
+
+    position: relative;
+}
+
+
+/* =========================================
+   INPUT + SELECT
+========================================= */
 
 .input-wrapper input,
-.input-wrapper select{
-    width:100%;
-    height:42px;
-    border:1px solid #cfcfcf;
-    border-radius:6px;
-    padding:0 42px 0 12px;
-    font-size:14px;
-    outline:none;
-    transition:.2s;
-    background:#fff;
+.input-wrapper select {
+
+    width: 100%;
+
+    height: 38px;
+
+    padding: 0 38px 0 11px;
+
+    border: 1px solid #cfd6df;
+
+    border-radius: 6px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #333;
+
+    font-size: 13px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
+
+
+/* =========================================
+   PLACEHOLDER
+========================================= */
+
+.input-wrapper input::placeholder {
+
+    color: #999;
+}
+
+
+/* =========================================
+   FOCUS
+========================================= */
 
 .input-wrapper input:focus,
-.input-wrapper select:focus{
-    border-color:#1976d2;
+.input-wrapper select:focus {
+
+    border-color: #1976d2;
+
+    box-shadow:
+        0 0 0 3px rgba(25, 118, 210, 0.10);
 }
 
-.field-icon{
-    position:absolute;
-    right:14px;
-    top:50%;
-    transform:translateY(-50%);
-    color:#1976d2;
-    font-size:15px;
+
+/* =========================================
+   SELECT
+========================================= */
+
+.input-wrapper select {
+
+    padding-right: 10px;
+
+    cursor: pointer;
+
+    appearance: auto;
 }
 
-.error{
-    margin-left:160px;
-    margin-top:-8px;
-    margin-bottom:10px;
-    display:block;
-    color:#dc3545;
-    font-size:12px;
+
+/* =========================================
+   ICON
+========================================= */
+
+.field-icon {
+
+    position: absolute;
+
+    right: 12px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #1976d2;
+
+    font-size: 14px;
+
+    pointer-events: none;
 }
 
-.note-box{
-    background:#f8f9fa;
-    border:1px solid #d8d8d8;
-    border-radius:6px;
-    padding:12px;
-    font-size:13px;
-    color:#555;
-    margin-top:12px;
-    margin-bottom:18px;
-    line-height:1.5;
+
+/* =========================================
+   ERROR
+========================================= */
+
+.error {
+
+    display: block;
+
+    min-height: 16px;
+
+    margin-left: 155px;
+
+    margin-top: 0;
+
+    margin-bottom: 2px;
+
+    color: #dc3545;
+
+    font-size: 11px;
+
+    line-height: 15px;
 }
 
-.button-group{
-    display:flex;
-    justify-content:space-between;
-    gap:15px;
+
+/* =========================================
+   NOTE BOX
+========================================= */
+
+.note-box {
+
+    margin-top: 7px;
+
+    margin-bottom: 16px;
+
+    padding: 9px 12px;
+
+    background: #f6f8fa;
+
+    border: 1px solid #dce2e8;
+
+    border-left: 3px solid #1976d2;
+
+    border-radius: 7px;
+
+    color: #555;
+
+    font-size: 11.5px;
+
+    line-height: 1.45;
 }
+
+
+/* =========================================
+   NOTE TITLE
+========================================= */
+
+.note-title {
+
+    color: #003366;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    margin-bottom: 2px;
+}
+
+
+/* =========================================
+   NOTE TEXT
+========================================= */
+
+.note-text {
+
+    color: #555;
+
+    font-size: 11.5px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================
+   BUTTON GROUP
+========================================= */
+
+.button-group {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 2px;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
 
 .reset-btn,
-.submit-btn{
-    flex:1;
-    height:44px;
-    border:none;
-    border-radius:6px;
-    color:#fff;
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
-    transition:.25s;
+.submit-btn {
+
+    height: 38px;
+
+    min-width: 125px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-.reset-btn{
-    background:#6c757d;
+.reset-btn:hover,
+.submit-btn:hover {
+
+    transform: translateY(-1px);
 }
 
-.reset-btn:hover{
-    background:#5c636a;
+
+/* =========================================
+   RESET BUTTON
+========================================= */
+
+.reset-btn {
+
+    background: #6c757d;
 }
 
-.submit-btn{
-    background:#198754;
+.reset-btn:hover {
+
+    background: #5c636a;
+
+    box-shadow:
+        0 3px 8px rgba(108, 117, 125, 0.25);
 }
 
-.submit-btn:hover{
-    background:#157347;
+
+/* =========================================
+   CREATE BUTTON
+========================================= */
+
+.submit-btn {
+
+    background: #198754;
 }
+
+.submit-btn:hover {
+
+    background: #157347;
+
+    box-shadow:
+        0 3px 8px rgba(25, 135, 84, 0.25);
+}
+
+
+/* =========================================
+   SMALL HEIGHT SCREENS
+========================================= */
+
+@media (max-height: 700px) {
+
+    .add-user-container {
+
+        padding-top: 8px;
+
+        padding-bottom: 8px;
+    }
+
+    .add-user-card {
+
+        padding-top: 18px;
+
+        padding-bottom: 18px;
+    }
+
+    .form-header {
+
+        margin-bottom: 12px;
+    }
+
+    .form-header h2 {
+
+        font-size: 21px;
+    }
+
+    .input-wrapper input,
+    .input-wrapper select {
+
+        height: 36px;
+    }
+
+    .error {
+
+        min-height: 14px;
+
+        line-height: 13px;
+    }
+
+    .note-box {
+
+        margin-top: 4px;
+
+        margin-bottom: 10px;
+
+        padding: 7px 10px;
+    }
+
+    .reset-btn,
+    .submit-btn {
+
+        height: 36px;
+    }
+}
+
+
+/* =========================================
+   TABLET / MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .add-user-container {
+
+        height: auto;
+
+        min-height: calc(100vh - 130px);
+
+        padding: 15px;
+    }
+
+    .add-user-card {
+
+        width: 100%;
+
+        padding: 20px;
+    }
+
+    .form-group {
+
+        display: block;
+
+        margin-bottom: 2px;
+    }
+
+    .form-group label {
+
+        display: block;
+
+        width: 100%;
+
+        margin-bottom: 5px;
+    }
+
+    .error {
+
+        margin-left: 0;
+
+        margin-bottom: 6px;
+    }
+
+    .button-group {
+
+        justify-content: stretch;
+    }
+
+    .reset-btn,
+    .submit-btn {
+
+        flex: 1;
+
+        min-width: 0;
+    }
+}
+

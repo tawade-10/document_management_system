@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { MdEmail } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import {
+    FaLock,
+    FaEye,
+    FaEyeSlash
+} from "react-icons/fa";
+import {
+    useNavigate,
+    useSearchParams
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import "./CreatePassword.css";
 
@@ -12,12 +18,23 @@ export default function CreatePassword() {
 
     const navigate = useNavigate();
 
-    const [showTempPassword, setShowTempPassword] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [searchParams] = useSearchParams();
+
+    // Password creation token received from email link
+    // Example:
+    // /create-password?token=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    const token = searchParams.get("token");
+
+    const [showTempPassword, setShowTempPassword] =
+        useState(false);
+
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [showConfirmPassword, setShowConfirmPassword] =
+        useState(false);
 
     const [formData, setFormData] = useState({
-        email: "",
         temporaryPassword: "",
         password: "",
         confirmPassword: ""
@@ -25,45 +42,52 @@ export default function CreatePassword() {
 
     const [errors, setErrors] = useState({});
 
+
+    /* =========================
+       HANDLE CHANGE
+    ========================= */
+
     const handleChange = (e) => {
 
         const { name, value } = e.target;
 
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
-        });
+        }));
 
-        setErrors({
-            ...errors,
+        setErrors(prev => ({
+            ...prev,
             [name]: ""
-        });
+        }));
+
     };
+
+
+    /* =========================
+       VALIDATION
+    ========================= */
 
     const validate = () => {
 
-        let temp = {};
-
-        if (!formData.email.trim()) {
-            temp.email = "Email is required";
-        } else if (
-            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
-        ) {
-            temp.email = "Invalid Email Address";
-        }
+        const temp = {};
 
         if (!formData.temporaryPassword.trim()) {
-            temp.temporaryPassword = "Temporary Password is required";
+
+            temp.temporaryPassword =
+                "Temporary Password is required";
+
         }
 
         if (!formData.password.trim()) {
 
-            temp.password = "New Password is required";
+            temp.password =
+                "New Password is required";
 
-        } else if (
-            !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%&!]).{8,20}$/.test(
-                formData.password
-            )
+        }
+        else if (
+            !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%&!]).{8,20}$/
+                .test(formData.password)
         ) {
 
             temp.password =
@@ -73,211 +97,472 @@ export default function CreatePassword() {
 
         if (!formData.confirmPassword.trim()) {
 
-            temp.confirmPassword = "Confirm Password is required";
+            temp.confirmPassword =
+                "Confirm Password is required";
 
-        } else if (formData.password !== formData.confirmPassword) {
+        }
+        else if (
+            formData.password !==
+            formData.confirmPassword
+        ) {
 
-            temp.confirmPassword = "Passwords do not match";
+            temp.confirmPassword =
+                "Passwords do not match";
 
         }
 
         setErrors(temp);
 
         return Object.keys(temp).length === 0;
+
     };
+
+
+    /* =========================
+       RESET
+    ========================= */
+
+    const handleReset = () => {
+
+        setFormData({
+            temporaryPassword: "",
+            password: "",
+            confirmPassword: ""
+        });
+
+        setErrors({});
+
+        setShowTempPassword(false);
+        setShowPassword(false);
+        setShowConfirmPassword(false);
+
+    };
+
+
+    /* =========================
+       SUBMIT
+    ========================= */
 
     const handleSubmit = async () => {
 
-        if (!validate()) return;
+        /*
+         * The password creation token comes from
+         * the email URL.
+         *
+         * We DO NOT use localStorage JWT here.
+         */
+
+        if (!token) {
+
+            toast.error(
+                "Invalid or missing password creation link."
+            );
+
+            return;
+        }
+
+        if (!validate()) {
+            return;
+        }
 
         const payload = {
-            email: formData.email,
-            temporaryPassword: formData.temporaryPassword,
-            newPassword: formData.password
+
+            temporaryPassword:
+                formData.temporaryPassword,
+
+            newPassword:
+                formData.password
+
         };
 
         try {
 
-            console.group("BB22 - Create Password");
+            console.group(
+                "BB22 - Create Password"
+            );
 
             console.log("Request");
+
             console.log({
                 method: "POST",
-                url: `${API_URL}/create-password`,
+                url:
+                    `${API_URL}/create-password?token=${token}`,
                 payload
             });
 
             const response = await axios.post(
-                `${API_URL}/create-password`,
-                payload
+
+                `${API_URL}/create-password?token=${encodeURIComponent(token)}`,
+
+                payload,
+
+                {
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    }
+                }
+
             );
 
             console.log("Response");
+
             console.log(response.data);
 
+            console.log("Status Code");
+
+            console.log(response.status);
+
             console.groupEnd();
 
-            toast.success(response.data);
+            toast.success(
+                response.data ||
+                "Password created successfully."
+            );
 
-            navigate("/");
+            handleReset();
 
-        } catch (error) {
+            /*
+             * Give toast a moment to display
+             * before navigating to login.
+             */
 
-            console.group("BB22 - Create Password");
+            setTimeout(() => {
+
+                navigate("/");
+
+            }, 1000);
+
+        }
+        catch (error) {
+
+            console.group(
+                "BB22 - Create Password"
+            );
 
             console.log("Request");
-            console.log(payload);
+
+            console.log({
+                method: "POST",
+                url:
+                    `${API_URL}/create-password?token=${token}`,
+                payload
+            });
 
             console.log("Response");
-            console.log(error.response?.data);
+
+            console.log(
+                error.response?.data
+            );
+
+            console.log("Status Code");
+
+            console.log(
+                error.response?.status
+            );
 
             console.groupEnd();
 
-            toast.error(
-                error.response?.data || "Unable to create password."
-            );
+            let errorMessage =
+                "Unable to create password.";
+
+            if (
+                typeof error.response?.data ===
+                "string"
+            ) {
+
+                errorMessage =
+                    error.response.data;
+
+            }
+            else if (
+                error.response?.data?.message
+            ) {
+
+                errorMessage =
+                    error.response.data.message;
+
+            }
+
+            toast.error(errorMessage);
+
         }
+
     };
+
 
     return (
 
-        <div className="reset-container">
+        <div className="create-password-container">
 
-            <div className="reset-card">
+            <div className="create-password-card">
 
-                <h2>Create New Password</h2>
 
-                <p className="reset-subtitle">
-                    Enter your registered email, temporary password and create a new password.
-                </p>
+                {/* =========================
+                    HEADER
+                ========================= */}
 
-                <div className="input-box">
+                <div className="password-form-header">
 
-                    <MdEmail />
+                    <h2>
+                        Create New Password
+                    </h2>
 
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Registered Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                    />
+                    <p>
+                        Enter your temporary password
+                        and create a new password.
+                    </p>
 
                 </div>
 
-                <span className="error">
-                    {errors.email}
-                </span>
 
-                <div className="input-box">
+                {/* =========================
+                    TEMPORARY PASSWORD
+                ========================= */}
 
-                    <FaLock />
+                <div className="password-form-group">
 
-                    <input
-                        type={showTempPassword ? "text" : "password"}
-                        name="temporaryPassword"
-                        placeholder="Temporary Password"
-                        value={formData.temporaryPassword}
-                        onChange={handleChange}
-                    />
+                    <label>
+                        Temporary Password
+                    </label>
 
-                    <span
-                        className="eye-icon"
-                        onClick={() =>
-                            setShowTempPassword(!showTempPassword)
-                        }
-                    >
-                        {showTempPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
+                    <div className="password-input-wrapper">
+
+                        <FaLock
+                            className="password-field-icon"
+                        />
+
+                        <input
+                            type={
+                                showTempPassword
+                                    ? "text"
+                                    : "password"
+                            }
+                            name="temporaryPassword"
+                            placeholder="Enter Temporary Password"
+                            value={
+                                formData.temporaryPassword
+                            }
+                            onChange={handleChange}
+                        />
+
+                        <span
+                            className="password-eye-icon"
+                            onClick={() =>
+                                setShowTempPassword(
+                                    prev => !prev
+                                )
+                            }
+                        >
+
+                            {
+                                showTempPassword
+                                    ? <FaEyeSlash />
+                                    : <FaEye />
+                            }
+
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <span className="error">
+                <span className="password-error">
                     {errors.temporaryPassword}
                 </span>
 
-                <div className="input-box">
 
-                    <FaLock />
+                {/* =========================
+                    NEW PASSWORD
+                ========================= */}
 
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        placeholder="New Password"
-                        value={formData.password}
-                        onChange={handleChange}
-                    />
+                <div className="password-form-group">
 
-                    <span
-                        className="eye-icon"
-                        onClick={() =>
-                            setShowPassword(!showPassword)
-                        }
-                    >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
+                    <label>
+                        New Password
+                    </label>
+
+                    <div className="password-input-wrapper">
+
+                        <FaLock
+                            className="password-field-icon"
+                        />
+
+                        <input
+                            type={
+                                showPassword
+                                    ? "text"
+                                    : "password"
+                            }
+                            name="password"
+                            placeholder="Enter New Password"
+                            value={
+                                formData.password
+                            }
+                            onChange={handleChange}
+                        />
+
+                        <span
+                            className="password-eye-icon"
+                            onClick={() =>
+                                setShowPassword(
+                                    prev => !prev
+                                )
+                            }
+                        >
+
+                            {
+                                showPassword
+                                    ? <FaEyeSlash />
+                                    : <FaEye />
+                            }
+
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <span className="error">
+                <span className="password-error">
                     {errors.password}
                 </span>
 
-                <div className="input-box">
 
-                    <FaLock />
+                {/* =========================
+                    CONFIRM PASSWORD
+                ========================= */}
 
-                    <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        placeholder="Confirm New Password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                    />
+                <div className="password-form-group">
 
-                    <span
-                        className="eye-icon"
-                        onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                        }
-                    >
-                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
+                    <label>
+                        Confirm New Password
+                    </label>
+
+                    <div className="password-input-wrapper">
+
+                        <FaLock
+                            className="password-field-icon"
+                        />
+
+                        <input
+                            type={
+                                showConfirmPassword
+                                    ? "text"
+                                    : "password"
+                            }
+                            name="confirmPassword"
+                            placeholder="Confirm New Password"
+                            value={
+                                formData.confirmPassword
+                            }
+                            onChange={handleChange}
+                        />
+
+                        <span
+                            className="password-eye-icon"
+                            onClick={() =>
+                                setShowConfirmPassword(
+                                    prev => !prev
+                                )
+                            }
+                        >
+
+                            {
+                                showConfirmPassword
+                                    ? <FaEyeSlash />
+                                    : <FaEye />
+                            }
+
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <span className="error">
+                <span className="password-error">
                     {errors.confirmPassword}
                 </span>
 
+
+                {/* =========================
+                    PASSWORD REQUIREMENTS
+                ========================= */}
+
                 <div className="password-note">
 
-                    <strong>Password Requirements</strong>
+                    <div className="password-note-title">
+                        Password Requirements
+                    </div>
 
                     <ul>
-                        <li>8 - 20 characters</li>
-                        <li>At least one uppercase letter</li>
-                        <li>At least one lowercase letter</li>
-                        <li>At least one number</li>
-                        <li>At least one special character (@ # $ % & !)</li>
+
+                        <li>
+                            8 - 20 characters
+                        </li>
+
+                        <li>
+                            At least one uppercase letter
+                        </li>
+
+                        <li>
+                            At least one lowercase letter
+                        </li>
+
+                        <li>
+                            At least one number
+                        </li>
+
+                        <li>
+                            At least one special character
+                            (@ # $ % & !)
+                        </li>
+
                     </ul>
 
                 </div>
 
-                <button
-                    className="reset-password-btn"
-                    onClick={handleSubmit}
-                >
-                    Create Password
-                </button>
+
+                {/* =========================
+                    BUTTONS
+                ========================= */}
+
+                <div className="password-button-group">
+
+                    <button
+                        type="button"
+                        className="password-reset-btn"
+                        onClick={handleReset}
+                    >
+                        Reset
+                    </button>
+
+                    <button
+                        type="button"
+                        className="password-submit-btn"
+                        onClick={handleSubmit}
+                    >
+                        Create Password
+                    </button>
+
+                </div>
+
+
+                {/* =========================
+                    BACK TO LOGIN
+                ========================= */}
 
                 <button
+                    type="button"
                     className="back-login-btn"
                     onClick={() => navigate("/")}
                 >
                     Back to Login
                 </button>
+
             </div>
+
         </div>
+
     );
+
 }

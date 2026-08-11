@@ -1,0 +1,403 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Poppins, sans-serif;
+}
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.create-notebook-container {
+
+    width: 100%;
+
+    height: calc(100vh - 130px);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    overflow: hidden;
+
+    padding: 15px;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.create-notebook-card {
+
+    width: 540px;
+
+    max-width: 100%;
+
+    background: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 25px 30px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+
+    border: 1px solid #eeeeee;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.notebook-form-header {
+
+    text-align: center;
+
+    margin-bottom: 20px;
+}
+
+.notebook-form-header h2 {
+
+    color: #003366;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+    margin-bottom: 5px;
+}
+
+.notebook-form-header p {
+
+    color: #777;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================
+   FORM GROUP
+========================= */
+
+.notebook-form-group {
+
+    display: flex;
+
+    align-items: center;
+
+    margin-bottom: 5px;
+}
+
+.notebook-form-group label {
+
+    width: 145px;
+
+    flex-shrink: 0;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #333;
+}
+
+
+/* =========================
+   INPUT WRAPPER
+========================= */
+
+.notebook-input-wrapper {
+
+    position: relative;
+
+    flex: 1;
+
+    display: flex;
+
+    align-items: center;
+}
+
+.notebook-field-icon {
+
+    position: absolute;
+
+    left: 13px;
+
+    color: #666;
+
+    font-size: 15px;
+
+    z-index: 1;
+}
+
+
+/* =========================
+   INPUT
+========================= */
+
+.notebook-input-wrapper input {
+
+    width: 100%;
+
+    height: 42px;
+
+    border: 1px solid #d2d2d2;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    padding: 0 12px 0 38px;
+
+    font-size: 14px;
+
+    color: #333;
+
+    background: #fff;
+
+    transition: 0.2s;
+}
+
+.notebook-input-wrapper input:focus {
+
+    border-color: #1976d2;
+
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.08);
+}
+
+
+/* =========================
+   TEXTAREA
+========================= */
+
+.textarea-wrapper {
+
+    align-items: flex-start;
+}
+
+.notebook-input-wrapper textarea {
+
+    width: 100%;
+
+    height: 80px;
+
+    resize: none;
+
+    border: 1px solid #d2d2d2;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    padding: 10px 12px 10px 38px;
+
+    font-size: 14px;
+
+    color: #333;
+
+    background: #fff;
+
+    line-height: 1.4;
+
+    transition: 0.2s;
+}
+
+.notebook-input-wrapper textarea:focus {
+
+    border-color: #1976d2;
+
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.08);
+}
+
+.textarea-icon {
+
+    top: 13px;
+
+    transform: none;
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+.notebook-error {
+
+    display: block;
+
+    margin-left: 145px;
+
+    min-height: 17px;
+
+    margin-top: 1px;
+
+    margin-bottom: 4px;
+
+    color: #dc3545;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   NOTE
+========================= */
+
+.notebook-note {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    background: #f8f9fa;
+
+    border: 1px solid #dcdcdc;
+
+    border-radius: 7px;
+
+    padding: 10px 12px;
+
+    margin-top: 8px;
+
+    margin-bottom: 18px;
+
+    color: #555;
+
+    font-size: 12px;
+
+    line-height: 1.45;
+}
+
+.notebook-note strong {
+
+    color: #333;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.notebook-button-group {
+
+    display: flex;
+
+    gap: 12px;
+
+    width: 100%;
+}
+
+.notebook-reset-btn,
+.notebook-submit-btn {
+
+    flex: 1;
+
+    height: 42px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    color: #fff;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+
+/* Reset */
+
+.notebook-reset-btn {
+
+    background: #6c757d;
+}
+
+.notebook-reset-btn:hover {
+
+    background: #5c636a;
+}
+
+
+/* Submit */
+
+.notebook-submit-btn {
+
+    background: #198754;
+}
+
+.notebook-submit-btn:hover {
+
+    background: #157347;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .create-notebook-container {
+
+        height: calc(100vh - 100px);
+
+        padding: 10px;
+    }
+
+    .create-notebook-card {
+
+        width: 95%;
+
+        padding: 20px;
+    }
+
+    .notebook-form-group {
+
+        display: block;
+    }
+
+    .notebook-form-group label {
+
+        display: block;
+
+        width: 100%;
+
+        margin-bottom: 5px;
+    }
+
+    .notebook-error {
+
+        margin-left: 0;
+    }
+
+    .notebook-input-wrapper {
+
+        width: 100%;
+    }
+
+    .notebook-button-group {
+
+        flex-direction: column;
+    }
+
+    .notebook-reset-btn,
+    .notebook-submit-btn {
+        width: 100%;
+    }
+}

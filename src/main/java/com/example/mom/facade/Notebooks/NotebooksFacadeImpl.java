@@ -3,6 +3,7 @@ package com.example.mom.facade.Notebooks;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.service.Notebooks.NotebooksService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,8 +23,8 @@ public class NotebooksFacadeImpl implements NotebooksFacade{
     }
 
     @Override
-    public List<NotebooksResponseDto> getAllNotebooks() {
-        return notebooksService.getAllNotebooks();
+    public Page<NotebooksResponseDto> getAllNotebooks(int page, int size, String search, String authority, String status, String sortBy, String sortDir) {
+        return notebooksService.getAllNotebooks(page,size,search,authority,status,sortBy,sortDir);
     }
 
     @Override

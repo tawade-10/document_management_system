@@ -3,7 +3,6 @@ package com.example.mom.facade.Auth;
 import com.example.mom.config.JwtService;
 import com.example.mom.dto.Passwords.CreatePasswordRequestDto;
 import com.example.mom.dto.Users.LoginRequestDto;
-import com.example.mom.dto.Users.LoginResponseDto;
 import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.CustomUserDetails;
@@ -13,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -67,8 +65,8 @@ public class AuthFacadeImpl implements AuthFacade{
     }
 
     @Override
-    public String createPassword(CreatePasswordRequestDto requestDto) {
-        return authService.createPassword(requestDto);
+    public String createPassword(String token, CreatePasswordRequestDto requestDto) {
+        return authService.createPassword(token, requestDto);
     }
 
     @Override

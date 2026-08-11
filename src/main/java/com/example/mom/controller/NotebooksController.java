@@ -4,6 +4,7 @@ import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.facade.Notebooks.NotebooksFacade;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,8 +31,15 @@ public class NotebooksController {
 
     @GetMapping
     @PreAuthorize("hasRole('SUPER_USER')")
-    public ResponseEntity<List<NotebooksResponseDto>> getAllNotebooks(){
-        List<NotebooksResponseDto> allNotebooks = notebooksFacade.getAllNotebooks();
+    public ResponseEntity<Page<NotebooksResponseDto>> getAllNotebooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String authority,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir){
+        Page<NotebooksResponseDto> allNotebooks = notebooksFacade.getAllNotebooks(page, size, search, authority, status, sortBy, sortDir);
         return ResponseEntity.ok(allNotebooks);
     }
 

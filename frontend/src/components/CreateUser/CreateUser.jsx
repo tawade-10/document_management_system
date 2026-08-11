@@ -20,41 +20,64 @@ export default function CreateUser() {
 
     const [errors, setErrors] = useState({});
 
+
+    /* =========================
+       HANDLE CHANGE
+    ========================= */
+
     const handleChange = (e) => {
 
         const { name, value } = e.target;
 
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
-        });
+        }));
 
-        setErrors({
-            ...errors,
+        setErrors(prev => ({
+            ...prev,
             [name]: ""
-        });
+        }));
 
     };
 
+
+    /* =========================
+       VALIDATION
+    ========================= */
+
     const validate = () => {
 
-        let temp = {};
+        const temp = {};
 
         if (!formData.userName.trim()) {
-            temp.userName = "User Name is required";
+
+            temp.userName =
+                "User Name is required";
+
         }
 
         if (!formData.email.trim()) {
-            temp.email = "Email is required";
+
+            temp.email =
+                "Email is required";
+
         }
         else if (
-            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
+                .test(formData.email)
         ) {
-            temp.email = "Invalid Email Address";
+
+            temp.email =
+                "Invalid Email Address";
+
         }
 
         if (!formData.authorityId) {
-            temp.authorityId = "Please select Authority";
+
+            temp.authorityId =
+                "Please select Authority";
+
         }
 
         setErrors(temp);
@@ -62,6 +85,11 @@ export default function CreateUser() {
         return Object.keys(temp).length === 0;
 
     };
+
+
+    /* =========================
+       RESET
+    ========================= */
 
     const handleReset = () => {
 
@@ -75,11 +103,19 @@ export default function CreateUser() {
 
     };
 
+
+    /* =========================
+       SUBMIT
+    ========================= */
+
     const handleSubmit = async () => {
 
-        if (!validate()) return;
+        if (!validate()) {
+            return;
+        }
 
-        const token = localStorage.getItem("token");
+        const token =
+            localStorage.getItem("token");
 
         const payload = {
             userName: formData.userName,
@@ -87,9 +123,12 @@ export default function CreateUser() {
             authorityId: formData.authorityId
         };
 
+
         try {
 
-            console.group("BB17 - Create User");
+            console.group(
+                "BB17 - Create User"
+            );
 
             console.log("Request");
 
@@ -99,16 +138,21 @@ export default function CreateUser() {
                 payload
             });
 
+
             const response = await axios.post(
                 `${API_URL}/register`,
                 payload,
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json"
+                        Authorization:
+                            `Bearer ${token}`,
+
+                        "Content-Type":
+                            "application/json"
                     }
                 }
             );
+
 
             console.log("Response");
 
@@ -116,11 +160,14 @@ export default function CreateUser() {
 
             console.groupEnd();
 
+
             toast.success(
                 "User created successfully.\nTemporary password has been sent to the user's email."
             );
 
+
             handleReset();
+
 
             navigate("/admin", {
                 state: {
@@ -131,11 +178,16 @@ export default function CreateUser() {
         }
         catch (error) {
 
-            console.group("BB17 - Create User");
+            console.group(
+                "BB17 - Create User"
+            );
 
-            console.log(error.response?.data);
+            console.log(
+                error.response?.data
+            );
 
             console.groupEnd();
+
 
             toast.error(
                 error.response?.data?.message ||
@@ -146,60 +198,110 @@ export default function CreateUser() {
 
     };
 
+
     return (
 
         <div className="add-user-container">
 
             <div className="add-user-card">
 
-                <h2>Create User</h2>
 
-               <div className="form-group">
-                   <label>Authority Profile</label>
-                   <div className="input-wrapper">
-                       <select
-                           name="authorityId"
-                           value={formData.authorityId}
-                           onChange={handleChange}
-                       >
-                           <option value="">
-                               Select Authority Profile
-                           </option>
-                           <option value="0001">
-                               0001 - ADMIN,SUPER_USER,USER
-                           </option>
-                           <option value="0002">
-                               0002 - SUPER_USER,USER
-                           </option>
-                           <option value="0003">
-                               0003 - ADMIN
-                           </option>
-                           <option value="0004">
-                               0004 - ADMIN,USER
-                           </option>
-                           <option value="0005">
-                               0005 - USER
-                           </option>
-                       </select>
-                   </div>
-               </div>
-               <span className="error">{errors.authorityId}</span>
+                {/* =========================
+                    HEADER
+                ========================= */}
+
+                <div className="form-header">
+
+                    <h2>
+                        Create User
+                    </h2>
+
+                    <p>
+                        Create a new user account
+                        and assign an authority profile.
+                    </p>
+
+                </div>
+
+
+                {/* =========================
+                    AUTHORITY PROFILE
+                ========================= */}
+
+                <div className="form-group">
+
+                    <label>
+                        Authority Profile
+                    </label>
+
+                    <div className="input-wrapper">
+
+                        <select
+                            name="authorityId"
+                            value={formData.authorityId}
+                            onChange={handleChange}
+                        >
+
+                            <option value="">
+                                Select Authority Profile
+                            </option>
+
+                            <option value="0001">
+                                0001 - ADMIN,SUPER_USER,USER
+                            </option>
+
+                            <option value="0002">
+                                0002 - SUPER_USER,USER
+                            </option>
+
+                            <option value="0003">
+                                0003 - ADMIN
+                            </option>
+
+                            <option value="0004">
+                                0004 - ADMIN,USER
+                            </option>
+
+                            <option value="0005">
+                                0005 - USER
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
 
                 <span className="error">
                     {errors.authorityId}
                 </span>
 
-                <div className="input-box">
 
-                    <FaUser />
+                {/* =========================
+                    USER NAME
+                ========================= */}
 
-                    <input
-                        type="text"
-                        name="userName"
-                        placeholder="Enter User Name"
-                        value={formData.userName}
-                        onChange={handleChange}
-                    />
+                <div className="form-group">
+
+                    <label>
+                        User Name
+                    </label>
+
+                    <div className="input-wrapper">
+
+                        <FaUser
+                            className="field-icon"
+                        />
+
+                        <input
+                            type="text"
+                            name="userName"
+                            placeholder="Enter User Name"
+                            value={formData.userName}
+                            onChange={handleChange}
+                        />
+
+                    </div>
 
                 </div>
 
@@ -207,17 +309,32 @@ export default function CreateUser() {
                     {errors.userName}
                 </span>
 
-                <div className="input-box">
 
-                    <MdEmail />
+                {/* =========================
+                    EMAIL
+                ========================= */}
 
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                    />
+                <div className="form-group">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <div className="input-wrapper">
+
+                        <MdEmail
+                            className="field-icon"
+                        />
+
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Enter Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                        />
+
+                    </div>
 
                 </div>
 
@@ -225,22 +342,33 @@ export default function CreateUser() {
                     {errors.email}
                 </span>
 
-                <div
-                    style={{
-                        background: "#f8f9fa",
-                        border: "1px solid #d6d6d6",
-                        padding: "12px",
-                        borderRadius: "8px",
-                        marginTop: "10px",
-                        fontSize: "14px",
-                        color: "#555"
-                    }}
-                >
-                    <strong>Note:</strong><br />
-                    A secure temporary password will be generated automatically
-                    by the system and sent to the user's registered email along
-                    with a password reset link.
+
+                {/* =========================
+                    INFORMATION NOTE
+                ========================= */}
+
+                <div className="note-box">
+
+                    <div className="note-title">
+                        Note
+                    </div>
+
+                    <div className="note-text">
+
+                        A secure temporary password
+                        will be generated automatically
+                        and sent to the user's registered
+                        email along with a password reset
+                        link.
+
+                    </div>
+
                 </div>
+
+
+                {/* =========================
+                    BUTTONS
+                ========================= */}
 
                 <div className="button-group">
 

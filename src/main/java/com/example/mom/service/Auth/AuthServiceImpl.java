@@ -64,24 +64,35 @@ public class AuthServiceImpl implements AuthService{
     public UsersCreationResponseDto addUser(UsersCreationRequestDto usersCreationRequestDto) {
 
         Optional<Users> existingCustomerByUsername = usersRepo.findByUserName(usersCreationRequestDto.getUserName());
+
         if (existingCustomerByUsername.isPresent()) {
-            return new UsersCreationResponseDto(existingCustomerByUsername.get());
+            return new UsersCreationResponseDto(
+                    existingCustomerByUsername.get()
+            );
         }
 
         Optional<Users> existingCustomerByEmail = usersRepo.findByEmail(usersCreationRequestDto.getEmail());
+
         if (existingCustomerByEmail.isPresent()) {
-            return new UsersCreationResponseDto(existingCustomerByEmail.get());
+            return new UsersCreationResponseDto(
+                    existingCustomerByEmail.get()
+            );
         }
 
         Status activeStatus = statusRepo.findById("UAC")
-                .orElseThrow(() -> new RuntimeException("Invalid Status!"));
+                        .orElseThrow(() -> new RuntimeException("Invalid Status!"));
 
-        AuthorityProfiles authority = authorityProfilesRepo.findById(usersCreationRequestDto.getAuthorityId())
-                .orElseThrow(() -> new RuntimeException("Invalid Authority Profile!"));
+        AuthorityProfiles authority =
+                authorityProfilesRepo.findById(usersCreationRequestDto.getAuthorityId()).orElseThrow(
+                        () -> new RuntimeException(
+                                "Invalid Authority Profile!"
+                        )
+                );
 
         String tempPassword = passwordGenerator.generatePassword();
 
         Users user = new Users();
+
         user.setUserId(customIdGenerator.generateUserId(authority));
         user.setUserName(usersCreationRequestDto.getUserName());
         user.setEmail(usersCreationRequestDto.getEmail());
@@ -91,36 +102,42 @@ public class AuthServiceImpl implements AuthService{
         user.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = usersRepo.save(user);
+
         passwordResetTokenRepo.deleteByUsers(savedUser);
 
         String token = UUID.randomUUID().toString();
 
         PasswordResetToken resetToken = new PasswordResetToken();
+
         resetToken.setToken(token);
         resetToken.setUsers(savedUser);
         resetToken.setExpiryTime(LocalDateTime.now().plusMinutes(15));
-
         passwordResetTokenRepo.save(resetToken);
 
-        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+        String createPasswordLink = "http://localhost:5173/create-password?token=" + token;
 
         try {
             String subject = "Welcome to MOM Portal";
-            String text = "Hello " + savedUser.getUserName() + ",\n\n" +
-                            "Your MOM Portal account has been created successfully.\n\n" +
-                            "Username : " + savedUser.getUserName() + "\n" +
-                            "Temporary Password : " + tempPassword + "\n\n" +
-                            "Please create your own password by visiting the link below.\n\n" +
-                            "http://localhost:5173/create-password\n\n" +
-                            "Regards,\n" +
-                            "MOM Team";
-            emailService.sendSimpleMessage(
-                    savedUser.getEmail(),
-                    subject,
-                    text,
-                    null
-            );
-        } catch (Exception e) {
+            String text = "Hello " + savedUser.getUserName() + ",\n\n"
+                            + "Your MOM Portal account has been "
+                            + "created successfully.\n\n"
+                            + "Username : "
+                            + savedUser.getUserName()
+                            + "\n"
+                            + "Temporary Password : "
+                            + tempPassword
+                            + "\n\n"
+                            + "Please create your own password "
+                            + "using the link below.\n\n"
+                            + createPasswordLink
+                            + "\n\n"
+                            + "This link will expire in 15 minutes.\n\n"
+                            + "Regards,\n"
+                            + "MOM Team";
+
+            emailService.sendSimpleMessage(savedUser.getEmail(), subject, text, null);
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
         return new UsersCreationResponseDto(savedUser);
@@ -187,21 +204,37 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     @Transactional
-    public String createPassword(CreatePasswordRequestDto requestDto) {
+    public String createPassword(String token, CreatePasswordRequestDto requestDto) {
 
-        Users user = usersRepo.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        PasswordResetToken resetToken = passwordResetTokenRepo.findByToken(token);
+
+        if (resetToken == null) {
+            throw new RuntimeException(
+                    "Invalid or used password creation link"
+            );
+        }
+
+        if (resetToken.getExpiryTime().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepo.delete(resetToken);
+            throw new RuntimeException("Password creation link has expired");
+        }
+
+        Users user = resetToken.getUsers();
+
+        if (user == null) {
+            throw new RuntimeException(
+                    "User associated with this link was not found"
+            );
+        }
 
         if (!passwordEncoder.matches(requestDto.getTemporaryPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid temporary password");
         }
 
-        user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
-
+        user.setPassword(passwordEncoder.encode(requestDto.getNewPassword())
+        );
         usersRepo.save(user);
-
-        passwordResetTokenRepo.deleteByUsers(user);
-
+        passwordResetTokenRepo.delete(resetToken);
         return "Password created successfully.";
     }
 

@@ -12,7 +12,7 @@ public interface AuthService {
 
     String resetPassword(String token, String newPassword);
 
-    String createPassword(CreatePasswordRequestDto requestDto);
+    String createPassword(String token, CreatePasswordRequestDto requestDto);
 
     Object logoutCustomer(HttpServletRequest request);
 }
