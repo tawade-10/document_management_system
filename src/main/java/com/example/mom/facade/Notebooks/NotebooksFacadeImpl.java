@@ -1,5 +1,6 @@
 package com.example.mom.facade.Notebooks;
 
+import com.example.mom.dto.Notebooks.NotebooksNamesResponseDto;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.service.Notebooks.NotebooksService;
@@ -30,6 +31,11 @@ public class NotebooksFacadeImpl implements NotebooksFacade{
     @Override
     public List<NotebooksResponseDto> getNotebooksByUser() {
         return notebooksService.getNotebooksByUser();
+    }
+
+    @Override
+    public List<NotebooksNamesResponseDto> getNotebooksNamesByUser() {
+        return notebooksService.getNotebooksNamesByUser();
     }
 
     @Override

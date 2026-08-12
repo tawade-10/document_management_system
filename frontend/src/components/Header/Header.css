@@ -19,6 +19,25 @@
     z-index: 1000;
 }
 
+.header-popup {
+    position: absolute;
+    top: 44px;
+    right: 0;
+    width: 300px;
+    background: #ffffff;
+    border: 1px solid #d9dee7;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+    z-index: 9999;
+    overflow: visible;
+    animation: popupFade .18s ease;
+}
+
+.create-popup {
+    left: 0;
+    right: auto;
+}
+
 .header-left {
     display: flex;
     align-items: center;

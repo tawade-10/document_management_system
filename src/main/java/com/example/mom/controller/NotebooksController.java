@@ -1,5 +1,6 @@
 package com.example.mom.controller;
 
+import com.example.mom.dto.Notebooks.NotebooksNamesResponseDto;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.facade.Notebooks.NotebooksFacade;
@@ -48,6 +49,13 @@ public class NotebooksController {
     public ResponseEntity<List<NotebooksResponseDto>> getNotebooksByUser(){
         List<NotebooksResponseDto> notebooksByUser = notebooksFacade.getNotebooksByUser();
         return ResponseEntity.ok(notebooksByUser);
+    }
+
+    @GetMapping("/allNames")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<NotebooksNamesResponseDto>> getNotebooksNamesByUser(){
+        List<NotebooksNamesResponseDto> notebooksNamesByUser = notebooksFacade.getNotebooksNamesByUser();
+        return ResponseEntity.ok(notebooksNamesByUser);
     }
 
     @GetMapping("/{notebookId}")

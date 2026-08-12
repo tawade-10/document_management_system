@@ -158,9 +158,9 @@ export default function Footer() {
                 )}
             </div>
             <div className="footer-right">
-                <span className="footer-version">
-                    Version 1.0.0
-                </span>
+{/*                 <span className="footer-version"> */}
+{/*                     Version 1.0.0 */}
+{/*                 </span> */}
             </div>
         </footer>
     );

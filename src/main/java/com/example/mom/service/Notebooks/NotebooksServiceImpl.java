@@ -1,6 +1,7 @@
 package com.example.mom.service.Notebooks;
 
 import com.example.mom.config.CustomIdGenerator;
+import com.example.mom.dto.Notebooks.NotebooksNamesResponseDto;
 import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
@@ -110,6 +111,25 @@ public class NotebooksServiceImpl implements NotebooksService{
         List<Notebooks> notebooks = notebooksRepo.findByCreatedBy(user);
 
         return notebooks.stream().map(NotebooksResponseDto::new).toList();
+    }
+
+    @Override
+    public List<NotebooksNamesResponseDto> getNotebooksNamesByUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users user = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        List<Notebooks> notebooks = notebooksRepo.findByCreatedBy(user);
+
+        return notebooks.stream().map(NotebooksNamesResponseDto::new).toList();
     }
 
     @Override

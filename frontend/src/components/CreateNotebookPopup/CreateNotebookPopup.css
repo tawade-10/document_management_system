@@ -1,0 +1,112 @@
+.create-notebook-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 360px;
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.create-notebook-popup-title {
+    padding: 14px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    background: #198754;
+    border-radius: 8px 8px 0 0;
+}
+
+.create-notebook-popup-body {
+    padding: 18px;
+}
+
+.create-notebook-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.create-notebook-field:last-child {
+    margin-bottom: 0;
+}
+
+.create-notebook-field label {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.create-notebook-field input,
+.create-notebook-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    font-size: 13px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-notebook-field input {
+    height: 38px;
+}
+
+.create-notebook-field textarea {
+    resize: vertical;
+    min-height: 85px;
+}
+
+.create-notebook-field input:focus,
+.create-notebook-field textarea:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.12);
+}
+
+.create-notebook-popup-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 18px;
+    border-top: 1px solid #eeeeee;
+    background: #fafafa;
+}
+
+.create-notebook-popup-buttons button {
+    height: 34px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.create-notebook-create-btn {
+    background: #198754;
+    color: #ffffff;
+}
+
+.create-notebook-create-btn:hover {
+    background: #157347;
+}
+
+.create-notebook-create-btn:disabled {
+    background: #a8cdb9;
+    cursor: not-allowed;
+}
+
+.create-notebook-cancel-btn {
+    background: #e9ecef;
+    color: #333333;
+}
+
+.create-notebook-cancel-btn:hover {
+    background: #d6d8db;
+}

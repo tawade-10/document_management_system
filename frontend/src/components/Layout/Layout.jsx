@@ -5,12 +5,9 @@ import Footer from "../Footer/Footer";
 import "./Layout.css";
 
 export default function Layout() {
-
     const [searchKeyword, setSearchKeyword] = useState("");
-
-    const [sortBy, setSortBy] = useState("userName");
+    const [sortBy, setSortBy] = useState("createdAt");
     const [sortDir, setSortDir] = useState("asc");
-
     const [authorityFilter, setAuthorityFilter] = useState([]);
     const [statusFilter, setStatusFilter] = useState([]);
 
@@ -32,10 +29,15 @@ export default function Layout() {
                 <Outlet
                     context={{
                         searchKeyword,
+                        setSearchKeyword,
                         sortBy,
+                        setSortBy,
                         sortDir,
+                        setSortDir,
                         authorityFilter,
-                        statusFilter
+                        setAuthorityFilter,
+                        statusFilter,
+                        setStatusFilter
                     }}
                 />
             </main>

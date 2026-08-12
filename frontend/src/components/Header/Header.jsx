@@ -7,6 +7,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import ToggleButton from "../ToggleButton/ToggleButton";
 
+import CreateNotebookPopup from "../CreateNotebookPopup/CreateNotebookPopup";
+// import CreatePagePopup from "../HeaderPopups/CreatePagePopup";
+
+
 export default function Header({
     searchKeyword,
     setSearchKeyword,
@@ -27,245 +31,71 @@ export default function Header({
 
     const [, forceUpdate] = useState(0);
 
+    /* =========================
+       POPUP STATES
+    ========================= */
+
     const [showSort, setShowSort] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
 
-    // Custom dropdown states
-    const [openSortDropdown, setOpenSortDropdown] = useState(null);
-    const [openFilterDropdown, setOpenFilterDropdown] = useState(null);
+    const [showCreateNotebook, setShowCreateNotebook] =
+        useState(false);
 
-    const handleBack = () => {
-        if (window.history.length > 1) {
-            navigate(-1);
-        } else {
-            navigate("/homepage");
-        }
-    };
+    const [showCreatePage, setShowCreatePage] =
+        useState(false);
 
-    const handleHome = () => {
-        navigate("/admin");
-    };
+    const [openSortDropdown, setOpenSortDropdown] =
+        useState(null);
 
-    useEffect(() => {
-        const refresh = () => forceUpdate(prev => prev + 1);
+    const [openFilterDropdown, setOpenFilterDropdown] =
+        useState(null);
 
-        window.addEventListener("login", refresh);
 
-        return () => {
-            window.removeEventListener("login", refresh);
-        };
-    }, []);
+    /* =========================
+       LOCAL STORAGE
+    ========================= */
 
-    const logButtonEvent = ({
-        buttonNo,
-        buttonName,
-        request,
-        response,
-        status
-    }) => {
-        console.group(`${buttonNo} - ${buttonName}`);
+    const token =
+        localStorage.getItem("token");
 
-        console.log("Request");
-        console.log(request);
-
-        console.log("Response");
-        console.log(response);
-
-        console.log("Status Code");
-        console.log(status);
-
-        console.groupEnd();
-    };
-
-    const authorityOptions = [
-        "ADMIN",
-        "SUPER_USER",
-        "USER"
-    ];
-
-    const statusOptions = [
-        "UAC",
-        "UIA"
-    ];
-
-    const sortByOptions = [
-        {
-            value: "userId",
-            label: "User ID"
-        },
-        {
-            value: "userName",
-            label: "User Name"
-        },
-        {
-            value: "email",
-            label: "Email"
-        },
-        {
-            value: "authorityProfiles.authorityName",
-            label: "Authority"
-        },
-        {
-            value: "status.description",
-            label: "Status"
-        },
-        {
-            value: "createdAt",
-            label: "Created Date"
-        }
-    ];
-
-    const sortOrderOptions = [
-        {
-            value: "asc",
-            label: "A → Z"
-        },
-        {
-            value: "desc",
-            label: "Z → A"
-        }
-    ];
-
-    const getSortByLabel = () => {
-        const selected = sortByOptions.find(
-            option => option.value === sortBy
-        );
-
-        return selected ? selected.label : "User ID";
-    };
-
-    const getSortOrderLabel = () => {
-        const selected = sortOrderOptions.find(
-            option => option.value === sortDir
-        );
-
-        return selected ? selected.label : "A → Z";
-    };
-
-    const toggleAuthority = (value) => {
-        if (authorityFilter.includes(value)) {
-            setAuthorityFilter(
-                authorityFilter.filter(
-                    item => item !== value
-                )
-            );
-        } else {
-            setAuthorityFilter([
-                ...authorityFilter,
-                value
-            ]);
-        }
-    };
-
-    const toggleStatus = (value) => {
-        if (statusFilter.includes(value)) {
-            setStatusFilter(
-                statusFilter.filter(
-                    item => item !== value
-                )
-            );
-        } else {
-            setStatusFilter([
-                ...statusFilter,
-                value
-            ]);
-        }
-    };
-
-    const applySort = () => {
-
-        logButtonEvent({
-            buttonNo: "HB11",
-            buttonName: "Sort Button",
-            request: {
-                sortBy,
-                sortDir
-            },
-            response: {
-                message: "Sorting Applied"
-            },
-            status: 200
-        });
-
-        setOpenSortDropdown(null);
-        setShowSort(false);
-    };
-
-    const applyFilter = () => {
-
-        logButtonEvent({
-            buttonNo: "HB12",
-            buttonName: "Filter Button",
-            request: {
-                authorityFilter,
-                statusFilter
-            },
-            response: {
-                message: "Filter Applied"
-            },
-            status: 200
-        });
-
-        setOpenFilterDropdown(null);
-        setShowFilter(false);
-    };
-
-    const resetFilter = () => {
-        setAuthorityFilter([]);
-        setStatusFilter([]);
-        setOpenFilterDropdown(null);
-    };
-
-    const handleSortButton = () => {
-        setShowSort(prev => !prev);
-        setShowFilter(false);
-
-        setOpenSortDropdown(null);
-        setOpenFilterDropdown(null);
-    };
-
-    const handleFilterButton = () => {
-        setShowFilter(prev => !prev);
-        setShowSort(false);
-
-        setOpenSortDropdown(null);
-        setOpenFilterDropdown(null);
-    };
-
-    const handleSortDropdown = (dropdownName) => {
-
-        setOpenSortDropdown(prev =>
-            prev === dropdownName
-                ? null
-                : dropdownName
-        );
-    };
-
-    const handleFilterDropdown = (dropdownName) => {
-
-        setOpenFilterDropdown(prev =>
-            prev === dropdownName
-                ? null
-                : dropdownName
-        );
-    };
-
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("userName");
+    const username =
+        localStorage.getItem("userName");
 
     const authorityString =
         localStorage.getItem("authority") || "";
 
-    const authorities = authorityString
-        .split(",")
-        .map(role => role.trim().toUpperCase());
+
+    const authorities =
+        authorityString
+            .split(",")
+            .map(role =>
+                role.trim().toUpperCase()
+            )
+            .filter(Boolean);
+
 
     const currentRole =
-        localStorage.getItem("currentRole") || "USER";
+        localStorage.getItem("currentRole") ||
+        "USER";
 
-    const isAdmin = currentRole === "ADMIN";
-    const isSuperUser = currentRole === "SUPER_USER";
-    const isUser = currentRole === "USER";
+
+    /* =========================
+       ROLE
+    ========================= */
+
+    const isAdmin =
+        currentRole === "ADMIN";
+
+    const isSuperUser =
+        currentRole === "SUPER_USER";
+
+    const isUser =
+        currentRole === "USER";
+
+
+    /* =========================
+       PERMISSIONS
+    ========================= */
 
     const permissions = {
 
@@ -282,25 +112,639 @@ export default function Header({
             isUser || isSuperUser,
 
         canSort:
-            isUser || isSuperUser || isAdmin,
+            isAdmin ||
+            isSuperUser ||
+            isUser,
 
         canFilter:
-            isUser || isSuperUser || isAdmin,
+            isAdmin ||
+            isSuperUser ||
+            isUser,
 
         canToggleRole:
             !isAdmin &&
             authorities.includes("USER")
     };
 
-    const hideHeaderRoutes = [
-        "/",
-        "/forgot-password",
-        "/reset-password"
+
+    /* =========================
+       PAGE TYPES
+    ========================= */
+
+    const isUserPage =
+        currentRole === "USER";
+
+    const isSuperUserPage =
+        currentRole === "SUPER_USER";
+
+    const isAdminPage =
+        currentRole === "ADMIN";
+
+
+    const isNotebookPage =
+        isSuperUserPage ||
+        location.pathname ===
+            "/user-homepage/view-all-notebooks-pages";
+
+
+    /* =========================
+       SEARCH PLACEHOLDER
+    ========================= */
+
+    const getSearchPlaceholder = () => {
+
+        if (isAdminPage) {
+            return "Search Users...";
+        }
+
+        if (isNotebookPage) {
+            return "Search Notebooks...";
+        }
+
+        if (isUserPage) {
+            return "Search Notebooks / Pages...";
+        }
+
+        return "Search...";
+    };
+
+
+    /* =========================
+       SORT OPTIONS
+    ========================= */
+
+    const userSortByOptions = [
+
+        {
+            value: "userId",
+            label: "User ID"
+        },
+
+        {
+            value: "userName",
+            label: "User Name"
+        },
+
+        {
+            value: "email",
+            label: "Email"
+        },
+
+        {
+            value:
+                "authorityProfiles.authorityName",
+            label: "Authority"
+        },
+
+        {
+            value:
+                "status.description",
+            label: "Status"
+        },
+
+        {
+            value: "createdAt",
+            label: "Created Date"
+        }
     ];
 
-    if (hideHeaderRoutes.includes(location.pathname)) {
-        return null;
-    }
+
+    const sortOrderOptions = [
+
+        {
+            value: "asc",
+            label: "A → Z"
+        },
+
+        {
+            value: "desc",
+            label: "Z → A"
+        }
+    ];
+
+
+    /* =========================
+       FILTER OPTIONS
+    ========================= */
+
+    const authorityOptions = [
+        "ADMIN",
+        "SUPER_USER",
+        "USER"
+    ];
+
+
+    const statusOptions = [
+        "UAC",
+        "UIA"
+    ];
+
+
+    /* =========================
+       SORT LABELS
+    ========================= */
+
+    const getSortByLabel = () => {
+
+        const selected =
+            userSortByOptions.find(
+                option =>
+                    option.value === sortBy
+            );
+
+        return selected
+            ? selected.label
+            : "User ID";
+    };
+
+
+    const getSortOrderLabel = () => {
+
+        const selected =
+            sortOrderOptions.find(
+                option =>
+                    option.value === sortDir
+            );
+
+        return selected
+            ? selected.label
+            : "A → Z";
+    };
+
+
+    /* =========================
+       BUTTON EVENT LOGGER
+    ========================= */
+
+    const logButtonEvent = ({
+        buttonNo,
+        buttonName,
+        request,
+        response,
+        status
+    }) => {
+
+        console.group(
+            `${buttonNo} - ${buttonName}`
+        );
+
+        console.log("Request");
+        console.log(request);
+
+        console.log("Response");
+        console.log(response);
+
+        console.log("Status Code");
+        console.log(status);
+
+        console.groupEnd();
+    };
+
+
+    /* =========================
+       LOGIN / ROLE CHANGE
+    ========================= */
+
+    useEffect(() => {
+
+        const refresh = () => {
+
+            forceUpdate(
+                prev => prev + 1
+            );
+        };
+
+
+        window.addEventListener(
+            "login",
+            refresh
+        );
+
+        window.addEventListener(
+            "roleChanged",
+            refresh
+        );
+
+
+        return () => {
+
+            window.removeEventListener(
+                "login",
+                refresh
+            );
+
+            window.removeEventListener(
+                "roleChanged",
+                refresh
+            );
+        };
+
+    }, []);
+
+
+    /* =========================
+       CLOSE POPUPS ON ROUTE/ROLE
+    ========================= */
+
+    useEffect(() => {
+
+        setShowSort(false);
+        setShowFilter(false);
+
+        setShowCreateNotebook(false);
+        setShowCreatePage(false);
+
+        setOpenSortDropdown(null);
+        setOpenFilterDropdown(null);
+
+    }, [
+        location.pathname,
+        currentRole
+    ]);
+
+
+    /* =========================
+       HOME
+    ========================= */
+
+    const handleHome = () => {
+
+        const role =
+            localStorage.getItem(
+                "currentRole"
+            ) || "USER";
+
+
+        if (role === "ADMIN") {
+
+            navigate("/admin");
+
+        } else if (
+            role === "SUPER_USER"
+        ) {
+
+            navigate(
+                "/superuser-homepage"
+            );
+
+        } else if (
+            role === "USER"
+        ) {
+
+            navigate(
+                "/user-homepage"
+            );
+
+        } else {
+
+            navigate("/");
+        }
+    };
+
+
+    /* =========================
+       BACK
+    ========================= */
+
+    const handleBack = () => {
+
+        if (window.history.length > 1) {
+
+            navigate(-1);
+
+        } else {
+
+            navigate(
+                "/user-homepage"
+            );
+        }
+    };
+
+
+    /* =========================
+       NEW NOTEBOOK BUTTON
+    ========================= */
+
+    const handleCreateNotebookButton = () => {
+
+        const nextState =
+            !showCreateNotebook;
+
+
+        setShowCreateNotebook(
+            nextState
+        );
+
+        setShowCreatePage(false);
+        setShowSort(false);
+        setShowFilter(false);
+
+        setOpenSortDropdown(null);
+        setOpenFilterDropdown(null);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB21",
+
+            buttonName:
+                "Create Notebook Button",
+
+            request: {
+
+                action:
+                    nextState
+                        ? "Open Popup"
+                        : "Close Popup",
+
+                from:
+                    location.pathname,
+
+                currentRole
+            },
+
+            response: {
+
+                message:
+                    nextState
+                        ? "Create Notebook popup opened"
+                        : "Create Notebook popup closed"
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================
+       NEW PAGE BUTTON
+    ========================= */
+
+    const handleCreatePageButton = () => {
+
+        const nextState =
+            !showCreatePage;
+
+
+        setShowCreatePage(
+            nextState
+        );
+
+        setShowCreateNotebook(false);
+        setShowSort(false);
+        setShowFilter(false);
+
+        setOpenSortDropdown(null);
+        setOpenFilterDropdown(null);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB22",
+
+            buttonName:
+                "Create Page Button",
+
+            request: {
+
+                action:
+                    nextState
+                        ? "Open Popup"
+                        : "Close Popup",
+
+                from:
+                    location.pathname,
+
+                currentRole
+            },
+
+            response: {
+
+                message:
+                    nextState
+                        ? "Create Page popup opened"
+                        : "Create Page popup closed"
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================
+       SORT
+    ========================= */
+
+    const handleSortButton = () => {
+
+        setShowSort(
+            prev => !prev
+        );
+
+        setShowFilter(false);
+        setShowCreateNotebook(false);
+        setShowCreatePage(false);
+
+        setOpenSortDropdown(null);
+        setOpenFilterDropdown(null);
+    };
+
+
+    /* =========================
+       FILTER
+    ========================= */
+
+    const handleFilterButton = () => {
+
+        setShowFilter(
+            prev => !prev
+        );
+
+        setShowSort(false);
+        setShowCreateNotebook(false);
+        setShowCreatePage(false);
+
+        setOpenSortDropdown(null);
+        setOpenFilterDropdown(null);
+    };
+
+
+    /* =========================
+       AUTHORITY FILTER
+    ========================= */
+
+    const toggleAuthority = value => {
+
+        if (
+            authorityFilter.includes(value)
+        ) {
+
+            setAuthorityFilter(
+                authorityFilter.filter(
+                    item =>
+                        item !== value
+                )
+            );
+
+        } else {
+
+            setAuthorityFilter([
+                ...authorityFilter,
+                value
+            ]);
+        }
+    };
+
+
+    /* =========================
+       STATUS FILTER
+    ========================= */
+
+    const toggleStatus = value => {
+
+        if (
+            statusFilter.includes(value)
+        ) {
+
+            setStatusFilter(
+                statusFilter.filter(
+                    item =>
+                        item !== value
+                )
+            );
+
+        } else {
+
+            setStatusFilter([
+                ...statusFilter,
+                value
+            ]);
+        }
+    };
+
+
+    /* =========================
+       SORT DROPDOWN
+    ========================= */
+
+    const handleSortDropdown = dropdownName => {
+
+        setOpenSortDropdown(
+            prev =>
+                prev === dropdownName
+                    ? null
+                    : dropdownName
+        );
+    };
+
+
+    /* =========================
+       FILTER DROPDOWN
+    ========================= */
+
+    const handleFilterDropdown = dropdownName => {
+
+        setOpenFilterDropdown(
+            prev =>
+                prev === dropdownName
+                    ? null
+                    : dropdownName
+        );
+    };
+
+
+    /* =========================
+       APPLY SORT
+    ========================= */
+
+    const applySort = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB11",
+
+            buttonName:
+                "Sort Button",
+
+            request: {
+
+                currentRole,
+                sortBy,
+                sortDir
+            },
+
+            response: {
+
+                message:
+                    isSuperUserPage
+                        ? "Notebook sorting applied"
+                        : "Sorting Applied"
+            },
+
+            status: 200
+        });
+
+
+        setOpenSortDropdown(null);
+        setShowSort(false);
+    };
+
+
+    /* =========================
+       APPLY FILTER
+    ========================= */
+
+    const applyFilter = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB12",
+
+            buttonName:
+                "Filter Button",
+
+            request: {
+
+                currentRole,
+
+                authorityFilter,
+
+                statusFilter
+            },
+
+            response: {
+
+                message:
+                    isSuperUserPage
+                        ? "Notebook filtering applied"
+                        : "Filter Applied"
+            },
+
+            status: 200
+        });
+
+
+        setOpenFilterDropdown(null);
+        setShowFilter(false);
+    };
+
+
+    /* =========================
+       RESET FILTER
+    ========================= */
+
+    const resetFilter = () => {
+
+        setAuthorityFilter([]);
+        setStatusFilter([]);
+
+        setOpenFilterDropdown(null);
+    };
+
+
+    /* =========================
+       LOGOUT
+    ========================= */
 
     const handleLogout = async () => {
 
@@ -311,10 +755,13 @@ export default function Header({
                 {},
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`
+
+                        Authorization:
+                            `Bearer ${token}`
                     }
                 }
             );
+
 
             toast.success(
                 "Logged out successfully."
@@ -338,15 +785,46 @@ export default function Header({
         }
     };
 
+
+    /* =========================
+       HIDDEN ROUTES
+    ========================= */
+
+    const hideHeaderRoutes = [
+
+        "/",
+
+        "/forgot-password",
+
+        "/reset-password"
+    ];
+
+
+    if (
+        hideHeaderRoutes.includes(
+            location.pathname
+        )
+    ) {
+
+        return null;
+    }
+
+
+    /* =========================
+       JSX
+    ========================= */
+
     return (
 
         <header className="header">
 
-            {/* =========================
-                LEFT
-            ========================= */}
+            {/* =================================
+                LEFT SIDE
+            ================================= */}
 
             <div className="header-left">
+
+                {/* HOME */}
 
                 <button
                     className="header-btn home-btn"
@@ -355,12 +833,18 @@ export default function Header({
                     🏠 Home
                 </button>
 
+
+                {/* BACK */}
+
                 <button
                     className="header-btn back-btn"
                     onClick={handleBack}
                 >
                     ← Back
                 </button>
+
+
+                {/* CREATE USER */}
 
                 {permissions.canManageUsers && (
 
@@ -369,19 +853,33 @@ export default function Header({
                         onClick={() => {
 
                             logButtonEvent({
+
                                 buttonNo: "HB14",
-                                buttonName: "Create User Button",
+
+                                buttonName:
+                                    "Create User Button",
+
                                 request: {
-                                    action: "Navigate",
-                                    from: location.pathname,
-                                    to: "/admin/add-user"
+
+                                    action:
+                                        "Navigate",
+
+                                    from:
+                                        location.pathname,
+
+                                    to:
+                                        "/admin/create-user"
                                 },
+
                                 response: {
+
                                     message:
                                         "Navigating to Create User Component"
                                 },
+
                                 status: 200
                             });
+
 
                             navigate(
                                 "/admin/create-user"
@@ -390,87 +888,153 @@ export default function Header({
                     >
                         Create User
                     </button>
-
                 )}
+
+
+                {/* =================================
+                    NEW NOTEBOOK
+                ================================= */}
 
                 {permissions.canCreateNotebook && (
 
-                    <button
-                        className="header-btn green"
-                        onClick={() => {
+                    <div className="header-popup-container">
 
-                            logButtonEvent({
-                                buttonNo: "HB21",
-                                buttonName: "Create Notebook Button",
-                                request: {
-                                    action: "Navigate",
-                                    from: location.pathname,
-                                    to: "/user-homepage/create-notebook"
-                                },
-                                response: {
-                                    message:
-                                        "Navigating to Create Notebook Component"
-                                },
-                                status: 200
-                            });
+                        <button
+                            className="header-btn green"
+                            onClick={
+                                handleCreateNotebookButton
+                            }
+                        >
+                            New Notebook
+                        </button>
 
-                            navigate(
-                                "/user-homepage/create-notebook"
-                            );
-                        }}
-                    >
-                        New Notebook
-                    </button>
 
+                        {showCreateNotebook && (
+
+                            <CreateNotebookPopup
+                                onClose={() =>
+                                    setShowCreateNotebook(
+                                        false
+                                    )
+                                }
+
+                                currentRole={
+                                    currentRole
+                                }
+
+                                location={
+                                    location
+                                }
+
+                                logButtonEvent={
+                                    logButtonEvent
+                                }
+                            />
+                        )}
+
+                    </div>
                 )}
 
-                {permissions.canCreateNotebook && (
 
-                    <button
-                        className="header-btn green"
-                        onClick={() => {
+                {/* =================================
+                    NEW PAGE
+                ================================= */}
 
-                            logButtonEvent({
-                                buttonNo: "HB22",
-                                buttonName: "Create Page Button",
-                                request: {
-                                    action: "Navigate",
-                                    from: location.pathname,
-                                    to: "/user-homepage/create-page"
-                                },
-                                response: {
-                                    message:
-                                        "Navigating to Create Page Component"
-                                },
-                                status: 200
-                            });
+                {permissions.canCreatePage && (
 
-                            navigate(
-                                "/user-homepage/create-page"
-                            );
-                        }}
-                    >
-                        New Page
-                    </button>
+                    <div className="header-popup-container">
 
+                        <button
+                            className="header-btn green"
+                            onClick={
+                                handleCreatePageButton
+                            }
+                        >
+                            New Page
+                        </button>
+
+
+                        {showCreatePage && (
+
+                            <CreatePagePopup
+                                onClose={() =>
+                                    setShowCreatePage(
+                                        false
+                                    )
+                                }
+
+                                currentRole={
+                                    currentRole
+                                }
+
+                                location={
+                                    location
+                                }
+
+                                logButtonEvent={
+                                    logButtonEvent
+                                }
+                            />
+                        )}
+
+                    </div>
                 )}
+
+
+                {/* =================================
+                    VIEW ALL
+                ================================= */}
 
                 {permissions.canViewPages && (
 
                     <button
-                        className="header-btn orange"
-                    >
-                        View Pages
-                    </button>
+                        className="header-btn green"
+                        onClick={() => {
 
+                            logButtonEvent({
+
+                                buttonNo: "HB23",
+
+                                buttonName:
+                                    "View All Notebooks & Pages Button",
+
+                                request: {
+
+                                    action:
+                                        "Navigate",
+
+                                    from:
+                                        location.pathname,
+
+                                    to:
+                                        "/user-homepage/view-all-notebooks-pages"
+                                },
+
+                                response: {
+
+                                    message:
+                                        "Navigating to View All Notebooks and Pages Component"
+                                },
+
+                                status: 200
+                            });
+
+
+                            navigate(
+                                "/user-homepage/view-all-notebooks-pages"
+                            );
+                        }}
+                    >
+                        View All
+                    </button>
                 )}
 
             </div>
 
 
-            {/* =========================
-                CENTER
-            ========================= */}
+            {/* =================================
+                CENTER SEARCH
+            ================================= */}
 
             <div className="header-center">
 
@@ -478,14 +1042,18 @@ export default function Header({
 
                     <input
                         className="search-input"
+
                         type="text"
+
                         placeholder={
-                            permissions.canManageUsers
-                                ? "Search Users..."
-                                : "Search Notebooks / Pages..."
+                            getSearchPlaceholder()
                         }
-                        value={searchKeyword}
-                        onChange={(e) =>
+
+                        value={
+                            searchKeyword || ""
+                        }
+
+                        onChange={e =>
                             setSearchKeyword(
                                 e.target.value
                             )
@@ -501,15 +1069,15 @@ export default function Header({
             </div>
 
 
-            {/* =========================
-                RIGHT
-            ========================= */}
+            {/* =================================
+                RIGHT SIDE
+            ================================= */}
 
             <div className="header-right">
 
-                {/* =========================
+                {/* =================================
                     SORT
-                ========================= */}
+                ================================= */}
 
                 {permissions.canSort && (
 
@@ -517,7 +1085,9 @@ export default function Header({
 
                         <button
                             className="header-btn gray"
-                            onClick={handleSortButton}
+                            onClick={
+                                handleSortButton
+                            }
                         >
                             ⬍ Sort
                         </button>
@@ -528,9 +1098,15 @@ export default function Header({
                             <div className="header-popup">
 
                                 <div className="popup-title">
+
                                     <span>
-                                        Sort Users
+
+                                        {isSuperUserPage
+                                            ? "Sort Notebooks"
+                                            : "Sort Users"}
+
                                     </span>
+
                                 </div>
 
 
@@ -544,15 +1120,19 @@ export default function Header({
                                             Sort By
                                         </label>
 
+
                                         <div className="custom-dropdown">
 
                                             <button
                                                 type="button"
+
                                                 className={`custom-dropdown-button ${
-                                                    openSortDropdown === "sortBy"
+                                                    openSortDropdown ===
+                                                    "sortBy"
                                                         ? "dropdown-open"
                                                         : ""
                                                 }`}
+
                                                 onClick={() =>
                                                     handleSortDropdown(
                                                         "sortBy"
@@ -561,12 +1141,15 @@ export default function Header({
                                             >
 
                                                 <span>
-                                                    {getSortByLabel()}
+                                                    {
+                                                        getSortByLabel()
+                                                    }
                                                 </span>
 
                                                 <span
                                                     className={`dropdown-arrow ${
-                                                        openSortDropdown === "sortBy"
+                                                        openSortDropdown ===
+                                                        "sortBy"
                                                             ? "arrow-up"
                                                             : ""
                                                     }`}
@@ -579,26 +1162,30 @@ export default function Header({
 
                                             <div
                                                 className={`custom-dropdown-options ${
-                                                    openSortDropdown === "sortBy"
+                                                    openSortDropdown ===
+                                                    "sortBy"
                                                         ? "options-open"
                                                         : ""
                                                 }`}
                                             >
 
-                                                {sortByOptions.map(
+                                                {userSortByOptions.map(
                                                     option => (
 
                                                         <button
                                                             type="button"
+
                                                             key={
                                                                 option.value
                                                             }
+
                                                             className={`custom-dropdown-option ${
                                                                 sortBy ===
                                                                 option.value
                                                                     ? "selected-option"
                                                                     : ""
                                                             }`}
+
                                                             onClick={() => {
 
                                                                 setSortBy(
@@ -614,7 +1201,6 @@ export default function Header({
                                                                 option.label
                                                             }
                                                         </button>
-
                                                     )
                                                 )}
 
@@ -633,15 +1219,19 @@ export default function Header({
                                             Order
                                         </label>
 
+
                                         <div className="custom-dropdown">
 
                                             <button
                                                 type="button"
+
                                                 className={`custom-dropdown-button ${
-                                                    openSortDropdown === "order"
+                                                    openSortDropdown ===
+                                                    "order"
                                                         ? "dropdown-open"
                                                         : ""
                                                 }`}
+
                                                 onClick={() =>
                                                     handleSortDropdown(
                                                         "order"
@@ -657,7 +1247,8 @@ export default function Header({
 
                                                 <span
                                                     className={`dropdown-arrow ${
-                                                        openSortDropdown === "order"
+                                                        openSortDropdown ===
+                                                        "order"
                                                             ? "arrow-up"
                                                             : ""
                                                     }`}
@@ -670,7 +1261,8 @@ export default function Header({
 
                                             <div
                                                 className={`custom-dropdown-options ${
-                                                    openSortDropdown === "order"
+                                                    openSortDropdown ===
+                                                    "order"
                                                         ? "options-open"
                                                         : ""
                                                 }`}
@@ -681,15 +1273,18 @@ export default function Header({
 
                                                         <button
                                                             type="button"
+
                                                             key={
                                                                 option.value
                                                             }
+
                                                             className={`custom-dropdown-option ${
                                                                 sortDir ===
                                                                 option.value
                                                                     ? "selected-option"
                                                                     : ""
                                                             }`}
+
                                                             onClick={() => {
 
                                                                 setSortDir(
@@ -705,7 +1300,6 @@ export default function Header({
                                                                 option.label
                                                             }
                                                         </button>
-
                                                     )
                                                 )}
 
@@ -718,16 +1312,19 @@ export default function Header({
                                 </div>
 
 
-                                {/* BUTTONS */}
+                                {/* SORT BUTTONS */}
 
                                 <div className="popup-buttons">
 
                                     <button
                                         className="apply-btn"
-                                        onClick={applySort}
+                                        onClick={
+                                            applySort
+                                        }
                                     >
                                         Apply
                                     </button>
+
 
                                     <button
                                         className="cancel-btn"
@@ -748,47 +1345,78 @@ export default function Header({
                                 </div>
 
                             </div>
-
                         )}
 
                     </div>
-
                 )}
+
+
+                {/* =================================
+                    FILTER
+                ================================= */}
+
                 {permissions.canFilter && (
+
                     <div className="header-popup-container">
+
                         <button
                             className="header-btn gray"
-                            onClick={handleFilterButton}
+                            onClick={
+                                handleFilterButton
+                            }
                         >
                             ⛃ Filter
                         </button>
+
+
                         {showFilter && (
+
                             <div className="header-popup filter-popup">
+
                                 <div className="popup-title">
+
                                     <span>
-                                        Filter Users
+
+                                        {isSuperUserPage
+                                            ? "Filter Notebooks"
+                                            : "Filter Users"}
+
                                     </span>
 
                                 </div>
+
+
                                 <div className="popup-body">
+
+                                    {/* AUTHORITIES */}
+
                                     <div className="popup-section">
+
                                         <label>
                                             Authorities
                                         </label>
+
+
                                         {authorityOptions.map(
                                             authority => (
+
                                                 <label
                                                     key={
                                                         authority
                                                     }
+
                                                     className="checkbox-item"
                                                 >
 
                                                     <input
                                                         type="checkbox"
-                                                        checked={authorityFilter.includes(
-                                                            authority
-                                                        )}
+
+                                                        checked={
+                                                            authorityFilter.includes(
+                                                                authority
+                                                            )
+                                                        }
+
                                                         onChange={() =>
                                                             toggleAuthority(
                                                                 authority
@@ -803,7 +1431,6 @@ export default function Header({
                                                     </span>
 
                                                 </label>
-
                                             )
                                         )}
 
@@ -818,19 +1445,27 @@ export default function Header({
                                             Status
                                         </label>
 
+
                                         {statusOptions.map(
                                             status => (
 
                                                 <label
-                                                    key={status}
+                                                    key={
+                                                        status
+                                                    }
+
                                                     className="checkbox-item"
                                                 >
 
                                                     <input
                                                         type="checkbox"
-                                                        checked={statusFilter.includes(
-                                                            status
-                                                        )}
+
+                                                        checked={
+                                                            statusFilter.includes(
+                                                                status
+                                                            )
+                                                        }
+
                                                         onChange={() =>
                                                             toggleStatus(
                                                                 status
@@ -839,28 +1474,40 @@ export default function Header({
                                                     />
 
                                                     <span>
-                                                        {
-                                                            status ===
-                                                            "UAC"
-                                                                ? "Active"
-                                                                : "Inactive"
-                                                        }
+
+                                                        {status ===
+                                                        "UAC"
+                                                            ? "Active"
+                                                            : "Inactive"}
+
                                                     </span>
+
                                                 </label>
                                             )
                                         )}
+
                                     </div>
+
                                 </div>
+
+
+                                {/* FILTER BUTTONS */}
+
                                 <div className="popup-buttons">
+
                                     <button
                                         className="apply-btn"
-                                        onClick={applyFilter}
+                                        onClick={
+                                            applyFilter
+                                        }
                                     >
                                         Apply
                                     </button>
                                     <button
                                         className="reset-btn"
-                                        onClick={resetFilter}
+                                        onClick={
+                                            resetFilter
+                                        }
                                     >
                                         Reset
                                     </button>
@@ -887,9 +1534,7 @@ export default function Header({
                 )}
                 <span className="welcome-user">
                     Welcome,&nbsp;
-                    <b>
-                        {username}
-                    </b>
+                    <b>{username}</b>
                 </span>
                 <CgProfile
                     size={24}
@@ -897,7 +1542,9 @@ export default function Header({
                 />
                 <button
                     className="logout-btn"
-                    onClick={handleLogout}
+                    onClick={
+                        handleLogout
+                    }
                 >
                     Logout
                 </button>

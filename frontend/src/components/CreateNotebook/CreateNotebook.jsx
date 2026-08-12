@@ -35,16 +35,13 @@ export default function CreateNotebook() {
 
 
     const validate = () => {
-
         const temp = {};
-
         if (!formData.name.trim()) {
             temp.name = "Notebook Name is required";
         }
         else if (formData.name.trim().length > 150) {
             temp.name = "Notebook Name cannot exceed 150 characters";
         }
-
         if (formData.description.trim().length > 500) {
             temp.description =
                 "Description cannot exceed 500 characters";
@@ -115,7 +112,7 @@ export default function CreateNotebook() {
 
             handleReset();
 
-            navigate("/superuser-homepage", {
+            navigate("/user-homepage/view-all-notebooks-pages", {
                 state: {
                     refresh: true
                 }

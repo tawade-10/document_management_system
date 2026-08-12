@@ -1,106 +1,178 @@
-.view-user-container{
+.view-user-page{
     width:100%;
     height:calc(100vh - 120px);
     display:flex;
     justify-content:center;
     align-items:center;
     overflow:hidden;
+    box-sizing:border-box;
+    padding:20px;
 }
 
 .view-user-card{
-    width:650px;
-    background:#fff;
+    width:620px;
+    max-width:100%;
+    background:#ffffff;
     border-radius:10px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.15);
     padding:24px 30px;
-    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    box-sizing:border-box;
 }
 
-.view-user-card h2{
+.view-user-header{
     text-align:center;
+    margin-bottom:22px;
+}
+
+.view-user-header h2{
+    margin:0;
     color:#003366;
-    margin-bottom:18px;
+    font-size:22px;
+    font-weight:700;
 }
 
-.divider{
-    margin:20px 0;
-    border-top:1px solid #dcdcdc;
+.view-user-header p{
+    margin:6px 0 0;
+    color:#777;
+    font-size:13px;
 }
 
-.form-group{
+.view-user-form{
+    width:100%;
+}
+
+.view-user-form-group{
     display:flex;
     align-items:center;
+    width:100%;
     margin-bottom:14px;
 }
 
-.form-group label{
-    width:150px;
-    margin-bottom:0;
+.view-user-form-group label{
+    width:155px;
+    flex-shrink:0;
+    color:#333;
     font-size:14px;
     font-weight:600;
-    color:#333;
-    flex-shrink:0;
 }
 
-.input-wrapper{
+.view-user-input-wrapper{
     position:relative;
     flex:1;
 }
 
-.input-wrapper input{
+.view-user-input-wrapper input{
     width:100%;
     height:40px;
-    border:1px solid #cfcfcf;
-    border-radius:6px;
-    padding:0 40px 0 12px;
-    font-size:14px;
-    outline:none;
-    transition:.2s;
     box-sizing:border-box;
+    border:1px solid #cccccc;
+    border-radius:6px;
+    padding:0 42px 0 12px;
+    outline:none;
+    font-size:14px;
+    color:#333;
+    background:#ffffff;
+    transition:0.2s;
 }
 
-.input-wrapper input:focus{
+.view-user-input-wrapper input:focus{
     border-color:#1976d2;
+    box-shadow:0 0 0 2px rgba(25,118,210,0.08);
 }
 
-.readonly input{
-    background:#f3f3f3;
+.view-user-input-wrapper.readonly input{
+    background:#f2f2f2;
     color:#666;
     cursor:not-allowed;
 }
 
-.field-icon{
+.view-user-input-wrapper.editable input{
+    background:#ffffff;
+}
+
+.view-user-field-icon{
     position:absolute;
-    right:14px;
+    right:13px;
     top:50%;
     transform:translateY(-50%);
-    font-size:16px;
+    font-size:15px;
 }
 
-.readonly .field-icon{
-    color:#7b7b7b;
+.view-user-input-wrapper.readonly .view-user-field-icon{
+    color:#777;
 }
 
-.editable .field-icon{
+.view-user-input-wrapper.editable .view-user-field-icon{
     color:#1976d2;
+}
+
+.view-user-actions{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-top:22px;
+}
+
+.view-user-actions button{
+    height:40px;
+    min-width:145px;
+    border:none;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:600;
     cursor:pointer;
+    transition:0.2s;
 }
 
-.status-box input{
-    background:#f8f8f8;
-    color:#333;
+.view-user-save-btn{
+    background:#198754;
+    color:#ffffff;
 }
 
-.save-btn{
-    width:100%;
-    height:42px;
-    margin-top:18px;
-}
-
-.save-btn:hover{
+.view-user-save-btn:hover{
     background:#157347;
 }
 
-.loading{
-    text-align:center;
-    margin-top:50px;
+.view-user-cancel-btn{
+    background:#6c757d;
+    color:#ffffff;
+}
+
+.view-user-cancel-btn:hover{
+    background:#5c636a;
+}
+
+.view-user-loading{
+    font-size:18px;
+    font-weight:600;
+    color:#003366;
+}
+
+@media(max-width:650px){
+
+    .view-user-page{
+        padding:15px;
+    }
+
+    .view-user-card{
+        padding:20px;
+    }
+
+    .view-user-form-group{
+        display:block;
+    }
+
+    .view-user-form-group label{
+        display:block;
+        width:100%;
+        margin-bottom:6px;
+    }
+
+    .view-user-actions{
+        flex-direction:column;
+    }
+
+    .view-user-actions button{
+        width:100%;
+    }
 }
