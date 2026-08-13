@@ -38,7 +38,7 @@ public class NotebooksController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String authority,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "notebookId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir){
         Page<NotebooksResponseDto> allNotebooks = notebooksFacade.getAllNotebooks(page, size, search, authority, status, sortBy, sortDir);
         return ResponseEntity.ok(allNotebooks);

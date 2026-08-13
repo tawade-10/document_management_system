@@ -17,10 +17,10 @@ public class Pages {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @Column(name = "page_content", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "page_content", columnDefinition = "TEXT")
     private String pageContent;
 
-    @Column(name = "participants", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "participants", columnDefinition = "TEXT")
     private String participants;
 
     @ManyToOne(fetch = FetchType.LAZY)

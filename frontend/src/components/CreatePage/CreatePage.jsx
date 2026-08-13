@@ -198,9 +198,7 @@ export default function CreatePage(){
                         >
                             {loading ? "Creating..." : "Create Page"}
                         </button>
-
                     </div>
-
                 </form>
             </div>
         </div>

@@ -1,53 +1,52 @@
 package com.example.mom.dto.Pages;
 
-import com.example.mom.entity.Notebooks;
 import com.example.mom.entity.Pages;
-import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PagesResponseDto {
+public class PagesUpdateResponseDto {
 
     private String pageId;
-
     private String title;
-
     private List<String> participants;
-
     private String createdBy;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
-
     private String pageContent;
-
     private String status;
-
     private String notebookId;
 
-    public PagesResponseDto(Pages pages) {
+    public PagesUpdateResponseDto(Pages pages) {
+
         this.pageId = pages.getPageId();
         this.title = pages.getTitle();
         this.participants = pages.getParticipants() == null
+                || pages.getParticipants().isBlank()
                 ? new ArrayList<>()
-                : Arrays.stream(pages.getParticipants().split(","))
+                : Arrays.stream(
+                        pages.getParticipants().split(",")
+                )
                 .map(String::trim)
+                .filter(participant -> !participant.isBlank())
                 .toList();
-        this.createdBy = pages.getCreatedBy().getUserName();
+        this.createdBy = pages.getCreatedBy() != null
+                ? pages.getCreatedBy().getUserName()
+                : null;
         this.createdAt = pages.getCreatedAt();
         this.updatedAt = pages.getUpdatedAt();
         this.pageContent = pages.getPageContent();
-        this.status = pages.getStatus().getStatusId();
+        this.status = pages.getStatus() != null
+                ? pages.getStatus().getStatusId()
+                : null;
         this.notebookId = pages.getNotebooks() != null
                 ? pages.getNotebooks().getNotebookId()
                 : null;
     }
 
-    public PagesResponseDto() {
+    public PagesUpdateResponseDto() {
     }
 
     public String getPageId() {

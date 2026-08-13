@@ -1,7 +1,9 @@
 package com.example.mom.facade.Pages;
 
-import com.example.mom.dto.Pages.PagesRequestDto;
-import com.example.mom.dto.Pages.PagesResponseDto;
+import com.example.mom.dto.Pages.PagesCreationRequestDto;
+import com.example.mom.dto.Pages.PagesCreationResponseDto;
+import com.example.mom.dto.Pages.PagesUpdateRequestDto;
+import com.example.mom.dto.Pages.PagesUpdateResponseDto;
 import com.example.mom.service.Pages.PagesService;
 import org.springframework.stereotype.Component;
 
@@ -17,67 +19,67 @@ public class PagesFacadeImpl implements PagesFacade{
     }
 
     @Override
-    public PagesResponseDto createPage(PagesRequestDto pagesRequestDto) {
-        return pagesService.createPage(pagesRequestDto);
+    public PagesCreationResponseDto createPage(PagesCreationRequestDto pagesCreationRequestDto) {
+        return pagesService.createPage(pagesCreationRequestDto);
     }
 
     @Override
-    public List<PagesResponseDto> getAllPages(String sortBy, String sortDir) {
+    public List<PagesUpdateResponseDto> getAllPages(String sortBy, String sortDir) {
         return pagesService.getAllPages(sortBy, sortDir);
     }
 
     @Override
-    public List<PagesResponseDto> getPagesByUser(String sortBy, String sortDir) {
+    public List<PagesUpdateResponseDto> getPagesByUser(String sortBy, String sortDir) {
         return pagesService.getPagesByUser(sortBy,sortDir);
     }
 
     @Override
-    public PagesResponseDto getPageById(String pageId) {
+    public PagesUpdateResponseDto getPageById(String pageId) {
         return pagesService.getPageById(pageId);
     }
 
     @Override
-    public PagesResponseDto editPageDetails(String pageId, PagesRequestDto pagesRequestDto) {
-        return pagesService.editPageDetails(pageId, pagesRequestDto);
+    public PagesUpdateResponseDto editPageDetails(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto) {
+        return pagesService.editPageDetails(pageId, pagesUpdateRequestDto);
     }
 
     @Override
-    public PagesResponseDto publishPage(String pageId, PagesRequestDto pagesRequestDto) {
-        return pagesService.publishPage(pageId, pagesRequestDto);
+    public PagesUpdateResponseDto publishPage(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto) {
+        return pagesService.publishPage(pageId, pagesUpdateRequestDto);
     }
 
     @Override
-    public PagesResponseDto archivePage(String pageId) {
+    public PagesUpdateResponseDto archivePage(String pageId) {
         return pagesService.archivePage(pageId);
     }
 
     @Override
-    public List<PagesResponseDto> getPublishedPages() {
+    public List<PagesUpdateResponseDto> getPublishedPages() {
         return pagesService.getPublishedPages();
     }
 
     @Override
-    public List<PagesResponseDto> getPublishedPagesByUser() {
+    public List<PagesUpdateResponseDto> getPublishedPagesByUser() {
         return pagesService.getPublishedPagesByUser();
     }
 
     @Override
-    public List<PagesResponseDto> getArchivedPages() {
+    public List<PagesUpdateResponseDto> getArchivedPages() {
         return pagesService.getArchivedPages();
     }
 
     @Override
-    public List<PagesResponseDto> getArchivedPagesByUser() {
+    public List<PagesUpdateResponseDto> getArchivedPagesByUser() {
         return pagesService.getArchivedPagesByUser();
     }
 
     @Override
-    public PagesResponseDto mapPageToNotebook(String pageId, String notebookId) {
+    public PagesUpdateResponseDto mapPageToNotebook(String pageId, String notebookId) {
         return pagesService.mapPageToNotebook(pageId, notebookId);
     }
 
     @Override
-    public List<PagesResponseDto> getAllPagesByNotebook(String notebookId) {
+    public List<PagesUpdateResponseDto> getAllPagesByNotebook(String notebookId) {
         return pagesService.getAllPagesByNotebook(notebookId);
     }
 }

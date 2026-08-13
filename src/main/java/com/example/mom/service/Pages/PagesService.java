@@ -1,35 +1,37 @@
 package com.example.mom.service.Pages;
 
-import com.example.mom.dto.Pages.PagesRequestDto;
-import com.example.mom.dto.Pages.PagesResponseDto;
+import com.example.mom.dto.Pages.PagesCreationRequestDto;
+import com.example.mom.dto.Pages.PagesCreationResponseDto;
+import com.example.mom.dto.Pages.PagesUpdateRequestDto;
+import com.example.mom.dto.Pages.PagesUpdateResponseDto;
 
 import java.util.List;
 
 public interface PagesService {
 
-    PagesResponseDto createPage(PagesRequestDto pagesRequestDto);
+    PagesCreationResponseDto createPage(PagesCreationRequestDto pagesCreationRequestDto);
 
-    List<PagesResponseDto> getAllPages(String sortBy, String sortDir);
+    List<PagesUpdateResponseDto> getAllPages(String sortBy, String sortDir);
 
-    List<PagesResponseDto> getPagesByUser(String sortBy, String sortDir);
+    List<PagesUpdateResponseDto> getPagesByUser(String sortBy, String sortDir);
 
-    PagesResponseDto getPageById(String pageId);
+    PagesUpdateResponseDto getPageById(String pageId);
 
-    PagesResponseDto editPageDetails(String pageId, PagesRequestDto pagesRequestDto);
+    PagesUpdateResponseDto editPageDetails(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto);
 
-    PagesResponseDto publishPage(String pageId, PagesRequestDto pagesRequestDto);
+    PagesUpdateResponseDto publishPage(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto);
 
-    PagesResponseDto archivePage(String pageId);
+    PagesUpdateResponseDto archivePage(String pageId);
 
-    List<PagesResponseDto> getPublishedPages();
+    List<PagesUpdateResponseDto> getPublishedPages();
 
-    List<PagesResponseDto> getPublishedPagesByUser();
+    List<PagesUpdateResponseDto> getPublishedPagesByUser();
 
-    List<PagesResponseDto> getArchivedPages();
+    List<PagesUpdateResponseDto> getArchivedPages();
 
-    List<PagesResponseDto> getArchivedPagesByUser();
+    List<PagesUpdateResponseDto> getArchivedPagesByUser();
 
-    PagesResponseDto mapPageToNotebook(String pageId, String notebookId);
+    PagesUpdateResponseDto mapPageToNotebook(String pageId, String notebookId);
 
-    List<PagesResponseDto> getAllPagesByNotebook(String notebookId);
+    List<PagesUpdateResponseDto> getAllPagesByNotebook(String notebookId);
 }

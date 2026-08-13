@@ -5,24 +5,13 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
-public class PagesRequestDto {
-
-    @NotBlank(message = "Title cannot be empty")
-    private String title;
+public class PagesUpdateRequestDto {
 
     @NotEmpty(message = "Please add at least one participant")
     private List<String> participants;
 
     @NotBlank(message = "Page content cannot be empty")
     private String pageContent;
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public List<String> getParticipants() {
         return participants;

@@ -8,8 +8,7 @@ import { toast } from "react-toastify";
 import ToggleButton from "../ToggleButton/ToggleButton";
 
 import CreateNotebookPopup from "../CreateNotebookPopup/CreateNotebookPopup";
-// import CreatePagePopup from "../HeaderPopups/CreatePagePopup";
-
+import CreatePagePopup from "../CreatePagePopup/CreatePagePopup";
 
 export default function Header({
     searchKeyword,

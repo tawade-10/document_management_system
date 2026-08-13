@@ -1,7 +1,7 @@
 package com.example.mom.controller;
 
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
-import com.example.mom.dto.Pages.PagesResponseDto;
+import com.example.mom.dto.Pages.PagesUpdateResponseDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.Notebooks;
 import com.example.mom.facade.Search.SearchFacade;
@@ -28,8 +28,8 @@ public class SearchController {
     }
 
     @GetMapping("/pages")
-    public ResponseEntity<List<PagesResponseDto>> searchPages(@RequestParam String keyword){
-        List<PagesResponseDto> searchedPages = searchFacade.searchPages(keyword);
+    public ResponseEntity<List<PagesUpdateResponseDto>> searchPages(@RequestParam String keyword){
+        List<PagesUpdateResponseDto> searchedPages = searchFacade.searchPages(keyword);
         return new ResponseEntity<>(searchedPages, HttpStatus.OK);
     }
 

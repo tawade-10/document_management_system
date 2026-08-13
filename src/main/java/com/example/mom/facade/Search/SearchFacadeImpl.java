@@ -1,9 +1,8 @@
 package com.example.mom.facade.Search;
 
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
-import com.example.mom.dto.Pages.PagesResponseDto;
+import com.example.mom.dto.Pages.PagesUpdateResponseDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
-import com.example.mom.entity.Notebooks;
 import com.example.mom.service.Search.SearchService;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,7 @@ public class SearchFacadeImpl implements SearchFacade{
     }
 
     @Override
-    public List<PagesResponseDto> searchPages(String keyword) {
+    public List<PagesUpdateResponseDto> searchPages(String keyword) {
         return searchService.searchPages(keyword);
     }
 
