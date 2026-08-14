@@ -819,11 +819,8 @@ export default function UserHomePage() {
                                         );
                                     }
                                 )
-
                         )}
-
                         {filteredRecentPages.length > 8 && (
-
                             <button
                                 type="button"
                                 className="recent-view-more"
@@ -835,15 +832,10 @@ export default function UserHomePage() {
                             >
                                 View All Pages
                             </button>
-
                         )}
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     );
 }

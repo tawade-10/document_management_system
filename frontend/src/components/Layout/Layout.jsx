@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import React,{useState} from "react";
+import {Outlet} from "react-router-dom";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import "./Layout.css";
 
-export default function Layout() {
-    const [searchKeyword, setSearchKeyword] = useState("");
-    const [sortBy, setSortBy] = useState("createdAt");
-    const [sortDir, setSortDir] = useState("asc");
-    const [authorityFilter, setAuthorityFilter] = useState([]);
-    const [statusFilter, setStatusFilter] = useState([]);
+export default function Layout(){
 
-    return (
+    const [searchKeyword,setSearchKeyword]=useState("");
+    const [sortBy,setSortBy]=useState("createdAt");
+    const [sortDir,setSortDir]=useState("asc");
+    const [authorityFilter,setAuthorityFilter]=useState([]);
+    const [statusFilter,setStatusFilter]=useState([]);
+
+    return(
         <div className="layout">
             <Header
                 searchKeyword={searchKeyword}
@@ -41,7 +42,7 @@ export default function Layout() {
                     }}
                 />
             </main>
-            <Footer />
+            <Footer/>
         </div>
     );
 }

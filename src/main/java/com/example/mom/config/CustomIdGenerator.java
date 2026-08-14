@@ -43,7 +43,6 @@ public class CustomIdGenerator {
                 "SELECT nextval('notebook_seq')",
                 Long.class
         );
-
         return String.format("NA%04d", nextValue);
     }
 

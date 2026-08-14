@@ -1,0 +1,241 @@
+.update-page-container{
+    width:100%;
+    min-height:calc(100vh - 70px);
+    background:#f3f3f3;
+    overflow:visible;
+    box-sizing:border-box;
+    position:relative;
+}
+
+.update-page-toolbar{
+    width:100%;
+    height:42px;
+    min-height:42px;
+    display:flex;
+    align-items:center;
+    padding:0 18px;
+    box-sizing:border-box;
+    background:#ffffff;
+    border-bottom:1px solid #d8d8d8;
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.update-page-toolbar-button{
+    width:32px;
+    height:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:4px;
+    background:transparent;
+    color:#444444;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.update-page-toolbar-button:hover{
+    background:#eeeeee;
+}
+
+.update-page-toolbar-button.active{
+    background:#dbe7f5;
+    color:#1f4e79;
+}
+
+.update-page-toolbar-button:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+.update-page-scroll{
+    width:100%;
+    min-height:calc(100vh - 112px);
+    padding:35px 40px 50px;
+    box-sizing:border-box;
+    overflow:visible;
+}
+
+.update-page{
+    width:794px;
+    min-height:1123px;
+    margin:0 auto;
+    padding:75px 80px 90px;
+    box-sizing:border-box;
+    background:#ffffff;
+    box-shadow:0 1px 6px rgba(0,0,0,0.18);
+}
+
+.update-page-title{
+    width:100%;
+    margin:0 0 35px;
+}
+
+.update-page-title input{
+    width:100%;
+    height:auto;
+    padding:0;
+    margin:0;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:#202124;
+    font-family:Calibri,Arial,sans-serif;
+    font-size:24px;
+    font-weight:600;
+    line-height:1.3;
+    text-align:left;
+    box-sizing:border-box;
+}
+
+.update-page-title input::placeholder{
+    color:#9ca3af;
+}
+
+.update-page-editor{
+    width:100%;
+    min-height:900px;
+    padding:0;
+    margin:0;
+    outline:none;
+    border:none;
+    background:#ffffff;
+    color:#202124;
+    font-family:Calibri,Arial,sans-serif;
+    font-size:12px;
+    line-height:1.5;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    overflow:visible;
+    box-sizing:border-box;
+}
+
+.update-page-editor:focus{
+    outline:none;
+}
+
+.update-page-editor:empty::before{
+    content:"Start typing your MOM...";
+    color:#9ca3af;
+    pointer-events:none;
+}
+
+.update-page-editor p{
+    margin:0 0 8px;
+}
+
+.update-page-editor div{
+    margin:0;
+}
+
+.update-page-editor ul,
+.update-page-editor ol{
+    margin-top:4px;
+    margin-bottom:8px;
+    padding-left:28px;
+}
+
+.update-page-editor table{
+    width:100%;
+    border-collapse:collapse;
+    margin:10px 0;
+}
+
+.update-page-editor td,
+.update-page-editor th{
+    border:1px solid #bdbdbd;
+    padding:6px 8px;
+}
+
+.update-page-editor h1,
+.update-page-editor h2,
+.update-page-editor h3{
+    margin-top:12px;
+    margin-bottom:8px;
+}
+
+.update-page-loading{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    padding:22px 35px;
+    background:#ffffff;
+    border-radius:5px;
+    box-shadow:0 3px 15px rgba(0,0,0,0.12);
+    color:#666666;
+    font-size:13px;
+    z-index:100;
+}
+
+.update-page-saving{
+    position:fixed;
+    right:25px;
+    bottom:20px;
+    padding:8px 14px;
+    border-radius:4px;
+    background:#ffffff;
+    color:#555555;
+    font-size:11px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    z-index:100;
+}
+
+@media(max-width:1000px){
+
+    .update-page{
+        width:720px;
+        padding-left:60px;
+        padding-right:60px;
+    }
+
+    .update-page-scroll{
+        padding-left:20px;
+        padding-right:20px;
+    }
+}
+
+@media(max-width:768px){
+
+    .update-page-container{
+        min-height:calc(100vh - 60px);
+    }
+
+    .update-page-scroll{
+        padding:20px 15px 35px;
+    }
+
+    .update-page{
+        width:680px;
+        min-height:1000px;
+        padding:55px 55px 70px;
+    }
+}
+
+@media(max-width:600px){
+
+    .update-page{
+        width:600px;
+        min-height:900px;
+        padding:45px 40px 60px;
+    }
+
+    .update-page-title input{
+        font-size:21px;
+    }
+}
+
+@media(max-width:480px){
+
+    .update-page{
+        width:550px;
+        padding:35px 30px 50px;
+    }
+
+    .update-page-scroll{
+        padding-left:10px;
+        padding-right:10px;
+    }
+}
