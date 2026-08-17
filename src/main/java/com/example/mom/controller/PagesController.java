@@ -59,7 +59,7 @@ public class PagesController {
     }
 
     @PutMapping("/publish/{pageId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_USER')")
     public ResponseEntity<PagesUpdateResponseDto> publishPage(@PathVariable String pageId, @Valid @RequestBody PagesUpdateRequestDto pagesRequestDto){
         PagesUpdateResponseDto publishedPage = pagesFacade.publishPage(pageId, pagesRequestDto);
         return ResponseEntity.ok(publishedPage);

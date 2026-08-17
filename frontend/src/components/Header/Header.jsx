@@ -1,8 +1,31 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import "./Header.css";
-import { useNavigate, useLocation } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
-import { FaSearch, FaUndo, FaRedo, FaBold, FaItalic, FaUnderline, FaHighlighter, FaAlignLeft, FaAlignCenter, FaAlignRight, FaListUl, FaListOl, FaTable, FaEllipsisH, FaMicrophone, FaSave, FaPalette } from "react-icons/fa";
+import {
+    FaSearch,
+    FaUndo,
+    FaRedo,
+    FaBold,
+    FaItalic,
+    FaUnderline,
+    FaHighlighter,
+    FaAlignLeft,
+    FaAlignCenter,
+    FaAlignRight,
+    FaListUl,
+    FaListOl,
+    FaTable,
+    FaEllipsisH,
+    FaHome,
+    FaArrowLeft,
+    FaUserPlus,
+    FaBook,
+    FaFileAlt,
+    FaSort,
+    FaFilter,
+    FaSignOutAlt
+} from "react-icons/fa";
 import { MdFormatColorText } from "react-icons/md";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -20,13 +43,17 @@ export default function Header({
     authorityFilter,
     setAuthorityFilter,
     statusFilter,
-    setStatusFilter
+    setStatusFilter,
+    pageTitle = "",
+    createdAt = ""
 }) {
     const API_URL = "http://localhost:8080/api/auth";
 
     const navigate = useNavigate();
     const location = useLocation();
+    const { pageId } = useParams();
 
+    const [headerPageTitle, setHeaderPageTitle] = useState(pageTitle);
     const [, forceUpdate] = useState(0);
 
     const [showSort, setShowSort] = useState(false);
@@ -53,7 +80,8 @@ export default function Header({
         .map(role => role.trim().toUpperCase())
         .filter(Boolean);
 
-    const currentRole = localStorage.getItem("currentRole") || "USER";
+    const currentRole =
+        localStorage.getItem("currentRole") || "USER";
 
     const isAdmin = currentRole === "ADMIN";
     const isSuperUser = currentRole === "SUPER_USER";
@@ -66,7 +94,10 @@ export default function Header({
         canViewPages: isUser || isSuperUser,
         canSort: isAdmin || isSuperUser || isUser,
         canFilter: isAdmin || isSuperUser || isUser,
-        canToggleRole: !isAdmin && authorities.includes("USER")
+        canToggleRole:
+            !isAdmin &&
+            authorities.includes("USER") &&
+            authorities.includes("SUPER_USER")
     };
 
     const userSortByOptions = [
@@ -230,6 +261,61 @@ export default function Header({
     }, []);
 
     useEffect(() => {
+        const fetchPageHeaderDetails = async () => {
+            if (!pageId) {
+                setHeaderPageTitle(pageTitle || "");
+                return;
+            }
+
+            try {
+                const response = await axios.get(
+                    `http://localhost:8080/api/pages/${pageId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                console.group(
+                    "HB33 - Load Page Header Details"
+                );
+
+                console.log("Request");
+
+                console.log({
+                    method: "GET",
+                    url: `http://localhost:8080/api/pages/${pageId}`
+                });
+
+                console.log("Response");
+
+                console.log(response.data);
+
+                console.groupEnd();
+
+                setHeaderPageTitle(
+                    response.data?.title || ""
+                );
+            } catch (error) {
+                console.group(
+                    "HB33 - Load Page Header Details"
+                );
+
+                console.log("Response");
+
+                console.log(error.response?.data);
+
+                console.groupEnd();
+
+                setHeaderPageTitle(pageTitle || "");
+            }
+        };
+
+        fetchPageHeaderDetails();
+    }, [pageId, pageTitle, token]);
+
+    useEffect(() => {
         setShowSort(false);
         setShowFilter(false);
         setShowCreateNotebook(false);
@@ -262,7 +348,8 @@ export default function Header({
 
             if (
                 statusFilter.some(
-                    status => !userStatusOptions.includes(status)
+                    status =>
+                        !userStatusOptions.includes(status)
                 )
             ) {
                 setStatusFilter([]);
@@ -278,7 +365,8 @@ export default function Header({
 
             if (
                 statusFilter.some(
-                    status => !notebookStatusOptions.includes(status)
+                    status =>
+                        !notebookStatusOptions.includes(status)
                 )
             ) {
                 setStatusFilter([]);
@@ -300,7 +388,10 @@ export default function Header({
         setStatusFilter
     ]);
 
-    const dispatchEditorCommand = (command, value = null) => {
+    const dispatchEditorCommand = (
+        command,
+        value = null
+    ) => {
         window.dispatchEvent(
             new CustomEvent("editorCommand", {
                 detail: {
@@ -322,7 +413,8 @@ export default function Header({
                 page: location.pathname
             },
             response: {
-                message: "Editor undo command triggered"
+                message:
+                    "Editor undo command triggered"
             },
             status: 200
         });
@@ -339,7 +431,8 @@ export default function Header({
                 page: location.pathname
             },
             response: {
-                message: "Editor redo command triggered"
+                message:
+                    "Editor redo command triggered"
             },
             status: 200
         });
@@ -358,11 +451,17 @@ export default function Header({
     };
 
     const handleHighlight = () => {
-        dispatchEditorCommand("hiliteColor", "#fff59d");
+        dispatchEditorCommand(
+            "hiliteColor",
+            "#fff59d"
+        );
     };
 
     const handleTextColor = () => {
-        dispatchEditorCommand("foreColor", "#000000");
+        dispatchEditorCommand(
+            "foreColor",
+            "#000000"
+        );
     };
 
     const handleAlignLeft = () => {
@@ -378,66 +477,52 @@ export default function Header({
     };
 
     const handleBulletList = () => {
-        dispatchEditorCommand("insertUnorderedList");
+        dispatchEditorCommand(
+            "insertUnorderedList"
+        );
     };
 
     const handleNumberList = () => {
-        dispatchEditorCommand("insertOrderedList");
+        dispatchEditorCommand(
+            "insertOrderedList"
+        );
     };
 
     const handleTable = () => {
-        dispatchEditorCommand("insertTable");
+        dispatchEditorCommand(
+            "insertTable"
+        );
     };
 
     const handleFontChange = value => {
         setFontFamily(value);
         setShowFontDropdown(false);
-        dispatchEditorCommand("fontName", value);
+        dispatchEditorCommand(
+            "fontName",
+            value
+        );
     };
 
     const handleFontSizeChange = value => {
         setFontSize(value);
         setShowSizeDropdown(false);
-        dispatchEditorCommand("fontSize", value);
-    };
-
-    const handleSaveEditor = () => {
-        window.dispatchEvent(
-            new CustomEvent("editorSave")
-        );
-
-        logButtonEvent({
-            buttonNo: "HB32",
-            buttonName: "Editor Save Button",
-            request: {
-                action: "save",
-                page: location.pathname
-            },
-            response: {
-                message: "Editor save event triggered"
-            },
-            status: 200
-        });
-    };
-
-    const handleEditorSearch = () => {
-        window.dispatchEvent(
-            new CustomEvent("editorSearch")
-        );
-    };
-
-    const handleEditorVoice = () => {
-        window.dispatchEvent(
-            new CustomEvent("editorVoice")
+        dispatchEditorCommand(
+            "fontSize",
+            value
         );
     };
 
     const handleHome = () => {
-        const role = localStorage.getItem("currentRole") || "USER";
+        const role =
+            localStorage.getItem(
+                "currentRole"
+            ) || "USER";
 
         if (role === "ADMIN") {
             navigate("/admin");
-        } else if (role === "SUPER_USER") {
+        } else if (
+            role === "SUPER_USER"
+        ) {
             navigate("/superuser-homepage");
         } else if (role === "USER") {
             navigate("/user-homepage");
@@ -455,20 +540,21 @@ export default function Header({
     };
 
     const handleCreateNotebookButton = () => {
-        const nextState = !showCreateNotebook;
+        const nextState =
+            !showCreateNotebook;
 
         setShowCreateNotebook(nextState);
         setShowCreatePage(false);
         setShowSort(false);
         setShowFilter(false);
-        setOpenSortDropdown(null);
-        setOpenFilterDropdown(null);
 
         logButtonEvent({
             buttonNo: "HB21",
             buttonName: "Create Notebook Button",
             request: {
-                action: nextState ? "Open Popup" : "Close Popup",
+                action: nextState
+                    ? "Open Popup"
+                    : "Close Popup",
                 from: location.pathname,
                 currentRole
             },
@@ -482,20 +568,21 @@ export default function Header({
     };
 
     const handleCreatePageButton = () => {
-        const nextState = !showCreatePage;
+        const nextState =
+            !showCreatePage;
 
         setShowCreatePage(nextState);
         setShowCreateNotebook(false);
         setShowSort(false);
         setShowFilter(false);
-        setOpenSortDropdown(null);
-        setOpenFilterDropdown(null);
 
         logButtonEvent({
             buttonNo: "HB22",
             buttonName: "Create Page Button",
             request: {
-                action: nextState ? "Open Popup" : "Close Popup",
+                action: nextState
+                    ? "Open Popup"
+                    : "Close Popup",
                 from: location.pathname,
                 currentRole
             },
@@ -513,8 +600,6 @@ export default function Header({
         setShowFilter(false);
         setShowCreateNotebook(false);
         setShowCreatePage(false);
-        setOpenSortDropdown(null);
-        setOpenFilterDropdown(null);
     };
 
     const handleFilterButton = () => {
@@ -522,8 +607,6 @@ export default function Header({
         setShowSort(false);
         setShowCreateNotebook(false);
         setShowCreatePage(false);
-        setOpenSortDropdown(null);
-        setOpenFilterDropdown(null);
     };
 
     const toggleAuthority = value => {
@@ -619,14 +702,19 @@ export default function Header({
                 {},
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        Authorization:
+                            `Bearer ${token}`
                     }
                 }
             );
 
-            toast.success("Logged out successfully.");
+            toast.success(
+                "Logged out successfully."
+            );
         } catch {
-            toast.error("Logout failed.");
+            toast.error(
+                "Logout failed."
+            );
         } finally {
             localStorage.clear();
 
@@ -644,70 +732,82 @@ export default function Header({
         "/reset-password"
     ];
 
-    if (hideHeaderRoutes.includes(location.pathname)) {
+    if (
+        hideHeaderRoutes.includes(
+            location.pathname
+        )
+    ) {
         return null;
     }
 
     return (
         <>
             <header className="header">
+
                 <div className="header-left">
+
                     <button
-                        className="header-btn home-btn"
+                        type="button"
+                        className="header-icon-btn"
+                        data-tooltip="Home"
                         onClick={handleHome}
                     >
-                        🏠 Home
+                        <FaHome />
                     </button>
 
                     <button
-                        className="header-btn back-btn"
+                        type="button"
+                        className="header-icon-btn"
+                        data-tooltip="Back"
                         onClick={handleBack}
                     >
-                        ← Back
+                        <FaArrowLeft />
                     </button>
 
                     {permissions.canManageUsers && (
                         <button
-                            className="header-btn blue"
+                            type="button"
+                            className="header-icon-btn"
+                            data-tooltip="Create User"
                             onClick={() => {
-                                logButtonEvent({
-                                    buttonNo: "HB14",
-                                    buttonName: "Create User Button",
-                                    request: {
-                                        action: "Navigate",
-                                        from: location.pathname,
-                                        to: "/admin/create-user"
-                                    },
-                                    response: {
-                                        message: "Navigating to Create User Component"
-                                    },
-                                    status: 200
-                                });
-
-                                navigate("/admin/create-user");
+                                navigate(
+                                    "/admin/create-user"
+                                );
                             }}
                         >
-                            Create User
+                            <FaUserPlus />
                         </button>
                     )}
 
                     {permissions.canCreateNotebook && (
                         <div className="header-popup-container">
                             <button
-                                className="header-btn green"
-                                onClick={handleCreateNotebookButton}
+                                type="button"
+                                className="header-icon-btn green-icon"
+                                data-tooltip="New Notebook"
+                                onClick={
+                                    handleCreateNotebookButton
+                                }
                             >
-                                New Notebook
+                                <FaBook />
                             </button>
 
                             {showCreateNotebook && (
                                 <CreateNotebookPopup
                                     onClose={() =>
-                                        setShowCreateNotebook(false)
+                                        setShowCreateNotebook(
+                                            false
+                                        )
                                     }
-                                    currentRole={currentRole}
-                                    location={location}
-                                    logButtonEvent={logButtonEvent}
+                                    currentRole={
+                                        currentRole
+                                    }
+                                    location={
+                                        location
+                                    }
+                                    logButtonEvent={
+                                        logButtonEvent
+                                    }
                                 />
                             )}
                         </div>
@@ -716,80 +816,123 @@ export default function Header({
                     {permissions.canCreatePage && (
                         <div className="header-popup-container">
                             <button
-                                className="header-btn green"
-                                onClick={handleCreatePageButton}
+                                type="button"
+                                className="header-icon-btn green-icon"
+                                data-tooltip="New Page"
+                                onClick={
+                                    handleCreatePageButton
+                                }
                             >
-                                New Page
+                                <FaFileAlt />
                             </button>
 
                             {showCreatePage && (
                                 <CreatePagePopup
                                     onClose={() =>
-                                        setShowCreatePage(false)
+                                        setShowCreatePage(
+                                            false
+                                        )
                                     }
-                                    currentRole={currentRole}
-                                    location={location}
-                                    logButtonEvent={logButtonEvent}
+                                    currentRole={
+                                        currentRole
+                                    }
+                                    location={
+                                        location
+                                    }
+                                    logButtonEvent={
+                                        logButtonEvent
+                                    }
                                 />
                             )}
                         </div>
                     )}
 
-                    {permissions.canViewPages && (
-                        <button
-                            className="header-btn green"
-                            onClick={() => {
-                                navigate(
-                                    "/user-homepage/view-all-notebooks-pages"
-                                );
-                            }}
+                    {pageId && (
+                        <div
+                            className="header-editable-page-title"
+                            title={
+                                headerPageTitle ||
+                                "Page Name"
+                            }
                         >
-                            View All
-                        </button>
+                            <input
+                                type="text"
+                                value={
+                                    headerPageTitle
+                                }
+                                onChange={e =>
+                                    setHeaderPageTitle(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Page Name"
+                            />
+                        </div>
                     )}
+
                 </div>
 
                 <div className="header-center">
+
                     <div className="search-container">
+
                         <input
                             className="search-input"
                             type="text"
-                            placeholder={getSearchPlaceholder()}
-                            value={searchKeyword || ""}
+                            placeholder={
+                                getSearchPlaceholder()
+                            }
+                            value={
+                                searchKeyword || ""
+                            }
                             onChange={e =>
-                                setSearchKeyword(e.target.value)
+                                setSearchKeyword(
+                                    e.target.value
+                                )
                             }
                         />
 
                         <FaSearch className="search-icon" />
+
                     </div>
+
                 </div>
 
                 <div className="header-right">
+
                     {permissions.canSort && (
                         <div className="header-popup-container">
+
                             <button
-                                className="header-btn gray"
-                                onClick={handleSortButton}
+                                type="button"
+                                className="header-icon-btn"
+                                data-tooltip="Sort"
+                                onClick={
+                                    handleSortButton
+                                }
                             >
-                                ⬍ Sort
+                                <FaSort />
                             </button>
 
                             {showSort && (
                                 <div className="header-popup">
+
                                     <div className="popup-title">
-                                        <span>
-                                            {isAdmin
-                                                ? "Sort Users"
-                                                : "Sort Notebooks"}
-                                        </span>
+                                        {isAdmin
+                                            ? "Sort Users"
+                                            : "Sort Notebooks"}
                                     </div>
 
                                     <div className="popup-body">
+
                                         <div className="popup-section">
-                                            <label>Sort By</label>
+
+                                            <label>
+                                                Sort By
+                                            </label>
 
                                             <div className="custom-dropdown">
+
                                                 <button
                                                     type="button"
                                                     className="custom-dropdown-button"
@@ -800,17 +943,19 @@ export default function Header({
                                                     }
                                                 >
                                                     <span>
-                                                        {getSortByLabel()}
+                                                        {
+                                                            getSortByLabel()
+                                                        }
                                                     </span>
 
-                                                    <span className="dropdown-arrow">
+                                                    <span>
                                                         ▼
                                                     </span>
                                                 </button>
 
                                                 {openSortDropdown ===
                                                     "sortBy" && (
-                                                    <div className="custom-dropdown-options options-open">
+                                                    <div className="custom-dropdown-options">
                                                         {currentSortOptions.map(
                                                             option => (
                                                                 <button
@@ -818,12 +963,12 @@ export default function Header({
                                                                     key={
                                                                         option.value
                                                                     }
-                                                                    className={`custom-dropdown-option ${
+                                                                    className={
                                                                         sortBy ===
                                                                         option.value
-                                                                            ? "selected-option"
-                                                                            : ""
-                                                                    }`}
+                                                                            ? "custom-dropdown-option selected-option"
+                                                                            : "custom-dropdown-option"
+                                                                    }
                                                                     onClick={() => {
                                                                         setSortBy(
                                                                             option.value
@@ -841,13 +986,19 @@ export default function Header({
                                                         )}
                                                     </div>
                                                 )}
+
                                             </div>
+
                                         </div>
 
                                         <div className="popup-section">
-                                            <label>Order</label>
+
+                                            <label>
+                                                Order
+                                            </label>
 
                                             <div className="custom-dropdown">
+
                                                 <button
                                                     type="button"
                                                     className="custom-dropdown-button"
@@ -858,17 +1009,19 @@ export default function Header({
                                                     }
                                                 >
                                                     <span>
-                                                        {getSortOrderLabel()}
+                                                        {
+                                                            getSortOrderLabel()
+                                                        }
                                                     </span>
 
-                                                    <span className="dropdown-arrow">
+                                                    <span>
                                                         ▼
                                                     </span>
                                                 </button>
 
                                                 {openSortDropdown ===
                                                     "order" && (
-                                                    <div className="custom-dropdown-options options-open">
+                                                    <div className="custom-dropdown-options">
                                                         {sortOrderOptions.map(
                                                             option => (
                                                                 <button
@@ -876,12 +1029,12 @@ export default function Header({
                                                                     key={
                                                                         option.value
                                                                     }
-                                                                    className={`custom-dropdown-option ${
+                                                                    className={
                                                                         sortDir ===
                                                                         option.value
-                                                                            ? "selected-option"
-                                                                            : ""
-                                                                    }`}
+                                                                            ? "custom-dropdown-option selected-option"
+                                                                            : "custom-dropdown-option"
+                                                                    }
                                                                     onClick={() => {
                                                                         setSortDir(
                                                                             option.value
@@ -899,14 +1052,20 @@ export default function Header({
                                                         )}
                                                     </div>
                                                 )}
+
                                             </div>
+
                                         </div>
+
                                     </div>
 
                                     <div className="popup-buttons">
+
                                         <button
                                             className="apply-btn"
-                                            onClick={applySort}
+                                            onClick={
+                                                applySort
+                                            }
                                         >
                                             Apply
                                         </button>
@@ -914,40 +1073,53 @@ export default function Header({
                                         <button
                                             className="cancel-btn"
                                             onClick={() => {
-                                                setOpenSortDropdown(null);
-                                                setShowSort(false);
+                                                setShowSort(
+                                                    false
+                                                );
+                                                setOpenSortDropdown(
+                                                    null
+                                                );
                                             }}
                                         >
                                             Cancel
                                         </button>
+
                                     </div>
+
                                 </div>
                             )}
+
                         </div>
                     )}
 
                     {permissions.canFilter && (
                         <div className="header-popup-container">
+
                             <button
-                                className="header-btn gray"
-                                onClick={handleFilterButton}
+                                type="button"
+                                className="header-icon-btn"
+                                data-tooltip="Filter"
+                                onClick={
+                                    handleFilterButton
+                                }
                             >
-                                ⛃ Filter
+                                <FaFilter />
                             </button>
 
                             {showFilter && (
                                 <div className="header-popup filter-popup">
+
                                     <div className="popup-title">
-                                        <span>
-                                            {isAdmin
-                                                ? "Filter Users"
-                                                : "Filter Notebooks"}
-                                        </span>
+                                        {isAdmin
+                                            ? "Filter Users"
+                                            : "Filter Notebooks"}
                                     </div>
 
                                     <div className="popup-body">
+
                                         {isAdmin && (
                                             <div className="popup-section">
+
                                                 <label>
                                                     Authorities
                                                 </label>
@@ -980,10 +1152,12 @@ export default function Header({
                                                         </label>
                                                     )
                                                 )}
+
                                             </div>
                                         )}
 
                                         <div className="popup-section">
+
                                             <label>
                                                 Status
                                             </label>
@@ -991,7 +1165,9 @@ export default function Header({
                                             {currentStatusOptions.map(
                                                 status => (
                                                     <label
-                                                        key={status}
+                                                        key={
+                                                            status
+                                                        }
                                                         className="checkbox-item"
                                                     >
                                                         <input
@@ -1020,20 +1196,27 @@ export default function Header({
                                                     </label>
                                                 )
                                             )}
+
                                         </div>
+
                                     </div>
 
                                     <div className="popup-buttons">
+
                                         <button
                                             className="apply-btn"
-                                            onClick={applyFilter}
+                                            onClick={
+                                                applyFilter
+                                            }
                                         >
                                             Apply
                                         </button>
 
                                         <button
                                             className="reset-btn"
-                                            onClick={resetFilter}
+                                            onClick={
+                                                resetFilter
+                                            }
                                         >
                                             Reset
                                         </button>
@@ -1041,15 +1224,22 @@ export default function Header({
                                         <button
                                             className="cancel-btn"
                                             onClick={() => {
-                                                setOpenFilterDropdown(null);
-                                                setShowFilter(false);
+                                                setShowFilter(
+                                                    false
+                                                );
+                                                setOpenFilterDropdown(
+                                                    null
+                                                );
                                             }}
                                         >
                                             Cancel
                                         </button>
+
                                     </div>
+
                                 </div>
                             )}
+
                         </div>
                     )}
 
@@ -1068,21 +1258,31 @@ export default function Header({
                     />
 
                     <button
-                        className="logout-btn"
-                        onClick={handleLogout}
+                        type="button"
+                        className="header-icon-btn logout-icon"
+                        data-tooltip="Logout"
+                        onClick={
+                            handleLogout
+                        }
                     >
-                        Logout
+                        <FaSignOutAlt />
                     </button>
+
                 </div>
+
             </header>
 
             <div className="editor-toolbar">
+
                 <div className="editor-toolbar-left">
+
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Undo"
-                        onClick={handleEditorUndo}
+                        data-tooltip="Undo"
+                        onClick={
+                            handleEditorUndo
+                        }
                     >
                         <FaUndo />
                     </button>
@@ -1090,8 +1290,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Redo"
-                        onClick={handleEditorRedo}
+                        data-tooltip="Redo"
+                        onClick={
+                            handleEditorRedo
+                        }
                     >
                         <FaRedo />
                     </button>
@@ -1099,6 +1301,7 @@ export default function Header({
                     <div className="editor-divider" />
 
                     <div className="editor-dropdown-container">
+
                         <button
                             type="button"
                             className="editor-font-button"
@@ -1106,38 +1309,54 @@ export default function Header({
                                 setShowFontDropdown(
                                     prev => !prev
                                 );
-                                setShowSizeDropdown(false);
-                                setShowMoreTools(false);
+                                setShowSizeDropdown(
+                                    false
+                                );
+                                setShowMoreTools(
+                                    false
+                                );
                             }}
                         >
-                            <span>{fontFamily}</span>
-                            <span className="editor-dropdown-arrow">
+                            <span>
+                                {fontFamily}
+                            </span>
+
+                            <span>
                                 ▼
                             </span>
                         </button>
 
                         {showFontDropdown && (
                             <div className="editor-dropdown-menu font-menu">
-                                {fontOptions.map(font => (
-                                    <button
-                                        type="button"
-                                        key={font}
-                                        className="editor-dropdown-item"
-                                        style={{
-                                            fontFamily: font
-                                        }}
-                                        onClick={() =>
-                                            handleFontChange(font)
-                                        }
-                                    >
-                                        {font}
-                                    </button>
-                                ))}
+                                {fontOptions.map(
+                                    font => (
+                                        <button
+                                            type="button"
+                                            key={
+                                                font
+                                            }
+                                            className="editor-dropdown-item"
+                                            style={{
+                                                fontFamily:
+                                                    font
+                                            }}
+                                            onClick={() =>
+                                                handleFontChange(
+                                                    font
+                                                )
+                                            }
+                                        >
+                                            {font}
+                                        </button>
+                                    )
+                                )}
                             </div>
                         )}
+
                     </div>
 
                     <div className="editor-dropdown-container size-container">
+
                         <button
                             type="button"
                             className="editor-size-button"
@@ -1145,59 +1364,79 @@ export default function Header({
                                 setShowSizeDropdown(
                                     prev => !prev
                                 );
-                                setShowFontDropdown(false);
-                                setShowMoreTools(false);
+                                setShowFontDropdown(
+                                    false
+                                );
+                                setShowMoreTools(
+                                    false
+                                );
                             }}
                         >
-                            <span>{fontSize}</span>
-                            <span className="editor-dropdown-arrow">
+                            <span>
+                                {fontSize}
+                            </span>
+
+                            <span>
                                 ▼
                             </span>
                         </button>
 
                         {showSizeDropdown && (
                             <div className="editor-dropdown-menu size-menu">
-                                {fontSizeOptions.map(size => (
-                                    <button
-                                        type="button"
-                                        key={size}
-                                        className="editor-dropdown-item"
-                                        onClick={() =>
-                                            handleFontSizeChange(size)
-                                        }
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
+                                {fontSizeOptions.map(
+                                    size => (
+                                        <button
+                                            type="button"
+                                            key={
+                                                size
+                                            }
+                                            className="editor-dropdown-item"
+                                            onClick={() =>
+                                                handleFontSizeChange(
+                                                    size
+                                                )
+                                            }
+                                        >
+                                            {size}
+                                        </button>
+                                    )
+                                )}
                             </div>
                         )}
+
                     </div>
 
                     <div className="editor-divider" />
 
                     <button
                         type="button"
-                        className="editor-tool-button editor-format-button"
-                        title="Bold"
-                        onClick={handleBold}
+                        className="editor-tool-button"
+                        data-tooltip="Bold"
+                        onClick={
+                            handleBold
+                        }
                     >
                         <FaBold />
                     </button>
 
                     <button
                         type="button"
-                        className="editor-tool-button editor-format-button"
-                        title="Italic"
-                        onClick={handleItalic}
+                        className="editor-tool-button"
+                        data-tooltip="Italic"
+                        onClick={
+                            handleItalic
+                        }
                     >
                         <FaItalic />
                     </button>
 
                     <button
                         type="button"
-                        className="editor-tool-button editor-format-button"
-                        title="Underline"
-                        onClick={handleUnderline}
+                        className="editor-tool-button"
+                        data-tooltip="Underline"
+                        onClick={
+                            handleUnderline
+                        }
                     >
                         <FaUnderline />
                     </button>
@@ -1205,8 +1444,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Highlight"
-                        onClick={handleHighlight}
+                        data-tooltip="Highlight"
+                        onClick={
+                            handleHighlight
+                        }
                     >
                         <FaHighlighter />
                     </button>
@@ -1214,8 +1455,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Text Color"
-                        onClick={handleTextColor}
+                        data-tooltip="Text Color"
+                        onClick={
+                            handleTextColor
+                        }
                     >
                         <MdFormatColorText />
                     </button>
@@ -1225,8 +1468,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Align Left"
-                        onClick={handleAlignLeft}
+                        data-tooltip="Align Left"
+                        onClick={
+                            handleAlignLeft
+                        }
                     >
                         <FaAlignLeft />
                     </button>
@@ -1234,8 +1479,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Align Center"
-                        onClick={handleAlignCenter}
+                        data-tooltip="Align Center"
+                        onClick={
+                            handleAlignCenter
+                        }
                     >
                         <FaAlignCenter />
                     </button>
@@ -1243,8 +1490,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Align Right"
-                        onClick={handleAlignRight}
+                        data-tooltip="Align Right"
+                        onClick={
+                            handleAlignRight
+                        }
                     >
                         <FaAlignRight />
                     </button>
@@ -1254,8 +1503,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Bulleted List"
-                        onClick={handleBulletList}
+                        data-tooltip="Bulleted List"
+                        onClick={
+                            handleBulletList
+                        }
                     >
                         <FaListUl />
                     </button>
@@ -1263,8 +1514,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Numbered List"
-                        onClick={handleNumberList}
+                        data-tooltip="Numbered List"
+                        onClick={
+                            handleNumberList
+                        }
                     >
                         <FaListOl />
                     </button>
@@ -1272,8 +1525,10 @@ export default function Header({
                     <button
                         type="button"
                         className="editor-tool-button"
-                        title="Insert Table"
-                        onClick={handleTable}
+                        data-tooltip="Insert Table"
+                        onClick={
+                            handleTable
+                        }
                     >
                         <FaTable />
                     </button>
@@ -1281,16 +1536,21 @@ export default function Header({
                     <div className="editor-divider" />
 
                     <div className="editor-dropdown-container">
+
                         <button
                             type="button"
                             className="editor-tool-button"
-                            title="More"
+                            data-tooltip="More"
                             onClick={() => {
                                 setShowMoreTools(
                                     prev => !prev
                                 );
-                                setShowFontDropdown(false);
-                                setShowSizeDropdown(false);
+                                setShowFontDropdown(
+                                    false
+                                );
+                                setShowSizeDropdown(
+                                    false
+                                );
                             }}
                         >
                             <FaEllipsisH />
@@ -1298,6 +1558,7 @@ export default function Header({
 
                         {showMoreTools && (
                             <div className="editor-more-menu">
+
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -1330,41 +1591,14 @@ export default function Header({
                                 >
                                     Justify
                                 </button>
+
                             </div>
                         )}
+
                     </div>
+
                 </div>
 
-                <div className="editor-toolbar-right">
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        title="Search"
-                        onClick={handleEditorSearch}
-                    >
-                        <FaSearch />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        title="Voice"
-                        onClick={handleEditorVoice}
-                    >
-                        <FaMicrophone />
-                    </button>
-
-                    <div className="editor-toolbar-save-container">
-                        <button
-                            type="button"
-                            className="editor-save-button"
-                            onClick={handleSaveEditor}
-                        >
-                            <FaSave />
-                            <span>Save</span>
-                        </button>
-                    </div>
-                </div>
             </div>
         </>
     );

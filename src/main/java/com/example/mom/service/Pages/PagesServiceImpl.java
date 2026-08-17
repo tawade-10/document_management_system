@@ -13,6 +13,9 @@ import com.example.mom.repository.NotebooksRepo;
 import com.example.mom.repository.PagesRepo;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
+import com.example.mom.service.Email.EmailService;
+import com.example.mom.service.Email.EmailServiceImpl;
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,12 +38,15 @@ public class PagesServiceImpl implements PagesService{
 
     private final NotebooksRepo notebooksRepo;
 
-    public PagesServiceImpl(CustomIdGenerator customIdGenerator, UsersRepo usersRepo, PagesRepo pagesRepo, StatusRepo statusRepo, NotebooksRepo notebooksRepo) {
+    private final EmailServiceImpl emailService;
+
+    public PagesServiceImpl(CustomIdGenerator customIdGenerator, UsersRepo usersRepo, PagesRepo pagesRepo, StatusRepo statusRepo, NotebooksRepo notebooksRepo, EmailServiceImpl emailService) {
         this.customIdGenerator = customIdGenerator;
         this.usersRepo = usersRepo;
         this.pagesRepo = pagesRepo;
         this.statusRepo = statusRepo;
         this.notebooksRepo = notebooksRepo;
+        this.emailService = emailService;
     }
 
     @Override
@@ -149,31 +155,93 @@ public class PagesServiceImpl implements PagesService{
     }
 
     @Override
-    public PagesUpdateResponseDto publishPage(String pageId, PagesUpdateRequestDto pagesRequestDto) {
+    public PagesUpdateResponseDto publishPage(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
+
+            throw new RuntimeException(
+                    "User not authenticated"
+            );
         }
 
         String email = authentication.getName();
 
-        Users loggedInUser = usersRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+        Users loggedInUser =
+                usersRepo.findByEmail(email)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found!"
+                                )
+                        );
 
-        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
-                .orElseThrow(() -> new RuntimeException("Cannot publish Page!"));
+        Pages page =
+                pagesRepo.findByPageIdAndCreatedBy(
+                                pageId,
+                                loggedInUser
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Cannot publish Page!"
+                                )
+                        );
 
-        Status status = statusRepo.findById("PPB")
-                .orElseThrow(() -> new RuntimeException("Invalid Status!"));
+        if (pagesUpdateRequestDto.getParticipants() == null ||
+                pagesUpdateRequestDto.getParticipants().isEmpty()) {
 
+            throw new RuntimeException(
+                    "Cannot publish page because no participants are assigned."
+            );
+        }
+
+        String participants =
+                pagesUpdateRequestDto.getParticipants()
+                        .stream()
+                        .map(String::trim)
+                        .filter(participant ->
+                                !participant.isBlank()
+                        )
+                        .distinct()
+                        .collect(Collectors.joining(","));
+
+        if (participants.isBlank()) {
+
+            throw new RuntimeException(
+                    "Cannot publish page because no valid participants are assigned."
+            );
+        }
+
+        if (pagesUpdateRequestDto.getPageContent() == null ||
+                pagesUpdateRequestDto.getPageContent().isBlank()) {
+
+            throw new RuntimeException(
+                    "Page content cannot be empty."
+            );
+        }
+
+        page.setParticipants(participants);
+
+        page.setPageContent(pagesUpdateRequestDto.getPageContent());
+
+        Status status = statusRepo.findById("PPB").orElseThrow(() ->
+                                new RuntimeException("Invalid Status!"));
         page.setStatus(status);
         page.setPublishedAt(LocalDateTime.now());
-
-        Pages savedPages = pagesRepo.save(page);
-
-        return new PagesUpdateResponseDto(savedPages);
+        Pages savedPage = pagesRepo.save(page);
+        try {
+            emailService.sendPublishedPage(
+                    savedPage
+            );
+        } catch (MessagingException e) {
+            throw new RuntimeException(
+                    "Page was published but email could not be sent.",
+                    e
+            );
+        }
+        return new PagesUpdateResponseDto(savedPage);
     }
 
     @Override
