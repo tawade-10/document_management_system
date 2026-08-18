@@ -1,10 +1,7 @@
 package com.example.mom.service.Pages;
 
 import com.example.mom.config.CustomIdGenerator;
-import com.example.mom.dto.Pages.PagesCreationRequestDto;
-import com.example.mom.dto.Pages.PagesCreationResponseDto;
-import com.example.mom.dto.Pages.PagesUpdateRequestDto;
-import com.example.mom.dto.Pages.PagesUpdateResponseDto;
+import com.example.mom.dto.Pages.*;
 import com.example.mom.entity.Notebooks;
 import com.example.mom.entity.Pages;
 import com.example.mom.entity.Status;
@@ -13,10 +10,14 @@ import com.example.mom.repository.NotebooksRepo;
 import com.example.mom.repository.PagesRepo;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
-import com.example.mom.service.Email.EmailService;
 import com.example.mom.service.Email.EmailServiceImpl;
+import com.example.mom.specification.PagesSpecification;
 import jakarta.mail.MessagingException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -85,34 +86,42 @@ public class PagesServiceImpl implements PagesService{
     }
 
     @Override
-    public List<PagesUpdateResponseDto> getAllPages(String sortBy, String sortDir) {
+    public Page<PagesUpdateResponseDto> getAllPages(int page, int size, String search,String authority, String status, String sortBy, String sortDir) {
 
-        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc")
-                        ? Sort.Direction.DESC
-                        : Sort.Direction.ASC,
-                sortBy
-        );
-        List<Pages> pages = pagesRepo.findAll(sort);
-        return pages.stream().map(PagesUpdateResponseDto::new).collect(Collectors.toList());
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Pages> specification = PagesSpecification.filterPages(search,authority,status);
+
+        Page<Pages> pagesPage = pagesRepo.findAll(specification, pageable);
+
+        return pagesPage.map(PagesUpdateResponseDto::new);
     }
 
     @Override
-    public List<PagesUpdateResponseDto> getPagesByUser(String sortBy, String sortDir) {
+    public Page<PagesUpdateResponseDto> getPagesByUser(int page, int size, String search,String authority, String status, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
-        }
 
         String email = authentication.getName();
 
         Users user = usersRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Pages> pages = pagesRepo.findByCreatedBy(user);
+        String userId = user.getUserId();
 
-        return pages.stream().map(PagesUpdateResponseDto::new).toList();
+        Page<Pages> pagesPage = pagesRepo.findByCreatedByUserId(userId, pageable);
+
+        return pagesPage.map(PagesUpdateResponseDto::new);
     }
 
     @Override
@@ -157,48 +166,26 @@ public class PagesServiceImpl implements PagesService{
     @Override
     public PagesUpdateResponseDto publishPage(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto) {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null ||
-                !authentication.isAuthenticated()) {
-
-            throw new RuntimeException(
-                    "User not authenticated"
-            );
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
         }
 
         String email = authentication.getName();
 
-        Users loggedInUser =
-                usersRepo.findByEmail(email)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "User not found!"
-                                )
-                        );
+        Users loggedInUser = usersRepo.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("User not found!"));
 
-        Pages page =
-                pagesRepo.findByPageIdAndCreatedBy(
-                                pageId,
-                                loggedInUser
-                        )
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Cannot publish Page!"
-                                )
-                        );
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                        .orElseThrow(() -> new RuntimeException("Cannot publish Page!"));
 
         if (pagesUpdateRequestDto.getParticipants() == null ||
                 pagesUpdateRequestDto.getParticipants().isEmpty()) {
-
-            throw new RuntimeException(
-                    "Cannot publish page because no participants are assigned."
-            );
+            throw new RuntimeException("Cannot publish page because no participants are assigned.");
         }
 
-        String participants =
-                pagesUpdateRequestDto.getParticipants()
+        String participants = pagesUpdateRequestDto.getParticipants()
                         .stream()
                         .map(String::trim)
                         .filter(participant ->
@@ -208,7 +195,6 @@ public class PagesServiceImpl implements PagesService{
                         .collect(Collectors.joining(","));
 
         if (participants.isBlank()) {
-
             throw new RuntimeException(
                     "Cannot publish page because no valid participants are assigned."
             );
@@ -271,6 +257,14 @@ public class PagesServiceImpl implements PagesService{
             Status publishedArchived = statusRepo.findById("PPA")
                     .orElseThrow(() -> new RuntimeException("Invalid Status!"));
             page.setStatus(publishedArchived);
+        } else if ("PSA".equals(currentStatus)) {
+            Status publishedUnarchived = statusRepo.findById("PSV")
+                    .orElseThrow(() -> new RuntimeException("Invalid Status!"));
+            page.setStatus(publishedUnarchived);
+        } else if ("PPA".equals(currentStatus)) {
+            Status savedUnarchived = statusRepo.findById("PPB")
+                    .orElseThrow(() -> new RuntimeException("Invalid Status!"));
+            page.setStatus(savedUnarchived);
         } else {
             throw new RuntimeException("Only Saved or Published pages can be archived.");
         }
@@ -278,6 +272,69 @@ public class PagesServiceImpl implements PagesService{
         page.setArchivedAt(LocalDateTime.now());
         Pages archivedPage = pagesRepo.save(page);
         return new PagesUpdateResponseDto(archivedPage);
+    }
+
+    @Override
+    public PagesUpdateResponseDto updatePageStatus(String pageId, PageStatusUpdateRequestDto pageStatusUpdateRequestDto) {
+
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new RuntimeException("User not authenticated");
+//        }
+//
+//        String email = authentication.getName();
+//
+//        Users loggedInUser = usersRepo.findByEmail(email)
+//                        .orElseThrow(() -> new RuntimeException("User not found!"));
+//
+//        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+//                        .orElseThrow(() -> new RuntimeException("Cannot update Page Status!"));
+//
+//        String currentStatus = page.getStatus().getStatusId();
+//
+//        String action = pageStatusUpdateRequestDto.getAction().trim().toLowerCase();
+//
+//        String newStatus;
+//
+//        if ("archive".equals(action)) {
+//            if ("PSV".equals(currentStatus)) {
+//                newStatus = "PSA";
+//            } else if ("PPB".equals(currentStatus)) {
+//                newStatus = "PPA";
+//            } else {
+//                throw new RuntimeException(
+//                        "Only Saved or Published pages can be archived."
+//                );
+//            }
+//        } else if ("unarchive".equals(action)) {
+//            if ("PSA".equals(currentStatus)) {
+//                newStatus = "PSV";
+//            } else if ("PPA".equals(currentStatus)) {
+//                newStatus = "PPB";
+//            } else {
+//                throw new RuntimeException("Only Archived pages can be unarchived.");
+//            }
+//        } else {
+//            throw new RuntimeException("Invalid page status action.");
+//        }
+//
+//        Status status = statusRepo.findById(newStatus)
+//                        .orElseThrow(() -> new RuntimeException("Invalid Status!"));
+//
+//        page.setStatus(status);
+//        page.setUpdatedAt(LocalDateTime.now());
+//
+//        if ("archive".equals(action)) {
+//            page.setArchivedAt(LocalDateTime.now());
+//        } else {
+//            page.setArchivedAt(null);
+//        }
+//
+//        Pages updatedPage = pagesRepo.save(page);
+//
+//        return new PagesUpdateResponseDto(updatedPage);
+        return null;
     }
 
     @Override

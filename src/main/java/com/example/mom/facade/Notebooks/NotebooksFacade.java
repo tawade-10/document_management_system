@@ -14,7 +14,7 @@ public interface NotebooksFacade {
 
     Page<NotebooksResponseDto> getAllNotebooks(int page, int size, String search, String authority, String status, String sortBy, String sortDir);
 
-    List<NotebooksResponseDto> getNotebooksByUser();
+    Page<NotebooksResponseDto> getAllNotebooksByUser(int page, int size, String search, String sortBy, String sortDir);
 
     List<NotebooksNamesResponseDto> getNotebooksNamesByUser();
 

@@ -117,9 +117,9 @@ public class AuthServiceImpl implements AuthService{
         String createPasswordLink = "http://localhost:5173/create-password?token=" + token;
 
         try {
-            String subject = "Welcome to MOM Portal";
+            String subject = "Welcome to Document Portal";
             String text = "Hello " + savedUser.getUserName() + ",\n\n"
-                            + "Your MOM Portal account has been "
+                            + "Your Document Management Portal account has been "
                             + "created successfully.\n\n"
                             + "Username : "
                             + savedUser.getUserName()

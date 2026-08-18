@@ -3,20 +3,20 @@ import { useOutletContext } from "react-router-dom";
 import RecentNotebooks from "../RecentNotebooks/RecentNotebooks";
 import SuperUserRecentPages from "../SuperUserRecentPages/SuperUserRecentPages";
 import UnmappedPages from "../UnmappedPages/UnmappedPages";
-import "./SuperUserHomePage.css";
+import "./SuperUserRecentNotebooks.css";
 
-export default function SuperUserHomePage() {
+export default function SuperUserRecentNotebooks() {
 
     const { searchKeyword } = useOutletContext();
 
     return (
-        <div className="superuser-home-page">
+        <div className="user-home-page">
 
-            <div className="superuser-home-content">
+            <div className="user-home-content">
 
-                <div className="superuser-home-grid">
+                <div className="user-home-grid">
 
-                    <section className="superuser-home-section">
+                    <section className="user-home-section">
 
                         <RecentNotebooks
                             searchKeyword={searchKeyword}
@@ -25,7 +25,7 @@ export default function SuperUserHomePage() {
 
                     </section>
 
-                    <section className="superuser-home-section">
+                    <section className="user-home-section">
 
                         <SuperUserRecentPages
                             searchKeyword={searchKeyword}
@@ -33,7 +33,7 @@ export default function SuperUserHomePage() {
 
                     </section>
 
-                    <section className="superuser-home-section">
+                    <section className="user-home-section">
 
                         <UnmappedPages
                             searchKeyword={searchKeyword}

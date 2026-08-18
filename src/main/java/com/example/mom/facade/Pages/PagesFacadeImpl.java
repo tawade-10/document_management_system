@@ -1,10 +1,8 @@
 package com.example.mom.facade.Pages;
 
-import com.example.mom.dto.Pages.PagesCreationRequestDto;
-import com.example.mom.dto.Pages.PagesCreationResponseDto;
-import com.example.mom.dto.Pages.PagesUpdateRequestDto;
-import com.example.mom.dto.Pages.PagesUpdateResponseDto;
+import com.example.mom.dto.Pages.*;
 import com.example.mom.service.Pages.PagesService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,13 +22,13 @@ public class PagesFacadeImpl implements PagesFacade{
     }
 
     @Override
-    public List<PagesUpdateResponseDto> getAllPages(String sortBy, String sortDir) {
-        return pagesService.getAllPages(sortBy, sortDir);
+    public Page<PagesUpdateResponseDto> getAllPages(int page, int size, String search,String authority,String status, String sortBy, String sortDir) {
+        return pagesService.getAllPages(page,size,search,authority,status,sortBy,sortDir);
     }
 
     @Override
-    public List<PagesUpdateResponseDto> getPagesByUser(String sortBy, String sortDir) {
-        return pagesService.getPagesByUser(sortBy,sortDir);
+    public Page<PagesUpdateResponseDto> getPagesByUser(int page, int size, String search,String authority, String status, String sortBy, String sortDir) {
+        return pagesService.getPagesByUser(page,size,search,authority,status,sortBy,sortDir);
     }
 
     @Override
@@ -51,6 +49,11 @@ public class PagesFacadeImpl implements PagesFacade{
     @Override
     public PagesUpdateResponseDto archivePage(String pageId) {
         return pagesService.archivePage(pageId);
+    }
+
+    @Override
+    public PagesUpdateResponseDto updatePageStatus(String pageId, PageStatusUpdateRequestDto pageStatusUpdateRequestDto) {
+        return pagesService.updatePageStatus(pageId,pageStatusUpdateRequestDto);
     }
 
     @Override

@@ -95,22 +95,26 @@ public class NotebooksServiceImpl implements NotebooksService{
     }
 
     @Override
-    public List<NotebooksResponseDto> getNotebooksByUser() {
+    public Page<NotebooksResponseDto> getAllNotebooksByUser(int page, int size, String search, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
-        }
 
         String email = authentication.getName();
 
         Users user = usersRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Notebooks> notebooks = notebooksRepo.findByCreatedBy(user);
+        String userId = user.getUserId();
 
-        return notebooks.stream().map(NotebooksResponseDto::new).toList();
+        Page<Notebooks> notebooksPage = notebooksRepo.findByCreatedByUserId(userId, pageable);
+
+        return notebooksPage.map(NotebooksResponseDto::new);
     }
 
     @Override

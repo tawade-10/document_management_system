@@ -3,13 +3,19 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./RecentNotebooks.css";
 
-const NOTEBOOKS_API =
+const MY_NOTEBOOKS_API =
+    "http://localhost:8080/api/notebooks/myNotebooks";
+
+const ALL_NOTEBOOKS_API =
     "http://localhost:8080/api/notebooks/allNotebooks";
 
 const PAGES_API =
     "http://localhost:8080/api/pages/allPages";
 
-export default function RecentNotebooks({ searchKeyword }) {
+export default function RecentNotebooks({
+    searchKeyword,
+    superUser = false
+}) {
 
     const navigate = useNavigate();
 
@@ -25,61 +31,100 @@ export default function RecentNotebooks({ searchKeyword }) {
     const token = localStorage.getItem("token");
 
     useEffect(() => {
-        fetchRecentNotebooks();
+        fetchNotebooks();
         fetchPages();
-    }, []);
+    }, [superUser]);
 
-    const fetchRecentNotebooks = async () => {
+    const fetchNotebooks = async () => {
 
         try {
 
             setLoading(true);
             setError("");
 
-            const response = await axios.get(
-                NOTEBOOKS_API,
-                {
-                    params: {
-                        sortBy: "createdAt",
-                        sortDir: "desc"
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            const apiUrl = superUser
+                ? ALL_NOTEBOOKS_API
+                : MY_NOTEBOOKS_API;
 
-            console.group("UH-RN1 - Load Recent Notebooks");
+            const pageSize = 100;
+            let currentPage = 0;
+            let allNotebooks = [];
+            let totalPages = 1;
 
-            console.log("Request");
+            do {
 
-            console.log({
-                method: "GET",
-                url: NOTEBOOKS_API,
-                params: {
+                const params = {
+                    page: currentPage,
+                    size: pageSize,
                     sortBy: "createdAt",
                     sortDir: "desc"
-                }
-            });
+                };
 
-            console.log("Response");
+                const response = await axios.get(
+                    apiUrl,
+                    {
+                        params,
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-            console.log(response.data);
+                console.group(
+                    superUser
+                        ? `UH-SRN1 - Load All Notebooks Page ${currentPage + 1}`
+                        : `UH-RN1 - Load My Notebooks Page ${currentPage + 1}`
+                );
 
-            console.groupEnd();
+                console.log("Request");
 
-            setNotebooks(
-                Array.isArray(response.data)
-                    ? response.data
-                    : []
+                console.log({
+                    method: "GET",
+                    url: apiUrl,
+                    params
+                });
+
+                console.log("Response");
+
+                console.log(response.data);
+
+                console.groupEnd();
+
+                const content =
+                    Array.isArray(response.data?.content)
+                        ? response.data.content
+                        : [];
+
+                allNotebooks = [
+                    ...allNotebooks,
+                    ...content
+                ];
+
+                totalPages =
+                    Number(response.data?.totalPages) || 1;
+
+                currentPage++;
+
+            } while (currentPage < totalPages);
+
+            console.log(
+                superUser
+                    ? "UH-SRN1 - Total All Notebooks Loaded:"
+                    : "UH-RN1 - Total My Notebooks Loaded:",
+                allNotebooks.length
             );
+
+            setNotebooks(allNotebooks);
 
         } catch (error) {
 
-            console.group("UH-RN1 - Load Recent Notebooks");
+            console.group(
+                superUser
+                    ? "UH-SRN1 - Load All Notebooks Error"
+                    : "UH-RN1 - Load My Notebooks Error"
+            );
 
             console.log("Response");
-
             console.log(error.response?.data);
 
             console.groupEnd();
@@ -87,7 +132,7 @@ export default function RecentNotebooks({ searchKeyword }) {
             setError(
                 error.response?.data?.message ||
                 error.response?.data ||
-                "Unable to load recent notebooks."
+                "Unable to load notebooks."
             );
 
         } finally {
@@ -103,43 +148,73 @@ export default function RecentNotebooks({ searchKeyword }) {
             setPagesLoading(true);
             setPagesError("");
 
-            const response = await axios.get(
-                PAGES_API,
-                {
-                    params: {
-                        sortBy: "createdAt",
-                        sortDir: "desc"
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            const pageSize = 100;
+            let currentPage = 0;
+            let allPages = [];
+            let totalPages = 1;
 
-            console.group("UH-RN2 - Load Notebook Pages");
+            do {
 
-            console.log("Request");
-
-            console.log({
-                method: "GET",
-                url: PAGES_API,
-                params: {
+                const params = {
+                    page: currentPage,
+                    size: pageSize,
                     sortBy: "createdAt",
                     sortDir: "desc"
-                }
-            });
+                };
 
-            console.log("Response");
+                const response = await axios.get(
+                    PAGES_API,
+                    {
+                        params,
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-            console.log(response.data);
+                console.group(
+                    `UH-RN2 - Load Pages Page ${currentPage + 1}`
+                );
 
-            console.groupEnd();
+                console.log("Request");
 
-            setPages(
-                Array.isArray(response.data)
-                    ? response.data
-                    : []
+                console.log({
+                    method: "GET",
+                    url: PAGES_API,
+                    params
+                });
+
+                console.log("Response");
+
+                console.log(response.data);
+
+                console.groupEnd();
+
+                const content =
+                    Array.isArray(response.data?.content)
+                        ? response.data.content
+                        : Array.isArray(response.data)
+                            ? response.data
+                            : [];
+
+                allPages = [
+                    ...allPages,
+                    ...content
+                ];
+
+                totalPages =
+                    Number(response.data?.totalPages) || 1;
+
+                currentPage++;
+
+            } while (currentPage < totalPages);
+
+            console.log(
+                "UH-RN2 - Total Pages Loaded:",
+                allPages.length
             );
+
+            setPages(allPages);
 
         } catch (error) {
 
@@ -184,15 +259,34 @@ export default function RecentNotebooks({ searchKeyword }) {
                 ""
             ).toLowerCase();
 
+        const createdBy =
+            String(
+                notebook.createdBy || ""
+            ).toLowerCase();
+
+        const description =
+            String(
+                notebook.description || ""
+            ).toLowerCase();
+
+        const status =
+            String(
+                notebook.status || ""
+            ).toLowerCase();
+
         return (
             notebookId.includes(keyword) ||
-            notebookName.includes(keyword)
+            notebookName.includes(keyword) ||
+            createdBy.includes(keyword) ||
+            description.includes(keyword) ||
+            status.includes(keyword)
         );
     });
 
-    const visibleNotebooks = showAllNotebooks
-        ? filteredNotebooks
-        : filteredNotebooks.slice(0, 6);
+    const visibleNotebooks =
+        showAllNotebooks
+            ? filteredNotebooks
+            : filteredNotebooks.slice(0, 6);
 
     const handleViewAllNotebooks = () => {
 
@@ -221,10 +315,46 @@ export default function RecentNotebooks({ searchKeyword }) {
                 page.notebookId ||
                 page.notebooks?.notebookId ||
                 page.notebook?.notebookId ||
+                page.notebooks?.id ||
+                page.notebook?.id ||
                 "";
 
             return String(pageNotebookId) === String(notebookId);
         });
+    };
+
+    const getNotebookStatus = notebook => {
+
+        return (
+            notebook.status ||
+            notebook.statusId ||
+            notebook.notebookStatus ||
+            "NAC"
+        );
+    };
+
+    const getNotebookStatusClass = status => {
+
+        const normalizedStatus =
+            String(status)
+                .toLowerCase()
+                .replace(/\s+/g, "-");
+
+        if (
+            normalizedStatus === "nac" ||
+            normalizedStatus.includes("active")
+        ) {
+            return "active";
+        }
+
+        if (
+            normalizedStatus === "nar" ||
+            normalizedStatus.includes("archived")
+        ) {
+            return "archived";
+        }
+
+        return normalizedStatus;
     };
 
     const handlePageClick = pageId => {
@@ -244,11 +374,19 @@ export default function RecentNotebooks({ searchKeyword }) {
             <div className="recent-notebooks-header">
 
                 <div>
-                    <h2>Recent Notebooks</h2>
+
+                    <h2>
+                        {superUser
+                            ? "All Notebooks"
+                            : "Recent Notebooks"}
+                    </h2>
 
                     <p>
-                        Recently created notebooks
+                        {superUser
+                            ? "All notebooks created in the system"
+                            : "Recently created notebooks"}
                     </p>
+
                 </div>
 
                 <span className="recent-notebooks-count">
@@ -278,7 +416,9 @@ export default function RecentNotebooks({ searchKeyword }) {
             ) : visibleNotebooks.length === 0 ? (
 
                 <div className="recent-notebooks-state">
-                    No recent notebooks found.
+                    {superUser
+                        ? "No notebooks found."
+                        : "No recent notebooks found."}
                 </div>
 
             ) : (
@@ -300,6 +440,13 @@ export default function RecentNotebooks({ searchKeyword }) {
                             notebook.name ||
                             notebook.notebookName ||
                             "Unnamed Notebook";
+
+                        const createdBy =
+                            notebook.createdBy ||
+                            "Unknown User";
+
+                        const notebookStatus =
+                            getNotebookStatus(notebook);
 
                         const isExpanded =
                             expandedNotebookId === notebookId;
@@ -340,9 +487,19 @@ export default function RecentNotebooks({ searchKeyword }) {
 
                                         <span className="recent-notebook-id">
                                             {notebookId}
+                                            {" · "}
+                                            {createdBy}
                                         </span>
 
                                     </div>
+
+                                    <span
+                                        className={`recent-notebook-status ${getNotebookStatusClass(
+                                            notebookStatus
+                                        )}`}
+                                    >
+                                        {notebookStatus}
+                                    </span>
 
                                     <span
                                         className={`recent-notebook-arrow ${
@@ -366,7 +523,7 @@ export default function RecentNotebooks({ searchKeyword }) {
                                                 Pages
                                             </span>
 
-                                            <span>
+                                            <span className="recent-notebook-pages-count">
                                                 {notebookPages.length}
                                             </span>
 
@@ -443,7 +600,9 @@ export default function RecentNotebooks({ searchKeyword }) {
                                                             </div>
 
                                                             <span
-                                                                className={`recent-notebook-page-status ${String(pageStatus)
+                                                                className={`recent-notebook-page-status ${String(
+                                                                    pageStatus
+                                                                )
                                                                     .toLowerCase()
                                                                     .replace(
                                                                         /\s+/g,
@@ -458,20 +617,27 @@ export default function RecentNotebooks({ searchKeyword }) {
                                                             </span>
 
                                                         </button>
+
                                                     );
+
                                                 })}
 
                                             </div>
+
                                         )}
 
                                     </div>
+
                                 )}
 
                             </div>
+
                         );
+
                     })}
 
                 </div>
+
             )}
 
             {filteredNotebooks.length > 6 &&
@@ -485,8 +651,9 @@ export default function RecentNotebooks({ searchKeyword }) {
                     >
                         {showAllNotebooks
                             ? "Show Less"
-                            : "View All Notebooks"}
+                            : `View All Notebooks (${filteredNotebooks.length})`}
                     </button>
+
                 )}
 
         </div>

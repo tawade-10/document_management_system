@@ -1,12 +1,10 @@
 package com.example.mom.controller;
 
-import com.example.mom.dto.Pages.PagesCreationRequestDto;
-import com.example.mom.dto.Pages.PagesCreationResponseDto;
-import com.example.mom.dto.Pages.PagesUpdateResponseDto;
-import com.example.mom.dto.Pages.PagesUpdateRequestDto;
+import com.example.mom.dto.Pages.*;
 import com.example.mom.dto.Pages.PagesUpdateResponseDto;
 import com.example.mom.facade.Pages.PagesFacade;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,18 +29,32 @@ public class PagesController {
         return new ResponseEntity<>(createdPage, HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/allPages")
     @PreAuthorize("hasRole('SUPER_USER')")
-    public ResponseEntity<List<PagesUpdateResponseDto>> getAllPages(@RequestParam String sortBy, @RequestParam String sortDir){
-        List<PagesUpdateResponseDto> allPages = pagesFacade.getAllPages(sortBy,sortDir);
+    public ResponseEntity<Page<PagesUpdateResponseDto>> getAllPages(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String authority,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Page<PagesUpdateResponseDto> allPages = pagesFacade.getAllPages(page, size, search,authority, status, sortBy, sortDir);
         return ResponseEntity.ok(allPages);
     }
 
-    @GetMapping("/allPages")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<PagesUpdateResponseDto>> getPagesByUser(@RequestParam String sortBy, @RequestParam String sortDir){
-        List<PagesUpdateResponseDto> pagesByUser = pagesFacade.getPagesByUser(sortBy,sortDir);
-        return ResponseEntity.ok(pagesByUser);
+    @GetMapping("/myPages")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_USER')")
+    public ResponseEntity<Page<PagesUpdateResponseDto>> getPagesByUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String authority,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Page<PagesUpdateResponseDto> myPages = pagesFacade.getPagesByUser(page, size, search, authority, status, sortBy, sortDir);
+        return ResponseEntity.ok(myPages);
     }
 
     @GetMapping("/{pageId}")
@@ -70,6 +82,13 @@ public class PagesController {
     public ResponseEntity<PagesUpdateResponseDto> archivePage(@PathVariable String pageId){
         PagesUpdateResponseDto archivedPage = pagesFacade.archivePage(pageId);
         return ResponseEntity.ok(archivedPage);
+    }
+
+    @PutMapping("/status/{pageId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<PagesUpdateResponseDto> updatePageStatus(@PathVariable String pageId, @Valid @RequestBody PageStatusUpdateRequestDto pageStatusUpdateRequestDto) {
+        PagesUpdateResponseDto updatedPage = pagesFacade.updatePageStatus(pageId, pageStatusUpdateRequestDto);
+        return ResponseEntity.ok(updatedPage);
     }
 
     @GetMapping("/published")

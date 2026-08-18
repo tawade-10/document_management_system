@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./CreatePagePopup.css";
 
 const CREATE_PAGE_API = "http://localhost:8080/api/pages/create";
-const NOTEBOOKS_API = "http://localhost:8080/api/notebooks/allNotebooks";
+const NOTEBOOKS_API = "http://localhost:8080/api/notebooks/allNames";
 
 export default function CreatePagePopup({ onClose, onCreate }) {
 

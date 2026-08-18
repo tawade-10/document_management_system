@@ -1,10 +1,8 @@
 package com.example.mom.facade.Pages;
 
-import com.example.mom.dto.Pages.PagesCreationRequestDto;
-import com.example.mom.dto.Pages.PagesCreationResponseDto;
-import com.example.mom.dto.Pages.PagesUpdateRequestDto;
-import com.example.mom.dto.Pages.PagesUpdateResponseDto;
+import com.example.mom.dto.Pages.*;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -12,9 +10,9 @@ public interface PagesFacade {
 
     PagesCreationResponseDto createPage(PagesCreationRequestDto pagesCreationRequestDto);
 
-    List<PagesUpdateResponseDto> getAllPages(String sortBy, String sortDir);
+    Page<PagesUpdateResponseDto> getAllPages(int page, int size, String search,String authority, String status, String sortBy, String sortDir);
 
-    List<PagesUpdateResponseDto> getPagesByUser(String sortBy, String sortDir);
+    Page<PagesUpdateResponseDto> getPagesByUser(int page, int size, String search,String authority, String status, String sortBy, String sortDir);
 
     PagesUpdateResponseDto getPageById(String pageId);
 
@@ -23,6 +21,8 @@ public interface PagesFacade {
     PagesUpdateResponseDto publishPage(String pageId, @Valid PagesUpdateRequestDto pagesUpdateRequestDto);
 
     PagesUpdateResponseDto archivePage(String pageId);
+
+    PagesUpdateResponseDto updatePageStatus(String pageId, @Valid PageStatusUpdateRequestDto pageStatusUpdateRequestDto);
 
     List<PagesUpdateResponseDto> getPublishedPages();
 

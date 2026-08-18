@@ -15,15 +15,8 @@ export default function CreateNotebookPopup({
 
     const [notebookName, setNotebookName] = useState("");
     const [description, setDescription] = useState("");
-
     const [errors, setErrors] = useState({});
-
     const [loading, setLoading] = useState(false);
-
-
-    /* =========================
-       VALIDATION
-    ========================= */
 
     const validate = () => {
 
@@ -42,7 +35,6 @@ export default function CreateNotebookPopup({
                 "Notebook Name cannot exceed 150 characters";
         }
 
-
         if (
             description.trim().length > 500
         ) {
@@ -51,16 +43,10 @@ export default function CreateNotebookPopup({
                 "Description cannot exceed 500 characters";
         }
 
-
         setErrors(temp);
 
         return Object.keys(temp).length === 0;
     };
-
-
-    /* =========================
-       CREATE NOTEBOOK
-    ========================= */
 
     const handleCreate = async () => {
 
@@ -68,53 +54,48 @@ export default function CreateNotebookPopup({
             return;
         }
 
-
         const token =
             localStorage.getItem("token");
 
+        if (!token) {
+
+            toast.error(
+                "Session expired. Please login again."
+            );
+
+            navigate("/");
+
+            return;
+        }
 
         const payload = {
-
-            name:
-                notebookName.trim(),
-
-            description:
-                description.trim()
+            name: notebookName.trim(),
+            description: description.trim()
         };
 
+        const request = {
+            method: "POST",
+            url: API_URL,
+            payload
+        };
 
         try {
 
             setLoading(true);
 
-
             console.group(
                 "NB1 - Create Notebook"
             );
 
-
             console.log("Request");
-
-            console.log({
-
-                method: "POST",
-
-                url: API_URL,
-
-                payload
-            });
-
+            console.log(request);
 
             const response =
                 await axios.post(
-
                     API_URL,
-
                     payload,
-
                     {
                         headers: {
-
                             Authorization:
                                 `Bearer ${token}`,
 
@@ -124,32 +105,13 @@ export default function CreateNotebookPopup({
                     }
                 );
 
-
             console.log("Response");
-
-            console.log(
-                response.data
-            );
-
+            console.log(response.data);
 
             console.log("Status Code");
-
-            console.log(
-                response.status
-            );
-
+            console.log(response.status);
 
             console.groupEnd();
-
-
-            toast.success(
-                "Notebook created successfully."
-            );
-
-
-            /*
-             * Notify Header / parent if required
-             */
 
             if (onCreate) {
 
@@ -158,27 +120,42 @@ export default function CreateNotebookPopup({
                 );
             }
 
+            window.dispatchEvent(
+                new CustomEvent(
+                    "notebookCreated",
+                    {
+                        detail: {
+                            notebook:
+                                response.data,
 
-            /*
-             * Close popup
-             */
+                            refreshKey:
+                                Date.now()
+                        }
+                    }
+                )
+            );
+
+            toast.success(
+                "Notebook created successfully."
+            );
+
+            setNotebookName("");
+            setDescription("");
+            setErrors({});
 
             onClose();
 
-
-            /*
-             * Refresh notebook list
-             */
-
             navigate(
-                "/user-homepage/view-all-notebooks-pages",
+                "/user-homepage",
                 {
                     state: {
-                        refresh: true
+                        refresh: true,
+                        refreshKey: Date.now(),
+                        createdNotebook:
+                            response.data
                     }
                 }
             );
-
 
         } catch (error) {
 
@@ -186,38 +163,63 @@ export default function CreateNotebookPopup({
                 "NB1 - Create Notebook"
             );
 
-
             console.log("Request");
-
-            console.log(payload);
-
+            console.log(request);
 
             console.log("Response");
 
             console.log(
-                error.response?.data
+                error.response?.data ||
+                error.message
             );
-
 
             console.log("Status Code");
 
             console.log(
-                error.response?.status
+                error.response?.status ||
+                500
             );
-
 
             console.groupEnd();
 
+            if (
+                error.response?.status === 401
+            ) {
 
-            toast.error(
+                toast.error(
+                    "Session expired. Please login again."
+                );
 
-                error.response?.data?.message ||
+                localStorage.clear();
 
-                error.response?.data ||
+                navigate("/");
 
-                "Unable to create notebook."
-            );
+            } else if (
+                error.response?.status === 403
+            ) {
 
+                toast.error(
+                    "You are not authorized to create a notebook."
+                );
+
+            } else if (
+                error.response?.status === 400
+            ) {
+
+                toast.error(
+                    error.response?.data?.message ||
+                    error.response?.data ||
+                    "Invalid notebook details."
+                );
+
+            } else {
+
+                toast.error(
+                    error.response?.data?.message ||
+                    error.response?.data ||
+                    "Unable to create notebook."
+                );
+            }
 
         } finally {
 
@@ -225,44 +227,31 @@ export default function CreateNotebookPopup({
         }
     };
 
-
-    /* =========================
-       RESET
-    ========================= */
-
     const handleReset = () => {
 
         setNotebookName("");
-
         setDescription("");
-
         setErrors({});
     };
 
+    const handleClose = () => {
+
+        if (loading) {
+            return;
+        }
+
+        onClose();
+    };
 
     return (
 
         <div className="create-notebook-popup">
 
-            {/* =========================
-                TITLE
-            ========================= */}
-
             <div className="create-notebook-popup-title">
-
                 Create Notebook
-
             </div>
 
-
-            {/* =========================
-                BODY
-            ========================= */}
-
             <div className="create-notebook-popup-body">
-
-
-                {/* Notebook Name */}
 
                 <div className="create-notebook-field">
 
@@ -272,15 +261,8 @@ export default function CreateNotebookPopup({
 
                     <input
                         type="text"
-
-                        placeholder={
-                            "Enter notebook name"
-                        }
-
-                        value={
-                            notebookName
-                        }
-
+                        placeholder="Enter notebook name"
+                        value={notebookName}
                         onChange={e => {
 
                             setNotebookName(
@@ -292,26 +274,19 @@ export default function CreateNotebookPopup({
                                 notebookName: ""
                             }));
                         }}
-
                         maxLength={150}
-
                         disabled={loading}
                     />
 
                     {errors.notebookName && (
 
                         <span className="create-notebook-error">
-
                             {errors.notebookName}
-
                         </span>
 
                     )}
 
                 </div>
-
-
-                {/* Description */}
 
                 <div className="create-notebook-field">
 
@@ -320,15 +295,8 @@ export default function CreateNotebookPopup({
                     </label>
 
                     <textarea
-
-                        placeholder={
-                            "Enter notebook description"
-                        }
-
-                        value={
-                            description
-                        }
-
+                        placeholder="Enter notebook description"
+                        value={description}
                         onChange={e => {
 
                             setDescription(
@@ -340,53 +308,47 @@ export default function CreateNotebookPopup({
                                 description: ""
                             }));
                         }}
-
                         maxLength={500}
-
                         rows={4}
-
                         disabled={loading}
                     />
 
                     {errors.description && (
 
                         <span className="create-notebook-error">
-
                             {errors.description}
-
                         </span>
 
                     )}
 
                 </div>
+
             </div>
+
             <div className="create-notebook-popup-buttons">
+
                 <button
                     type="button"
                     className="create-notebook-reset-btn"
-                    onClick={
-                        handleReset
-                    }
+                    onClick={handleReset}
                     disabled={loading}
                 >
                     Reset
                 </button>
+
                 <button
                     type="button"
                     className="create-notebook-cancel-btn"
-                    onClick={
-                        onClose
-                    }
+                    onClick={handleClose}
                     disabled={loading}
                 >
                     Cancel
                 </button>
+
                 <button
                     type="button"
                     className="create-notebook-create-btn"
-                    onClick={
-                        handleCreate
-                    }
+                    onClick={handleCreate}
                     disabled={
                         loading ||
                         !notebookName.trim()
@@ -396,7 +358,9 @@ export default function CreateNotebookPopup({
                         ? "Creating..."
                         : "Create"}
                 </button>
+
             </div>
+
         </div>
     );
 }

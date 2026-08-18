@@ -5,10 +5,10 @@ import { toast } from "react-toastify";
 import "./UnmappedPages.css";
 
 const USER_PAGES_API =
-    "http://localhost:8080/api/pages/allPages";
+    "http://localhost:8080/api/pages/myPages";
 
-const NOTEBOOKS_API =
-    "http://localhost:8080/api/notebooks/allNotebooks";
+const USER_NOTEBOOKS_API =
+    "http://localhost:8080/api/notebooks/myNotebooks";
 
 const MAP_PAGE_API =
     "http://localhost:8080/api/pages";
@@ -38,61 +38,92 @@ export default function UnmappedPages({ searchKeyword }) {
             setLoading(true);
             setError("");
 
-            const response = await axios.get(
-                USER_PAGES_API,
-                {
-                    params: {
-                        sortBy: "createdAt",
-                        sortDir: "desc"
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            const pageSize = 100;
+            let currentPage = 0;
+            let allPages = [];
+            let totalPages = 1;
 
-            console.group("UH-UP1 - Load Unmapped Pages");
+            do {
 
-            console.log("Request");
-
-            console.log({
-                method: "GET",
-                url: USER_PAGES_API,
-                params: {
+                const params = {
+                    page: currentPage,
+                    size: pageSize,
                     sortBy: "createdAt",
                     sortDir: "desc"
-                }
-            });
+                };
 
-            console.log("Response");
+                const response = await axios.get(
+                    USER_PAGES_API,
+                    {
+                        params,
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-            console.log(response.data);
+                console.group(
+                    `UH-UP1 - Load My Pages Page ${currentPage + 1}`
+                );
 
-            console.groupEnd();
+                console.log("Request");
 
-            const allPages =
-                Array.isArray(response.data)
-                    ? response.data
-                    : [];
+                console.log({
+                    method: "GET",
+                    url: USER_PAGES_API,
+                    params
+                });
+
+                console.log("Response");
+
+                console.log(response.data);
+
+                console.groupEnd();
+
+                const content =
+                    Array.isArray(response.data?.content)
+                        ? response.data.content
+                        : [];
+
+                allPages = [
+                    ...allPages,
+                    ...content
+                ];
+
+                totalPages =
+                    Number(response.data?.totalPages) || 1;
+
+                currentPage++;
+
+            } while (currentPage < totalPages);
 
             const unmappedPages =
                 allPages.filter(page => {
 
                     const notebookId =
-                        page.notebookId;
+                        page.notebookId ||
+                        page.notebooks?.notebookId ||
+                        page.notebook?.notebookId ||
+                        "";
 
-                    return (
-                        notebookId === null ||
-                        notebookId === undefined ||
-                        String(notebookId).trim() === ""
-                    );
+                    return String(notebookId).trim() === "";
                 });
+
+            console.log(
+                "UH-UP1 - Total My Pages Loaded:",
+                allPages.length
+            );
+
+            console.log(
+                "UH-UP1 - Total Unmapped Pages:",
+                unmappedPages.length
+            );
 
             setPages(unmappedPages);
 
         } catch (error) {
 
-            console.group("UH-UP1 - Load Unmapped Pages");
+            console.group("UH-UP1 - Load Unmapped Pages Error");
 
             console.log("Response");
 
@@ -118,47 +149,75 @@ export default function UnmappedPages({ searchKeyword }) {
 
             setLoadingNotebooks(true);
 
-            const response = await axios.get(
-                NOTEBOOKS_API,
-                {
-                    params: {
-                        sortBy: "createdAt",
-                        sortDir: "desc"
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            const pageSize = 100;
+            let currentPage = 0;
+            let allNotebooks = [];
+            let totalPages = 1;
 
-            console.group("UH-UP2 - Load Notebooks For Mapping");
+            do {
 
-            console.log("Request");
-
-            console.log({
-                method: "GET",
-                url: NOTEBOOKS_API,
-                params: {
+                const params = {
+                    page: currentPage,
+                    size: pageSize,
                     sortBy: "createdAt",
                     sortDir: "desc"
-                }
-            });
+                };
 
-            console.log("Response");
+                const response = await axios.get(
+                    USER_NOTEBOOKS_API,
+                    {
+                        params,
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-            console.log(response.data);
+                console.group(
+                    `UH-UP2 - Load My Notebooks Page ${currentPage + 1}`
+                );
 
-            console.groupEnd();
+                console.log("Request");
 
-            setNotebooks(
-                Array.isArray(response.data)
-                    ? response.data
-                    : []
+                console.log({
+                    method: "GET",
+                    url: USER_NOTEBOOKS_API,
+                    params
+                });
+
+                console.log("Response");
+
+                console.log(response.data);
+
+                console.groupEnd();
+
+                const content =
+                    Array.isArray(response.data?.content)
+                        ? response.data.content
+                        : [];
+
+                allNotebooks = [
+                    ...allNotebooks,
+                    ...content
+                ];
+
+                totalPages =
+                    Number(response.data?.totalPages) || 1;
+
+                currentPage++;
+
+            } while (currentPage < totalPages);
+
+            console.log(
+                "UH-UP2 - Total My Notebooks Loaded:",
+                allNotebooks.length
             );
+
+            setNotebooks(allNotebooks);
 
         } catch (error) {
 
-            console.group("UH-UP2 - Load Notebooks For Mapping");
+            console.group("UH-UP2 - Load My Notebooks Error");
 
             console.log("Response");
 
@@ -202,7 +261,7 @@ export default function UnmappedPages({ searchKeyword }) {
 
         event.stopPropagation();
 
-        if (!pageId || !notebookId) {
+        if (!pageId || !notebookId || mappingPageId) {
             return;
         }
 
@@ -210,19 +269,22 @@ export default function UnmappedPages({ searchKeyword }) {
 
             setMappingPageId(pageId);
 
+            const requestUrl =
+                `${MAP_PAGE_API}/${pageId}/notebook/${notebookId}`;
+
             console.group("UH-UP3 - Map Page To Notebook");
 
             console.log("Request");
 
             console.log({
                 method: "PUT",
-                url: `${MAP_PAGE_API}/${pageId}/notebook/${notebookId}`,
+                url: requestUrl,
                 pageId,
                 notebookId
             });
 
             const response = await axios.put(
-                `${MAP_PAGE_API}/${pageId}/notebook/${notebookId}`,
+                requestUrl,
                 {},
                 {
                     headers: {
@@ -245,11 +307,13 @@ export default function UnmappedPages({ searchKeyword }) {
 
             setOpenDropdown(null);
 
-            toast.success("Page mapped to notebook successfully.");
+            toast.success(
+                "Page mapped to notebook successfully."
+            );
 
         } catch (error) {
 
-            console.group("UH-UP3 - Map Page To Notebook");
+            console.group("UH-UP3 - Map Page To Notebook Error");
 
             console.log("Response");
 
@@ -294,10 +358,16 @@ export default function UnmappedPages({ searchKeyword }) {
                     page.status || ""
                 ).toLowerCase();
 
+            const participants =
+                String(
+                    page.participants || ""
+                ).toLowerCase();
+
             return (
                 pageId.includes(keyword) ||
                 pageTitle.includes(keyword) ||
-                pageStatus.includes(keyword)
+                pageStatus.includes(keyword) ||
+                participants.includes(keyword)
             );
         });
 
@@ -321,11 +391,15 @@ export default function UnmappedPages({ searchKeyword }) {
             <div className="unmapped-pages-header">
 
                 <div>
-                    <h2>Unmapped Pages</h2>
+
+                    <h2>
+                        Unmapped Pages
+                    </h2>
 
                     <p>
                         Pages not mapped to a notebook
                     </p>
+
                 </div>
 
                 <span className="unmapped-pages-count">
@@ -388,8 +462,7 @@ export default function UnmappedPages({ searchKeyword }) {
                                 key={pageId}
                             >
 
-                                <button
-                                    type="button"
+                                <div
                                     className="unmapped-page-row"
                                     onClick={() =>
                                         handlePageClick(pageId)
@@ -415,9 +488,14 @@ export default function UnmappedPages({ searchKeyword }) {
                                     <div className="unmapped-page-right">
 
                                         <span
-                                            className={`unmapped-page-status ${String(pageStatus)
+                                            className={`unmapped-page-status ${String(
+                                                pageStatus
+                                            )
                                                 .toLowerCase()
-                                                .replace(/\s+/g, "-")}`}
+                                                .replace(
+                                                    /\s+/g,
+                                                    "-"
+                                                )}`}
                                         >
                                             {pageStatus}
                                         </span>
@@ -425,6 +503,7 @@ export default function UnmappedPages({ searchKeyword }) {
                                         <button
                                             type="button"
                                             className="unmapped-page-map-button"
+                                            disabled={isMapping}
                                             onClick={event =>
                                                 handleMapButtonClick(
                                                     event,
@@ -437,13 +516,19 @@ export default function UnmappedPages({ searchKeyword }) {
                                                 : "Map"}
                                         </button>
 
-                                        <span className="unmapped-page-arrow">
+                                        <span
+                                            className={`unmapped-page-arrow ${
+                                                isDropdownOpen
+                                                    ? "unmapped-page-arrow-open"
+                                                    : ""
+                                            }`}
+                                        >
                                             ›
                                         </span>
 
                                     </div>
 
-                                </button>
+                                </div>
 
                                 {isDropdownOpen && (
 
@@ -523,20 +608,27 @@ export default function UnmappedPages({ searchKeyword }) {
                                                             </span>
 
                                                         </button>
+
                                                     );
+
                                                 })}
 
                                             </div>
+
                                         )}
 
                                     </div>
+
                                 )}
 
                             </div>
+
                         );
+
                     })}
 
                 </div>
+
             )}
 
             {filteredPages.length > 6 && (

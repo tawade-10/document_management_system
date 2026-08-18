@@ -1,40 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React,{useEffect,useState} from "react";
+import {useLocation} from "react-router-dom";
 import "./Footer.css";
 
-export default function Footer() {
+export default function Footer(){
 
-    const authorityString =
-        localStorage.getItem("authority") || "";
+    const location=useLocation();
 
-    const authorities =
+    const authorityString=
+        localStorage.getItem("authority")||"";
+
+    const authorities=
         authorityString
             .split(",")
-            .map(role =>
+            .map(role=>
                 role.trim().toUpperCase()
             );
 
-    const isAdmin =
+    const isAdmin=
         authorities.includes("ADMIN");
 
-    const isSuperUser =
+    const isSuperUser=
         authorities.includes("SUPER_USER");
 
-    const isUser =
+    const isUser=
         authorities.includes("USER");
 
-    const isUserPortal =
-        !isAdmin &&
-        (isUser || isSuperUser);
+    const isUserPortal=
+        !isAdmin&&
+        (isUser||isSuperUser);
 
-    const [pageStatus, setPageStatus] = useState("PSV");
+    const isPageOpened=
+        /^\/user-homepage\/view-page\/[^/]+$/.test(
+            location.pathname
+        );
 
-    const logButtonEvent = ({
+    const [pageStatus,setPageStatus]=
+        useState("PSV");
+
+    const [editMode,setEditMode]=
+        useState(false);
+
+    const logButtonEvent=({
         buttonNo,
         buttonName,
         request,
         response,
         status
-    }) => {
+    })=>{
 
         console.group(
             `${buttonNo} - ${buttonName}`
@@ -52,14 +64,21 @@ export default function Footer() {
         console.groupEnd();
     };
 
-    useEffect(() => {
+    useEffect(()=>{
 
-        const handlePageStatusChange = event => {
+        const handlePageStatusChange=event=>{
 
-            const status =
-                event.detail?.status || "PSV";
+            const status=
+                event.detail?.status||"PSV";
 
             setPageStatus(status);
+
+            if(
+                status!=="PSV"
+            ){
+
+                setEditMode(false);
+            }
         };
 
         window.addEventListener(
@@ -67,53 +86,97 @@ export default function Footer() {
             handlePageStatusChange
         );
 
-        return () => {
+        return()=>{
+
             window.removeEventListener(
                 "pageStatusChanged",
                 handlePageStatusChange
             );
         };
 
-    }, []);
+    },[]);
 
-    const getStatusLabel = status => {
+    useEffect(()=>{
 
-        const statusMap = {
-            PSV: "Saved",
-            PPB: "Published",
-            PSA: "Saved Archived",
-            PPA: "Published Archived"
+        const handleEditModeChange=event=>{
+
+            setEditMode(
+                event.detail?.editMode===true
+            );
         };
 
-        return statusMap[status] || status;
-    };
+        window.addEventListener(
+            "pageEditModeChanged",
+            handleEditModeChange
+        );
 
-    const getStatusClass = status => {
+        return()=>{
 
-        const statusMap = {
-            PSV: "saved-status",
-            PPB: "published-status",
-            PSA: "saved-archived-status",
-            PPA: "published-archived-status"
+            window.removeEventListener(
+                "pageEditModeChanged",
+                handleEditModeChange
+            );
         };
 
-        return statusMap[status] || "default-status";
+    },[]);
+
+    useEffect(()=>{
+
+        if(!isPageOpened){
+
+            setPageStatus("PSV");
+            setEditMode(false);
+        }
+
+    },[isPageOpened]);
+
+    const getStatusLabel=status=>{
+
+        const statusMap={
+            PSV:"Saved",
+            PPB:"Published",
+            PSA:"Saved Archived",
+            PPA:"Published Archived"
+        };
+
+        return statusMap[status]||status;
     };
 
-    const dispatchPageAction = ({
+    const getStatusClass=status=>{
+
+        const statusMap={
+            PSV:"saved-status",
+            PPB:"published-status",
+            PSA:"saved-archived-status",
+            PPA:"published-archived-status"
+        };
+
+        return statusMap[status]||"default-status";
+    };
+
+    const isArchived=
+        pageStatus==="PSA"||
+        pageStatus==="PPA";
+
+    const isSaved=
+        pageStatus==="PSV";
+
+    const dispatchPageAction=({
         action,
         buttonNo,
         buttonName
-    }) => {
+    })=>{
 
-        const request = {
-            action: "Page Footer Button Click",
-            pageAction: action,
+        const request={
+            action:"Page Footer Button Click",
+            pageAction:action,
             buttonNo,
-            buttonName
+            buttonName,
+            pageStatus,
+            editMode
         };
 
-        const response = {
+        const response={
             message:
                 `${buttonName} triggered successfully`
         };
@@ -123,30 +186,32 @@ export default function Footer() {
             buttonName,
             request,
             response,
-            status: 200
+            status:200
         });
 
         window.dispatchEvent(
             new CustomEvent(
                 "footerPageAction",
                 {
-                    detail: {
+                    detail:{
                         action,
                         buttonNo,
-                        buttonName
+                        buttonName,
+                        pageStatus,
+                        editMode
                     }
                 }
             )
         );
     };
 
-    return (
+    return(
 
         <footer className="footer">
 
             <div className="footer-left">
 
-                {isUserPortal && (
+                {isUserPortal&&isPageOpened&&(
 
                     <div className="footer-status-section">
 
@@ -155,7 +220,9 @@ export default function Footer() {
                         </span>
 
                         <span
-                            className={`footer-status-value ${getStatusClass(pageStatus)}`}
+                            className={
+                                `footer-status-value ${getStatusClass(pageStatus)}`
+                            }
                         >
                             {getStatusLabel(pageStatus)}
                         </span>
@@ -168,17 +235,17 @@ export default function Footer() {
 
             <div className="footer-center">
 
-                {isUserPortal && (
+                {isUserPortal&&isPageOpened&&(
 
                     <>
 
                         <button
                             type="button"
                             className="footer-btn copy"
-                            onClick={() =>
+                            onClick={()=>
                                 dispatchPageAction({
-                                    action: "copy",
-                                    buttonNo: "FB45",
+                                    action:"copy",
+                                    buttonNo:"FB45",
                                     buttonName:
                                         "Copy Page Details Button"
                                 })
@@ -190,13 +257,17 @@ export default function Footer() {
                         <button
                             type="button"
                             className="footer-btn attach"
-                            onClick={() =>
+                            onClick={()=>
                                 dispatchPageAction({
-                                    action: "attach",
-                                    buttonNo: "FB46",
+                                    action:"attach",
+                                    buttonNo:"FB46",
                                     buttonName:
                                         "Attach File Button"
                                 })
+                            }
+                            disabled={
+                                !isSaved||
+                                !editMode
                             }
                         >
                             Attach File
@@ -205,13 +276,17 @@ export default function Footer() {
                         <button
                             type="button"
                             className="footer-btn save"
-                            onClick={() =>
+                            onClick={()=>
                                 dispatchPageAction({
-                                    action: "save",
-                                    buttonNo: "FB40",
+                                    action:"save",
+                                    buttonNo:"FB40",
                                     buttonName:
                                         "Save Button"
                                 })
+                            }
+                            disabled={
+                                !isSaved||
+                                !editMode
                             }
                         >
                             Save
@@ -220,61 +295,95 @@ export default function Footer() {
                         <button
                             type="button"
                             className="footer-btn edit"
-                            onClick={() =>
+                            onClick={()=>
                                 dispatchPageAction({
-                                    action: "edit",
-                                    buttonNo: "FB41",
+                                    action:"edit",
+                                    buttonNo:"FB41",
                                     buttonName:
                                         "Edit Button"
                                 })
                             }
+                            disabled={
+                                !isSaved||
+                                editMode
+                            }
                         >
-                            Edit
+                            {editMode
+                                ? "Editing"
+                                : "Edit"}
                         </button>
 
                         <button
                             type="button"
                             className="footer-btn publish"
-                            onClick={() =>
+                            onClick={()=>
                                 dispatchPageAction({
-                                    action: "publish",
-                                    buttonNo: "FB42",
+                                    action:"publish",
+                                    buttonNo:"FB42",
                                     buttonName:
                                         "Publish MOM Button"
                                 })
+                            }
+                            disabled={
+                                !isSaved
                             }
                         >
                             Publish
                         </button>
 
-                        <button
-                            type="button"
-                            className="footer-btn archive"
-                            onClick={() =>
-                                dispatchPageAction({
-                                    action: "archive",
-                                    buttonNo: "FB43",
-                                    buttonName:
-                                        "Archive Button"
-                                })
-                            }
-                        >
-                            Archive
-                        </button>
+                        {isArchived?(
+
+                            <button
+                                type="button"
+                                className="footer-btn unarchive"
+                                onClick={()=>
+                                    dispatchPageAction({
+                                        action:"unarchive",
+                                        buttonNo:"FB44",
+                                        buttonName:
+                                            "Unarchive Button"
+                                    })
+                                }
+                            >
+                                Unarchive
+                            </button>
+
+                        ):(
+
+                            <button
+                                type="button"
+                                className="footer-btn archive"
+                                onClick={()=>
+                                    dispatchPageAction({
+                                        action:"archive",
+                                        buttonNo:"FB43",
+                                        buttonName:
+                                            "Archive Button"
+                                    })
+                                }
+                            >
+                                Archive
+                            </button>
+
+                        )}
 
                         <button
                             type="button"
                             className="footer-btn cancel"
-                            onClick={() =>
+                            onClick={()=>
                                 dispatchPageAction({
-                                    action: "cancel",
-                                    buttonNo: "BB18",
+                                    action:"cancel",
+                                    buttonNo:"BB18",
                                     buttonName:
-                                        "Cancel Button"
+                                        editMode
+                                            ? "Cancel Edit Button"
+                                            : "Cancel Button"
                                 })
                             }
                         >
-                            Cancel
+                            {editMode
+                                ? "Cancel Edit"
+                                : "Cancel"}
                         </button>
 
                     </>

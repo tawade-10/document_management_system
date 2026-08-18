@@ -31,6 +31,7 @@ export default function UpdatePage(){
     const [loading,setLoading]=useState(true);
     const [saving,setSaving]=useState(false);
     const [publishing,setPublishing]=useState(false);
+    const [archiving,setArchiving]=useState(false);
     const [uploadingAttachment,setUploadingAttachment]=useState(false);
 
     const token=localStorage.getItem("token");
@@ -52,6 +53,23 @@ export default function UpdatePage(){
         console.groupEnd();
     };
 
+    const getStatusValue=(status)=>{
+
+        if(typeof status==="string"){
+            return status;
+        }
+
+        if(status?.statusId){
+            return status.statusId;
+        }
+
+        if(status?.id){
+            return status.id;
+        }
+
+        return "PSV";
+    };
+
     const dispatchPageTitle=(value)=>{
         window.dispatchEvent(
             new CustomEvent("pageTitleChanged",{
@@ -63,13 +81,23 @@ export default function UpdatePage(){
     };
 
     const dispatchPageStatus=(status)=>{
+        const normalizedStatus=getStatusValue(status);
+
         window.dispatchEvent(
             new CustomEvent("pageStatusChanged",{
                 detail:{
-                    status:status||"PSV"
+                    pageId,
+                    status:normalizedStatus
                 }
             })
         );
+    };
+
+    const updateLocalPageStatus=(status)=>{
+        const normalizedStatus=getStatusValue(status);
+
+        setPageStatus(normalizedStatus);
+        dispatchPageStatus(normalizedStatus);
     };
 
     useEffect(()=>{
@@ -92,7 +120,11 @@ export default function UpdatePage(){
 
                 event.preventDefault();
 
-                if(!saving&&!publishing){
+                if(
+                    !saving&&
+                    !publishing&&
+                    !archiving
+                ){
                     handleSubmit();
                 }
             }
@@ -109,7 +141,8 @@ export default function UpdatePage(){
         pageContent,
         participants,
         saving,
-        publishing
+        publishing,
+        archiving
     ]);
 
     useEffect(()=>{
@@ -126,23 +159,43 @@ export default function UpdatePage(){
 
             if(command==="bold"){
 
-                document.execCommand("bold",false,null);
+                document.execCommand(
+                    "bold",
+                    false,
+                    null
+                );
 
             }else if(command==="undo"){
 
-                document.execCommand("undo",false,null);
+                document.execCommand(
+                    "undo",
+                    false,
+                    null
+                );
 
             }else if(command==="redo"){
 
-                document.execCommand("redo",false,null);
+                document.execCommand(
+                    "redo",
+                    false,
+                    null
+                );
 
             }else if(command==="italic"){
 
-                document.execCommand("italic",false,null);
+                document.execCommand(
+                    "italic",
+                    false,
+                    null
+                );
 
             }else if(command==="underline"){
 
-                document.execCommand("underline",false,null);
+                document.execCommand(
+                    "underline",
+                    false,
+                    null
+                );
 
             }else if(command==="hiliteColor"){
 
@@ -314,6 +367,14 @@ export default function UpdatePage(){
 
                 handlePublish();
 
+            }else if(action==="archive"){
+
+                handleArchive();
+
+            }else if(action==="unarchive"){
+
+                handleUnarchive();
+
             }else if(action==="copy"){
 
                 handleCopyDetails();
@@ -362,6 +423,7 @@ export default function UpdatePage(){
         participants,
         saving,
         publishing,
+        archiving,
         pageStatus,
         attachments
     ]);
@@ -398,14 +460,16 @@ export default function UpdatePage(){
             const loadedTitle=
                 page.title||"";
 
-            setTitle(loadedTitle);
+            setTitle(
+                loadedTitle
+            );
 
             setPageContent(
                 page.pageContent||""
             );
 
             const loadedStatus=
-                page.status||"PSV";
+                getStatusValue(page.status);
 
             setPageStatus(
                 loadedStatus
@@ -440,6 +504,7 @@ export default function UpdatePage(){
             );
 
             if(Array.isArray(page.attachments)){
+
                 setAttachments(
                     page.attachments
                 );
@@ -566,10 +631,8 @@ export default function UpdatePage(){
                         ).toLowerCase();
 
                     return(
-                        email &&
-                        !selectedEmails.includes(
-                            email
-                        )
+                        email&&
+                        !selectedEmails.includes(email)
                     );
                 });
 
@@ -727,6 +790,7 @@ export default function UpdatePage(){
             "";
 
         return{
+            title:title.trim(),
             participants:participants.map(
                 participant=>
                     String(participant).trim()
@@ -744,13 +808,25 @@ export default function UpdatePage(){
 
     const handleSubmit=async()=>{
 
-        if(saving||publishing){
+        if(
+            saving||
+            publishing||
+            archiving
+        ){
             return;
         }
 
         if(!token){
 
             navigate("/");
+
+            return;
+        }
+
+        if(isArchived){
+            toast.info(
+                "Archived pages cannot be updated."
+            );
 
             return;
         }
@@ -764,7 +840,7 @@ export default function UpdatePage(){
 
         const request={
             method:"PUT",
-            url:`${API_URL}/${pageId}`,
+            url:`${API_URL}/updateDetails/${pageId}`,
             data:requestData
         };
 
@@ -774,7 +850,7 @@ export default function UpdatePage(){
 
             const response=
                 await axios.put(
-                    `${API_URL}/${pageId}`,
+                    `${API_URL}/updateDetails/${pageId}`,
                     requestData,
                     {
                         headers:{
@@ -785,6 +861,13 @@ export default function UpdatePage(){
                         }
                     }
                 );
+
+            if(response.data?.status){
+
+                updateLocalPageStatus(
+                    response.data.status
+                );
+            }
 
             if(
                 Array.isArray(
@@ -804,14 +887,14 @@ export default function UpdatePage(){
                 );
             }
 
-            if(response.data?.status){
+            if(response.data?.title){
 
-                setPageStatus(
-                    response.data.status
+                setTitle(
+                    response.data.title
                 );
 
-                dispatchPageStatus(
-                    response.data.status
+                dispatchPageTitle(
+                    response.data.title
                 );
             }
 
@@ -880,13 +963,26 @@ export default function UpdatePage(){
 
     const handlePublish=async()=>{
 
-        if(saving||publishing){
+        if(
+            saving||
+            publishing||
+            archiving
+        ){
             return;
         }
 
         if(!token){
 
             navigate("/");
+
+            return;
+        }
+
+        if(
+            pageStatus==="PPB"||
+            pageStatus==="PPA"||
+            pageStatus==="PSA"
+        ){
 
             return;
         }
@@ -903,18 +999,6 @@ export default function UpdatePage(){
             url:`${API_URL}/publish/${pageId}`,
             data:requestData
         };
-
-        console.log(
-            "PUBLISH REQUEST JSON"
-        );
-
-        console.log(
-            JSON.stringify(
-                requestData,
-                null,
-                2
-            )
-        );
 
         try{
 
@@ -934,28 +1018,15 @@ export default function UpdatePage(){
                     }
                 );
 
-            console.log(
-                "PUBLISH RESPONSE JSON"
-            );
-
-            console.log(
-                JSON.stringify(
-                    response.data,
-                    null,
-                    2
-                )
-            );
-
             const returnedStatus=
-                response.data?.status||
-                "PPB";
+                getStatusValue(
+                    response.data?.status
+                );
 
-            setPageStatus(
-                returnedStatus
-            );
-
-            dispatchPageStatus(
-                returnedStatus
+            updateLocalPageStatus(
+                returnedStatus==="PSV"
+                    ? "PPB"
+                    : returnedStatus
             );
 
             if(
@@ -976,6 +1047,17 @@ export default function UpdatePage(){
                 );
             }
 
+            if(response.data?.title){
+
+                setTitle(
+                    response.data.title
+                );
+
+                dispatchPageTitle(
+                    response.data.title
+                );
+            }
+
             logButtonEvent({
                 buttonNo:"FB42",
                 buttonName:"Publish MOM Button",
@@ -989,15 +1071,6 @@ export default function UpdatePage(){
             );
 
         }catch(error){
-
-            console.log(
-                "PUBLISH ERROR RESPONSE"
-            );
-
-            console.log(
-                error.response?.data||
-                error.message
-            );
 
             logButtonEvent({
                 buttonNo:"FB42",
@@ -1045,6 +1118,234 @@ export default function UpdatePage(){
         }finally{
 
             setPublishing(false);
+        }
+    };
+
+    const handleArchive=async()=>{
+
+        if(
+            saving||
+            publishing||
+            archiving
+        ){
+            return;
+        }
+
+        if(!token){
+
+            navigate("/");
+
+            return;
+        }
+
+        if(
+            pageStatus==="PSA"||
+            pageStatus==="PPA"
+        ){
+
+            return;
+        }
+
+        const request={
+            method:"PUT",
+            url:`${API_URL}/archive/${pageId}`
+        };
+
+        try{
+
+            setArchiving(true);
+
+            const response=
+                await axios.put(
+                    `${API_URL}/archive/${pageId}`,
+                    {},
+                    {
+                        headers:{
+                            Authorization:
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+            const returnedStatus=
+                getStatusValue(
+                    response.data?.status
+                );
+
+            updateLocalPageStatus(
+                returnedStatus
+            );
+
+            logButtonEvent({
+                buttonNo:"FB43",
+                buttonName:"Archive Button",
+                request,
+                response:response.data,
+                status:response.status
+            });
+
+            toast.success(
+                "Page archived successfully."
+            );
+
+        }catch(error){
+
+            logButtonEvent({
+                buttonNo:"FB43",
+                buttonName:"Archive Button",
+                request,
+                response:
+                    error.response?.data||
+                    error.message,
+                status:
+                    error.response?.status||
+                    500
+            });
+
+            if(error.response?.status===401){
+
+                toast.error(
+                    "Session expired. Please login again."
+                );
+
+                localStorage.clear();
+
+                navigate("/");
+
+            }else if(error.response?.status===403){
+
+                toast.error(
+                    "You are not authorized to archive this page."
+                );
+
+            }else if(error.response?.status===404){
+
+                toast.error(
+                    "Page not found."
+                );
+
+            }else{
+
+                toast.error(
+                    error.response?.data?.message||
+                    error.response?.data||
+                    "Unable to archive page."
+                );
+            }
+
+        }finally{
+
+            setArchiving(false);
+        }
+    };
+
+    const handleUnarchive=async()=>{
+
+        if(
+            saving||
+            publishing||
+            archiving
+        ){
+            return;
+        }
+
+        if(!token){
+
+            navigate("/");
+
+            return;
+        }
+
+        const request={
+            method:"PUT",
+            url:`${API_URL}/unarchive/${pageId}`
+        };
+
+        try{
+
+            setArchiving(true);
+
+            const response=
+                await axios.put(
+                    `${API_URL}/archive/${pageId}`,
+                    {},
+                    {
+                        headers:{
+                            Authorization:
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+            const returnedStatus=
+                getStatusValue(
+                    response.data?.status
+                );
+
+            updateLocalPageStatus(
+                returnedStatus
+            );
+
+            logButtonEvent({
+                buttonNo:"FB44",
+                buttonName:"Unarchive Button",
+                request,
+                response:response.data,
+                status:response.status
+            });
+
+            toast.success(
+                "Page unarchived successfully."
+            );
+
+        }catch(error){
+
+            logButtonEvent({
+                buttonNo:"FB44",
+                buttonName:"Unarchive Button",
+                request,
+                response:
+                    error.response?.data||
+                    error.message,
+                status:
+                    error.response?.status||
+                    500
+            });
+
+            if(error.response?.status===401){
+
+                toast.error(
+                    "Session expired. Please login again."
+                );
+
+                localStorage.clear();
+
+                navigate("/");
+
+            }else if(error.response?.status===403){
+
+                toast.error(
+                    "You are not authorized to unarchive this page."
+                );
+
+            }else if(error.response?.status===404){
+
+                toast.error(
+                    "Unarchive endpoint or page not found."
+                );
+
+            }else{
+
+                toast.error(
+                    error.response?.data?.message||
+                    error.response?.data||
+                    "Unable to unarchive page."
+                );
+            }
+
+        }finally{
+
+            setArchiving(false);
         }
     };
 
@@ -1129,8 +1430,17 @@ export default function UpdatePage(){
         if(
             saving||
             publishing||
+            archiving||
             uploadingAttachment
         ){
+            return;
+        }
+
+        if(isArchived){
+            toast.info(
+                "Archived pages cannot have attachments added."
+            );
+
             return;
         }
 
@@ -1249,13 +1559,21 @@ export default function UpdatePage(){
             PPA:"Published Archived"
         };
 
-        return statusMap[status]||status;
+        return(
+            statusMap[status]||
+            status||
+            "Unknown"
+        );
     };
 
     const handleBack=()=>{
 
         navigate(-1);
     };
+
+    const isArchived=
+        pageStatus==="PSA"||
+        pageStatus==="PPA";
 
     if(loading){
 
@@ -1335,7 +1653,9 @@ export default function UpdatePage(){
                                             }
                                             disabled={
                                                 saving||
-                                                publishing
+                                                publishing||
+                                                archiving||
+                                                isArchived
                                             }
                                         >
                                             ×
@@ -1372,14 +1692,18 @@ export default function UpdatePage(){
                                     }
                                     disabled={
                                         saving||
-                                        publishing
+                                        publishing||
+                                        archiving||
+                                        isArchived
                                     }
                                 />
 
                                 {searchingParticipants&&(
+
                                     <div className="update-page-participant-searching">
                                         Searching...
                                     </div>
+
                                 )}
 
                                 {showParticipantSuggestions&&
@@ -1447,6 +1771,7 @@ export default function UpdatePage(){
                                         )}
 
                                     </div>
+
                                 )}
 
                             </div>
@@ -1464,7 +1789,9 @@ export default function UpdatePage(){
                         className="update-page-editor"
                         contentEditable={
                             !saving&&
-                            !publishing
+                            !publishing&&
+                            !archiving&&
+                            !isArchived
                         }
                         suppressContentEditableWarning
                         onInput={handleEditorInput}
@@ -1518,15 +1845,18 @@ export default function UpdatePage(){
 
             {(saving||
                 publishing||
+                archiving||
                 uploadingAttachment)&&(
 
                 <div className="update-page-saving">
 
                     {publishing
                         ? "Publishing and sending email..."
-                        : uploadingAttachment
-                            ? "Uploading attachment..."
-                            : "Saving..."}
+                        : archiving
+                            ? "Updating page status..."
+                            : uploadingAttachment
+                                ? "Uploading attachment..."
+                                : "Saving..."}
 
                 </div>
 
@@ -1541,6 +1871,7 @@ export default function UpdatePage(){
                     disabled={
                         saving||
                         publishing||
+                        archiving||
                         uploadingAttachment
                     }
                 >
@@ -1556,7 +1887,9 @@ export default function UpdatePage(){
                         disabled={
                             saving||
                             publishing||
-                            uploadingAttachment
+                            archiving||
+                            uploadingAttachment||
+                            isArchived
                         }
                     >
                         {saving
@@ -1571,8 +1904,11 @@ export default function UpdatePage(){
                         disabled={
                             saving||
                             publishing||
+                            archiving||
                             uploadingAttachment||
-                            pageStatus==="PPB"
+                            pageStatus==="PPB"||
+                            pageStatus==="PSA"||
+                            pageStatus==="PPA"
                         }
                     >
                         {publishing

@@ -30,7 +30,7 @@ public class NotebooksController {
         return new ResponseEntity<>(createdNotebook, HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/allNotebooks")
     @PreAuthorize("hasRole('SUPER_USER')")
     public ResponseEntity<Page<NotebooksResponseDto>> getAllNotebooks(
             @RequestParam(defaultValue = "0") int page,
@@ -38,17 +38,22 @@ public class NotebooksController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String authority,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "notebookId") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir){
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
         Page<NotebooksResponseDto> allNotebooks = notebooksFacade.getAllNotebooks(page, size, search, authority, status, sortBy, sortDir);
         return ResponseEntity.ok(allNotebooks);
     }
 
-    @GetMapping("/allNotebooks")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<NotebooksResponseDto>> getNotebooksByUser(){
-        List<NotebooksResponseDto> notebooksByUser = notebooksFacade.getNotebooksByUser();
-        return ResponseEntity.ok(notebooksByUser);
+    @GetMapping("/myNotebooks")
+    @PreAuthorize("hasAnyRole('USER', 'SUPER_USER')")
+    public ResponseEntity<Page<NotebooksResponseDto>> getAllNotebooksByUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        Page<NotebooksResponseDto> myNotebooks = notebooksFacade.getAllNotebooksByUser(page, size, search, sortBy, sortDir);
+        return ResponseEntity.ok(myNotebooks);
     }
 
     @GetMapping("/allNames")

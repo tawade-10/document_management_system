@@ -29,8 +29,8 @@ public class NotebooksFacadeImpl implements NotebooksFacade{
     }
 
     @Override
-    public List<NotebooksResponseDto> getNotebooksByUser() {
-        return notebooksService.getNotebooksByUser();
+    public Page<NotebooksResponseDto> getAllNotebooksByUser(int page, int size, String search, String sortBy, String sortDir) {
+        return notebooksService.getAllNotebooksByUser(page,size,search,sortBy,sortDir);
     }
 
     @Override
