@@ -1,754 +1,1207 @@
-import React,{useEffect,useRef,useState} from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useRef,
+    useState
+} from "react";
+
 import axios from "axios";
-import {useNavigate,useParams} from "react-router-dom";
-import {toast} from "react-toastify";
+
+import {
+    useNavigate,
+    useParams
+} from "react-router-dom";
+
+import { toast } from "react-toastify";
+
 import "./UpdatePage.css";
 
-const API_URL="http://localhost:8080/api/pages";
-const USERS_API_URL="http://localhost:8080/api/search/users";
-const ATTACHMENTS_API_URL="http://localhost:8080/api/attachments";
 
-export default function UpdatePage(){
+const API_URL =
+    "http://localhost:8080/api/pages";
 
-    const navigate=useNavigate();
-    const {pageId}=useParams();
+const USERS_API_URL =
+    "http://localhost:8080/api/search/users";
 
-    const editorRef=useRef(null);
-    const participantRef=useRef(null);
-    const fileInputRef=useRef(null);
+const ATTACHMENTS_API_URL =
+    "http://localhost:8080/api/attachments";
 
-    const [title,setTitle]=useState("");
-    const [participants,setParticipants]=useState([]);
-    const [participantInput,setParticipantInput]=useState("");
-    const [participantSuggestions,setParticipantSuggestions]=useState([]);
-    const [showParticipantSuggestions,setShowParticipantSuggestions]=useState(false);
-    const [searchingParticipants,setSearchingParticipants]=useState(false);
 
-    const [pageContent,setPageContent]=useState("");
-    const [pageStatus,setPageStatus]=useState("PSV");
-    const [attachments,setAttachments]=useState([]);
+export default function UpdatePage() {
 
-    const [loading,setLoading]=useState(true);
-    const [saving,setSaving]=useState(false);
-    const [publishing,setPublishing]=useState(false);
-    const [archiving,setArchiving]=useState(false);
-    const [uploadingAttachment,setUploadingAttachment]=useState(false);
+    const navigate = useNavigate();
+    const { pageId } = useParams();
 
-    const token=localStorage.getItem("token");
+    const editorRef = useRef(null);
+    const participantRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-    const logButtonEvent=({
-        buttonNo,
-        buttonName,
-        request,
-        response,
-        status
-    })=>{
-        console.group(`${buttonNo} - ${buttonName}`);
-        console.log("Request");
-        console.log(request);
-        console.log("Response");
-        console.log(response);
-        console.log("Status Code");
-        console.log(status);
-        console.groupEnd();
-    };
+    const token =
+        localStorage.getItem("token");
 
-    const getStatusValue=(status)=>{
 
-        if(typeof status==="string"){
+    /* =========================================================
+       PAGE DATA
+    ========================================================= */
+
+    const [title, setTitle] =
+        useState("");
+
+    const [participants, setParticipants] =
+        useState([]);
+
+    const [participantInput, setParticipantInput] =
+        useState("");
+
+    const [participantSuggestions, setParticipantSuggestions] =
+        useState([]);
+
+    const [showParticipantSuggestions, setShowParticipantSuggestions] =
+        useState(false);
+
+    const [searchingParticipants, setSearchingParticipants] =
+        useState(false);
+
+    const [pageContent, setPageContent] =
+        useState("");
+
+    const [pageStatus, setPageStatus] =
+        useState("PSV");
+
+    const [attachments, setAttachments] =
+        useState([]);
+
+
+    /* =========================================================
+       EDIT MODE
+    ========================================================= */
+
+    const [editMode, setEditMode] =
+        useState(false);
+
+
+    /* =========================================================
+       ORIGINAL DATA
+    ========================================================= */
+
+    const [originalPage, setOriginalPage] =
+        useState({
+            title: "",
+            participants: [],
+            pageContent: ""
+        });
+
+
+    /* =========================================================
+       LOADING
+    ========================================================= */
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [saving, setSaving] =
+        useState(false);
+
+    const [publishing, setPublishing] =
+        useState(false);
+
+    const [archiving, setArchiving] =
+        useState(false);
+
+    const [uploadingAttachment, setUploadingAttachment] =
+        useState(false);
+
+
+    /* =========================================================
+       STATUS HELPERS
+    ========================================================= */
+
+    const getStatusValue = status => {
+
+        if (typeof status === "string") {
             return status;
         }
 
-        if(status?.statusId){
+        if (status?.statusId) {
             return status.statusId;
         }
 
-        if(status?.id){
+        if (status?.id) {
             return status.id;
         }
 
         return "PSV";
     };
 
-    const dispatchPageTitle=(value)=>{
-        window.dispatchEvent(
-            new CustomEvent("pageTitleChanged",{
-                detail:{
-                    title:value||""
-                }
-            })
+
+    const getStatusLabel = status => {
+
+        const statusMap = {
+            PSV: "Saved",
+            PPB: "Published",
+            PSA: "Saved Archived",
+            PPA: "Published Archived"
+        };
+
+        return (
+            statusMap[status] ||
+            status ||
+            "Unknown"
         );
     };
 
-    const dispatchPageStatus=(status)=>{
-        const normalizedStatus=getStatusValue(status);
 
-        window.dispatchEvent(
-            new CustomEvent("pageStatusChanged",{
-                detail:{
-                    pageId,
-                    status:normalizedStatus
-                }
-            })
+    const isArchived =
+        pageStatus === "PSA" ||
+        pageStatus === "PPA";
+
+
+    const isSaved =
+        pageStatus === "PSV";
+
+
+    const isPublished =
+        pageStatus === "PPB";
+
+
+    const isBusy =
+        saving ||
+        publishing ||
+        archiving ||
+        uploadingAttachment;
+
+
+    /* =========================================================
+       LOGGING
+    ========================================================= */
+
+    const logButtonEvent = ({
+        buttonNo,
+        buttonName,
+        request,
+        response,
+        status
+    }) => {
+
+        console.group(
+            `${buttonNo} - ${buttonName}`
         );
+
+        console.log(
+            "Request",
+            request
+        );
+
+        console.log(
+            "Response",
+            response
+        );
+
+        console.log(
+            "Status Code",
+            status
+        );
+
+        console.groupEnd();
     };
 
-    const updateLocalPageStatus=(status)=>{
-        const normalizedStatus=getStatusValue(status);
 
-        setPageStatus(normalizedStatus);
-        dispatchPageStatus(normalizedStatus);
-    };
+    /* =========================================================
+       EVENTS
+    ========================================================= */
 
-    useEffect(()=>{
-        fetchPage();
+    const dispatchPageStatus = useCallback(
+        status => {
 
-        return()=>{
-            dispatchPageTitle("");
-            dispatchPageStatus("PSV");
-        };
-    },[pageId]);
+            const normalizedStatus =
+                getStatusValue(status);
 
-    useEffect(()=>{
+            window.dispatchEvent(
+                new CustomEvent(
+                    "pageStatusChanged",
+                    {
+                        detail: {
+                            pageId,
+                            status: normalizedStatus
+                        }
+                    }
+                )
+            );
+        },
+        [pageId]
+    );
 
-        const handleKeyDown=(event)=>{
 
-            if(
-                (event.ctrlKey||event.metaKey)&&
-                event.key.toLowerCase()==="s"
-            ){
+    const dispatchPageTitle = useCallback(
+        value => {
 
-                event.preventDefault();
+            window.dispatchEvent(
+                new CustomEvent(
+                    "pageTitleChanged",
+                    {
+                        detail: {
+                            title: value || ""
+                        }
+                    }
+                )
+            );
+        },
+        []
+    );
 
-                if(
-                    !saving&&
-                    !publishing&&
-                    !archiving
-                ){
-                    handleSubmit();
+
+    const updateEditMode = useCallback(
+        value => {
+
+            const newValue =
+                value === true;
+
+            setEditMode(
+                newValue
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "pageEditModeChanged",
+                    {
+                        detail: {
+                            pageId,
+                            editMode: newValue
+                        }
+                    }
+                )
+            );
+        },
+        [pageId]
+    );
+
+
+    const updateLocalPageStatus =
+        useCallback(
+            status => {
+
+                const normalizedStatus =
+                    getStatusValue(status);
+
+                setPageStatus(
+                    normalizedStatus
+                );
+
+                dispatchPageStatus(
+                    normalizedStatus
+                );
+
+                if (normalizedStatus !== "PSV") {
+                    updateEditMode(false);
                 }
-            }
-        };
+            },
+            [
+                dispatchPageStatus,
+                updateEditMode
+            ]
+        );
 
-        document.addEventListener("keydown",handleKeyDown);
 
-        return()=>{
-            document.removeEventListener("keydown",handleKeyDown);
-        };
+    /* =========================================================
+       FETCH PAGE
+    ========================================================= */
 
-    },[
-        title,
-        pageContent,
-        participants,
-        saving,
-        publishing,
-        archiving
-    ]);
+    const fetchPage = useCallback(
+        async () => {
 
-    useEffect(()=>{
+            if (!token) {
 
-        const handleEditorCommand=(event)=>{
+                navigate("/");
 
-            const {command,value}=event.detail||{};
-
-            if(!editorRef.current){
                 return;
             }
 
-            editorRef.current.focus();
+            const request = {
+                method: "GET",
+                url: `${API_URL}/${pageId}`
+            };
 
-            if(command==="bold"){
+            try {
 
-                document.execCommand(
-                    "bold",
-                    false,
-                    null
+                setLoading(true);
+
+                updateEditMode(false);
+
+                const response =
+                    await axios.get(
+                        `${API_URL}/${pageId}`,
+                        {
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+                const page =
+                    response.data || {};
+
+
+                /* TITLE */
+
+                const loadedTitle =
+                    page.title || "";
+
+                setTitle(
+                    loadedTitle
                 );
 
-            }else if(command==="undo"){
 
-                document.execCommand(
-                    "undo",
-                    false,
-                    null
+                /* CONTENT */
+
+                const loadedContent =
+                    page.pageContent || "";
+
+                setPageContent(
+                    loadedContent
                 );
 
-            }else if(command==="redo"){
 
-                document.execCommand(
-                    "redo",
-                    false,
-                    null
+                /* STATUS */
+
+                const loadedStatus =
+                    getStatusValue(
+                        page.status
+                    );
+
+                setPageStatus(
+                    loadedStatus
                 );
 
-            }else if(command==="italic"){
-
-                document.execCommand(
-                    "italic",
-                    false,
-                    null
+                dispatchPageStatus(
+                    loadedStatus
                 );
 
-            }else if(command==="underline"){
 
-                document.execCommand(
-                    "underline",
-                    false,
-                    null
+                /* PARTICIPANTS */
+
+                const loadedParticipants =
+                    Array.isArray(page.participants)
+                        ? page.participants
+                        : [];
+
+
+                const normalizedParticipants =
+                    loadedParticipants
+                        .map(participant => {
+
+                            if (
+                                typeof participant === "string"
+                            ) {
+                                return participant.trim();
+                            }
+
+                            return String(
+                                participant?.email || ""
+                            ).trim();
+                        })
+                        .filter(Boolean);
+
+
+                const uniqueParticipants = [
+                    ...new Set(
+                        normalizedParticipants
+                    )
+                ];
+
+
+                setParticipants(
+                    uniqueParticipants
                 );
 
-            }else if(command==="hiliteColor"){
 
-                document.execCommand(
-                    "hiliteColor",
-                    false,
-                    value
+                /* ORIGINAL DATA */
+
+                setOriginalPage({
+                    title: loadedTitle,
+                    participants: [
+                        ...uniqueParticipants
+                    ],
+                    pageContent: loadedContent
+                });
+
+
+                /* ATTACHMENTS */
+
+                setAttachments(
+                    Array.isArray(page.attachments)
+                        ? page.attachments
+                        : []
                 );
 
-            }else if(command==="foreColor"){
 
-                document.execCommand(
-                    "foreColor",
-                    false,
-                    value
+                /* HEADER */
+
+                dispatchPageTitle(
+                    loadedTitle
                 );
 
-            }else if(command==="justifyLeft"){
 
-                document.execCommand(
-                    "justifyLeft",
-                    false,
-                    null
-                );
+                /* EDITOR */
 
-            }else if(command==="justifyCenter"){
+                if (editorRef.current) {
 
-                document.execCommand(
-                    "justifyCenter",
-                    false,
-                    null
-                );
+                    editorRef.current.innerHTML =
+                        loadedContent;
+                }
 
-            }else if(command==="justifyRight"){
 
-                document.execCommand(
-                    "justifyRight",
-                    false,
-                    null
-                );
+                logButtonEvent({
+                    buttonNo: "HB23",
+                    buttonName:
+                        "View Page Button",
+                    request,
+                    response:
+                        response.data,
+                    status:
+                        response.status
+                });
 
-            }else if(command==="insertUnorderedList"){
+            } catch (error) {
 
-                document.execCommand(
-                    "insertUnorderedList",
-                    false,
-                    null
-                );
+                logButtonEvent({
+                    buttonNo: "HB23",
+                    buttonName:
+                        "View Page Button",
+                    request,
+                    response:
+                        error.response?.data ||
+                        error.message,
+                    status:
+                        error.response?.status ||
+                        500
+                });
 
-            }else if(command==="insertOrderedList"){
 
-                document.execCommand(
-                    "insertOrderedList",
-                    false,
-                    null
-                );
+                if (
+                    error.response?.status === 401
+                ) {
 
-            }else if(command==="strikeThrough"){
+                    toast.error(
+                        "Session expired. Please login again."
+                    );
 
-                document.execCommand(
-                    "strikeThrough",
-                    false,
-                    null
-                );
+                    localStorage.clear();
 
-            }else if(command==="removeFormat"){
+                    navigate("/");
 
-                document.execCommand(
-                    "removeFormat",
-                    false,
-                    null
-                );
+                } else if (
+                    error.response?.status === 403
+                ) {
 
-            }else if(command==="justifyFull"){
+                    toast.error(
+                        "You are not authorized to view this page."
+                    );
 
-                document.execCommand(
-                    "justifyFull",
-                    false,
-                    null
-                );
+                    navigate(-1);
 
-            }else if(command==="fontName"){
+                } else if (
+                    error.response?.status === 404
+                ) {
 
-                document.execCommand(
-                    "fontName",
-                    false,
-                    value
-                );
+                    toast.error(
+                        "Page not found."
+                    );
 
-            }else if(command==="fontSize"){
+                    navigate(-1);
 
-                const sizeMap={
-                    "8":"1",
-                    "9":"1",
-                    "10":"2",
-                    "11":"2",
-                    "12":"3",
-                    "14":"4",
-                    "16":"5",
-                    "18":"5",
-                    "20":"6",
-                    "24":"6",
-                    "28":"7",
-                    "32":"7"
-                };
+                } else {
 
-                document.execCommand(
-                    "fontSize",
-                    false,
-                    sizeMap[value]||"3"
-                );
+                    toast.error(
+                        error.response?.data?.message ||
+                        error.response?.data ||
+                        "Unable to load page."
+                    );
+                }
+
+            } finally {
+
+                setLoading(false);
             }
+        },
+        [
+            navigate,
+            pageId,
+            dispatchPageStatus,
+            dispatchPageTitle,
+            updateEditMode,
+            token
+        ]
+    );
 
-            setPageContent(
-                editorRef.current.innerHTML
+
+    /* =========================================================
+       INITIAL LOAD
+    ========================================================= */
+
+    useEffect(() => {
+
+        fetchPage();
+
+        return () => {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "pageTitleChanged",
+                    {
+                        detail: {
+                            title: ""
+                        }
+                    }
+                )
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "pageStatusChanged",
+                    {
+                        detail: {
+                            pageId,
+                            status: "PSV"
+                        }
+                    }
+                )
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "pageEditModeChanged",
+                    {
+                        detail: {
+                            pageId,
+                            editMode: false
+                        }
+                    }
+                )
             );
         };
 
-        window.addEventListener(
-            "editorCommand",
-            handleEditorCommand
-        );
+    }, [
+        fetchPage,
+        pageId
+    ]);
 
-        return()=>{
-            window.removeEventListener(
-                "editorCommand",
-                handleEditorCommand
-            );
-        };
 
-    },[]);
+    /* =========================================================
+       HEADER TITLE CHANGE
+    ========================================================= */
 
-    useEffect(()=>{
+    useEffect(() => {
 
-        const handleHeaderTitleChange=(event)=>{
+        const handleHeaderTitleChange =
+            event => {
 
-            const newTitle=
-                event.detail?.title||"";
+                if (!editMode) {
+                    return;
+                }
 
-            setTitle(newTitle);
-        };
+                if (!isSaved || isArchived) {
+                    return;
+                }
+
+                setTitle(
+                    event.detail?.title || ""
+                );
+            };
+
 
         window.addEventListener(
             "headerPageTitleChanged",
             handleHeaderTitleChange
         );
 
-        return()=>{
+
+        return () => {
+
             window.removeEventListener(
                 "headerPageTitleChanged",
                 handleHeaderTitleChange
             );
         };
 
-    },[]);
-
-    useEffect(()=>{
-
-        const handleFooterAction=(event)=>{
-
-            const action=
-                event.detail?.action;
-
-            if(action==="save"){
-
-                handleSubmit();
-
-            }else if(action==="publish"){
-
-                handlePublish();
-
-            }else if(action==="archive"){
-
-                handleArchive();
-
-            }else if(action==="unarchive"){
-
-                handleUnarchive();
-
-            }else if(action==="copy"){
-
-                handleCopyDetails();
-
-            }else if(action==="attach"){
-
-                handleAttachClick();
-
-            }else if(action==="edit"){
-
-                if(editorRef.current){
-                    editorRef.current.focus();
-                }
-
-            }else if(action==="cancel"){
-
-                navigate(-1);
-
-            }else if(action==="back"){
-
-                navigate(-1);
-
-            }else if(action==="status"){
-
-                toast.info(
-                    `Current page status: ${getStatusLabel(pageStatus)}`
-                );
-            }
-        };
-
-        window.addEventListener(
-            "footerPageAction",
-            handleFooterAction
-        );
-
-        return()=>{
-            window.removeEventListener(
-                "footerPageAction",
-                handleFooterAction
-            );
-        };
-
-    },[
-        title,
-        pageContent,
-        participants,
-        saving,
-        publishing,
-        archiving,
-        pageStatus,
-        attachments
+    }, [
+        editMode,
+        isSaved,
+        isArchived
     ]);
 
-    const fetchPage=async()=>{
 
-        if(!token){
+    /* =========================================================
+       HEADER EDITOR COMMANDS
+    ========================================================= */
 
-            navigate("/");
+    useEffect(() => {
 
-            return;
-        }
+        const handleEditorCommand =
+            event => {
 
-        const request={
-            method:"GET",
-            url:`${API_URL}/${pageId}`
+                const {
+                    command,
+                    value
+                } = event.detail || {};
+
+
+                if (!editorRef.current) {
+                    return;
+                }
+
+
+                if (
+                    !editMode ||
+                    !isSaved ||
+                    isArchived
+                ) {
+                    return;
+                }
+
+
+                editorRef.current.focus();
+
+
+                if (command === "bold") {
+
+                    document.execCommand(
+                        "bold",
+                        false,
+                        null
+                    );
+
+                } else if (command === "italic") {
+
+                    document.execCommand(
+                        "italic",
+                        false,
+                        null
+                    );
+
+                } else if (command === "underline") {
+
+                    document.execCommand(
+                        "underline",
+                        false,
+                        null
+                    );
+
+                } else if (command === "undo") {
+
+                    document.execCommand(
+                        "undo",
+                        false,
+                        null
+                    );
+
+                } else if (command === "redo") {
+
+                    document.execCommand(
+                        "redo",
+                        false,
+                        null
+                    );
+
+                } else if (command === "hiliteColor") {
+
+                    document.execCommand(
+                        "hiliteColor",
+                        false,
+                        value
+                    );
+
+                } else if (command === "foreColor") {
+
+                    document.execCommand(
+                        "foreColor",
+                        false,
+                        value
+                    );
+
+                } else if (command === "justifyLeft") {
+
+                    document.execCommand(
+                        "justifyLeft",
+                        false,
+                        null
+                    );
+
+                } else if (command === "justifyCenter") {
+
+                    document.execCommand(
+                        "justifyCenter",
+                        false,
+                        null
+                    );
+
+                } else if (command === "justifyRight") {
+
+                    document.execCommand(
+                        "justifyRight",
+                        false,
+                        null
+                    );
+
+                } else if (command === "justifyFull") {
+
+                    document.execCommand(
+                        "justifyFull",
+                        false,
+                        null
+                    );
+
+                } else if (
+                    command === "insertUnorderedList"
+                ) {
+
+                    document.execCommand(
+                        "insertUnorderedList",
+                        false,
+                        null
+                    );
+
+                } else if (
+                    command === "insertOrderedList"
+                ) {
+
+                    document.execCommand(
+                        "insertOrderedList",
+                        false,
+                        null
+                    );
+
+                } else if (
+                    command === "strikeThrough"
+                ) {
+
+                    document.execCommand(
+                        "strikeThrough",
+                        false,
+                        null
+                    );
+
+                } else if (
+                    command === "removeFormat"
+                ) {
+
+                    document.execCommand(
+                        "removeFormat",
+                        false,
+                        null
+                    );
+
+                } else if (
+                    command === "fontName"
+                ) {
+
+                    document.execCommand(
+                        "fontName",
+                        false,
+                        value
+                    );
+
+                } else if (
+                    command === "fontSize"
+                ) {
+
+                    const sizeMap = {
+                        "8": "1",
+                        "9": "1",
+                        "10": "2",
+                        "11": "2",
+                        "12": "3",
+                        "14": "4",
+                        "16": "5",
+                        "18": "5",
+                        "20": "6",
+                        "24": "6",
+                        "28": "7",
+                        "32": "7"
+                    };
+
+                    document.execCommand(
+                        "fontSize",
+                        false,
+                        sizeMap[value] || "3"
+                    );
+                }
+
+
+                setPageContent(
+                    editorRef.current.innerHTML
+                );
+            };
+
+
+        window.addEventListener(
+            "editorCommand",
+            handleEditorCommand
+        );
+
+
+        return () => {
+
+            window.removeEventListener(
+                "editorCommand",
+                handleEditorCommand
+            );
         };
 
-        try{
+    }, [
+        editMode,
+        isSaved,
+        isArchived
+    ]);
 
-            setLoading(true);
 
-            const response=await axios.get(
-                `${API_URL}/${pageId}`,
-                {
-                    headers:{
-                        Authorization:`Bearer ${token}`
+    /* =========================================================
+       CTRL + S
+    ========================================================= */
+
+    useEffect(() => {
+
+        const handleKeyDown =
+            event => {
+
+                if (
+                    (event.ctrlKey || event.metaKey) &&
+                    event.key.toLowerCase() === "s"
+                ) {
+
+                    event.preventDefault();
+
+                    if (
+                        editMode &&
+                        !isBusy
+                    ) {
+
+                        handleSubmit();
                     }
                 }
+            };
+
+
+        document.addEventListener(
+            "keydown",
+            handleKeyDown
+        );
+
+
+        return () => {
+
+            document.removeEventListener(
+                "keydown",
+                handleKeyDown
             );
+        };
 
-            const page=response.data;
+    }, [
+        editMode,
+        isBusy,
+        title,
+        participants,
+        pageContent
+    ]);
 
-            const loadedTitle=
-                page.title||"";
 
-            setTitle(
-                loadedTitle
-            );
+    /* =========================================================
+       PARTICIPANT SEARCH
+    ========================================================= */
 
-            setPageContent(
-                page.pageContent||""
-            );
+    const fetchParticipantSuggestions =
+        async keyword => {
 
-            const loadedStatus=
-                getStatusValue(page.status);
+            if (!keyword.trim()) {
 
-            setPageStatus(
-                loadedStatus
-            );
+                setParticipantSuggestions([]);
 
-            dispatchPageStatus(
-                loadedStatus
-            );
+                setShowParticipantSuggestions(false);
 
-            const loadedParticipants=
-                Array.isArray(page.participants)
-                    ? page.participants
-                    : [];
+                return;
+            }
 
-            const normalizedParticipants=
-                loadedParticipants
-                    .map(participant=>{
 
-                        if(typeof participant==="string"){
-                            return participant.trim();
+            try {
+
+                setSearchingParticipants(true);
+
+
+                const response =
+                    await axios.get(
+                        USERS_API_URL,
+                        {
+                            params: {
+                                keyword:
+                                    keyword.trim()
+                            },
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
                         }
+                    );
 
-                        return String(
-                            participant?.email||""
-                        ).trim();
 
-                    })
-                    .filter(Boolean);
+                const users =
+                    Array.isArray(response.data)
+                        ? response.data
+                        : [];
+
+
+                const selectedEmails =
+                    participants.map(
+                        participant =>
+                            String(
+                                participant
+                            ).toLowerCase()
+                    );
+
+
+                const filteredUsers =
+                    users.filter(user => {
+
+                        const email =
+                            String(
+                                user.email || ""
+                            ).toLowerCase();
+
+                        return (
+                            email &&
+                            !selectedEmails.includes(
+                                email
+                            )
+                        );
+                    });
+
+
+                setParticipantSuggestions(
+                    filteredUsers
+                );
+
+
+                setShowParticipantSuggestions(
+                    filteredUsers.length > 0
+                );
+
+            } catch (error) {
+
+                console.log(
+                    "Participant search response",
+                    error.response?.data
+                );
+
+                setParticipantSuggestions([]);
+
+                setShowParticipantSuggestions(false);
+
+            } finally {
+
+                setSearchingParticipants(false);
+            }
+        };
+
+
+    /* =========================================================
+       PARTICIPANT INPUT
+    ========================================================= */
+
+    const handleParticipantInput =
+        event => {
+
+            if (
+                !editMode ||
+                isArchived ||
+                !isSaved
+            ) {
+                return;
+            }
+
+
+            const value =
+                event.target.value;
+
+
+            setParticipantInput(
+                value
+            );
+
+
+            fetchParticipantSuggestions(
+                value
+            );
+        };
+
+
+    /* =========================================================
+       SELECT PARTICIPANT
+    ========================================================= */
+
+    const handleParticipantSelect =
+        user => {
+
+            if (
+                !user ||
+                !editMode ||
+                isArchived ||
+                !isSaved
+            ) {
+                return;
+            }
+
+
+            const email =
+                String(
+                    user.email || ""
+                ).trim();
+
+
+            if (!email) {
+                return;
+            }
+
+
+            const exists =
+                participants.some(
+                    participant =>
+                        String(
+                            participant
+                        ).toLowerCase() ===
+                        email.toLowerCase()
+                );
+
+
+            if (exists) {
+                return;
+            }
+
 
             setParticipants(
-                [...new Set(normalizedParticipants)]
+                previous => [
+                    ...previous,
+                    email
+                ]
             );
 
-            if(Array.isArray(page.attachments)){
 
-                setAttachments(
-                    page.attachments
-                );
-            }
-
-            dispatchPageTitle(
-                loadedTitle
-            );
-
-            if(editorRef.current){
-
-                editorRef.current.innerHTML=
-                    page.pageContent||"";
-            }
-
-            logButtonEvent({
-                buttonNo:"HB23",
-                buttonName:"View Page Button",
-                request,
-                response:response.data,
-                status:response.status
-            });
-
-        }catch(error){
-
-            logButtonEvent({
-                buttonNo:"HB23",
-                buttonName:"View Page Button",
-                request,
-                response:
-                    error.response?.data||
-                    error.message,
-                status:
-                    error.response?.status||
-                    500
-            });
-
-            if(error.response?.status===401){
-
-                toast.error(
-                    "Session expired. Please login again."
-                );
-
-                localStorage.clear();
-
-                navigate("/");
-
-            }else if(error.response?.status===403){
-
-                toast.error(
-                    "You are not authorized to view this page."
-                );
-
-                navigate(-1);
-
-            }else if(error.response?.status===404){
-
-                toast.error(
-                    "Page not found."
-                );
-
-                navigate(-1);
-
-            }else{
-
-                toast.error(
-                    error.response?.data?.message||
-                    error.response?.data||
-                    "Unable to load page."
-                );
-            }
-
-        }finally{
-
-            setLoading(false);
-        }
-    };
-
-    const fetchParticipantSuggestions=async(keyword)=>{
-
-        if(!keyword.trim()){
+            setParticipantInput("");
 
             setParticipantSuggestions([]);
+
             setShowParticipantSuggestions(false);
+        };
 
-            return;
-        }
 
-        try{
+    /* =========================================================
+       REMOVE PARTICIPANT
+    ========================================================= */
 
-            setSearchingParticipants(true);
+    const handleRemoveParticipant =
+        index => {
 
-            const response=await axios.get(
-                USERS_API_URL,
-                {
-                    params:{
-                        keyword:keyword.trim()
-                    },
-                    headers:{
-                        Authorization:`Bearer ${token}`
-                    }
-                }
+            if (
+                !editMode ||
+                isArchived ||
+                !isSaved
+            ) {
+                return;
+            }
+
+
+            setParticipants(
+                previous =>
+                    previous.filter(
+                        (_, i) =>
+                            i !== index
+                    )
             );
+        };
 
-            const users=
-                Array.isArray(response.data)
-                    ? response.data
-                    : [];
 
-            const selectedEmails=
-                participants.map(
-                    participant=>
-                        String(
-                            participant||""
-                        ).toLowerCase()
-                );
+    /* =========================================================
+       PARTICIPANT DISPLAY
+    ========================================================= */
 
-            const filteredUsers=
-                users.filter(user=>{
+    const getParticipantName =
+        participant => {
 
-                    const email=
-                        String(
-                            user.email||""
-                        ).toLowerCase();
+            if (
+                typeof participant === "string"
+            ) {
+                return participant;
+            }
 
-                    return(
-                        email&&
-                        !selectedEmails.includes(email)
-                    );
-                });
 
-            setParticipantSuggestions(
-                filteredUsers
+            return (
+                participant?.userName ||
+                participant?.username ||
+                participant?.name ||
+                participant?.email ||
+                "Participant"
             );
+        };
 
-            setShowParticipantSuggestions(
-                filteredUsers.length>0
+
+    const getParticipantEmail =
+        participant => {
+
+            if (
+                typeof participant === "string"
+            ) {
+                return participant;
+            }
+
+
+            return participant?.email || "";
+        };
+
+
+    /* =========================================================
+       EDITOR INPUT
+    ========================================================= */
+
+    const handleEditorInput =
+        event => {
+
+            if (
+                !editMode ||
+                isArchived ||
+                !isSaved
+            ) {
+                return;
+            }
+
+
+            setPageContent(
+                event.currentTarget.innerHTML
             );
+        };
 
-        }catch(error){
 
-            console.log(
-                "Participant search response",
-                error.response?.data
-            );
+    /* =========================================================
+       VALIDATION
+    ========================================================= */
 
-            setParticipantSuggestions([]);
-            setShowParticipantSuggestions(false);
+    const validatePage = () => {
 
-        }finally{
-
-            setSearchingParticipants(false);
-        }
-    };
-
-    const handleParticipantInput=(event)=>{
-
-        const value=
-            event.target.value;
-
-        setParticipantInput(
-            value
-        );
-
-        fetchParticipantSuggestions(
-            value
-        );
-    };
-
-    const handleParticipantSelect=(user)=>{
-
-        if(!user){
-            return;
-        }
-
-        const email=
+        const currentTitle =
             String(
-                user.email||""
+                title || ""
             ).trim();
 
-        if(!email){
-            return;
-        }
 
-        const alreadySelected=
-            participants.some(
-                participant=>
-                    String(
-                        participant||""
-                    ).toLowerCase()===
-                    email.toLowerCase()
-            );
+        const currentContent =
+            editorRef.current?.innerHTML ||
+            pageContent ||
+            "";
 
-        if(alreadySelected){
-            return;
-        }
 
-        setParticipants(prev=>[
-            ...prev,
-            email
-        ]);
+        const currentText =
+            editorRef.current?.innerText ||
+            "";
 
-        setParticipantInput("");
-        setParticipantSuggestions([]);
-        setShowParticipantSuggestions(false);
-    };
 
-    const handleRemoveParticipant=(index)=>{
-
-        setParticipants(prev=>
-            prev.filter(
-                (_,participantIndex)=>
-                    participantIndex!==index
-            )
-        );
-    };
-
-    const getParticipantName=(participant)=>{
-
-        if(typeof participant==="string"){
-            return participant;
-        }
-
-        return(
-            participant?.userName||
-            participant?.username||
-            participant?.name||
-            participant?.email||
-            "Participant"
-        );
-    };
-
-    const getParticipantEmail=(participant)=>{
-
-        if(typeof participant==="string"){
-            return participant;
-        }
-
-        return participant?.email||"";
-    };
-
-    const validatePage=()=>{
-
-        if(!title.trim()){
+        if (!currentTitle) {
 
             toast.error(
                 "Please enter a page title."
@@ -757,11 +1210,8 @@ export default function UpdatePage(){
             return false;
         }
 
-        const textContent=
-            editorRef.current?.innerText||
-            "";
 
-        if(!textContent.trim()){
+        if (!currentText.trim()) {
 
             toast.error(
                 "Please enter MOM content."
@@ -770,7 +1220,11 @@ export default function UpdatePage(){
             return false;
         }
 
-        if(participants.length===0){
+
+        if (
+            !Array.isArray(participants) ||
+            participants.length === 0
+        ) {
 
             toast.error(
                 "Please add at least one participant."
@@ -779,81 +1233,125 @@ export default function UpdatePage(){
             return false;
         }
 
+
         return true;
     };
 
-    const getRequestData=()=>{
 
-        const currentContent=
-            editorRef.current?.innerHTML||
-            pageContent||
-            "";
+    /* =========================================================
+       REQUEST DATA
+    ========================================================= */
 
-        return{
-            title:title.trim(),
-            participants:participants.map(
-                participant=>
-                    String(participant).trim()
-            ),
-            pageContent:currentContent
+    const getRequestData = () => {
+
+        const currentContent =
+            editorRef.current
+                ? editorRef.current.innerHTML
+                : pageContent;
+
+
+        const currentTitle =
+            String(
+                title || ""
+            ).trim();
+
+
+        const currentParticipants =
+            participants
+                .map(
+                    participant =>
+                        String(
+                            participant || ""
+                        ).trim()
+                )
+                .filter(Boolean);
+
+
+        return {
+            title:
+                currentTitle,
+
+            participants:
+                currentParticipants,
+
+            pageContent:
+                currentContent || ""
         };
     };
 
-    const handleEditorInput=(event)=>{
 
-        setPageContent(
-            event.currentTarget.innerHTML
-        );
-    };
+    /* =========================================================
+       SAVE
+    ========================================================= */
 
-    const handleSubmit=async()=>{
+    const handleSubmit = async () => {
 
-        if(
-            saving||
-            publishing||
-            archiving
-        ){
+        if (isBusy) {
             return;
         }
 
-        if(!token){
+
+        if (!editMode) {
+
+            toast.info(
+                "Click Edit before saving the page."
+            );
+
+            return;
+        }
+
+
+        if (!isSaved) {
+
+            toast.info(
+                "Only saved pages can be edited."
+            );
+
+            return;
+        }
+
+
+        if (!token) {
+
+            toast.error(
+                "Session expired. Please login again."
+            );
 
             navigate("/");
 
             return;
         }
 
-        if(isArchived){
-            toast.info(
-                "Archived pages cannot be updated."
-            );
 
+        if (!validatePage()) {
             return;
         }
 
-        if(!validatePage()){
-            return;
-        }
 
-        const requestData=
+        const requestData =
             getRequestData();
 
-        const request={
-            method:"PUT",
-            url:`${API_URL}/updateDetails/${pageId}`,
-            data:requestData
+
+        const request = {
+            method: "PUT",
+            url:
+                `${API_URL}/updateDetails/${pageId}`,
+            data:
+                requestData
         };
 
-        try{
+
+        try {
 
             setSaving(true);
 
-            const response=
+
+            const response =
                 await axios.put(
                     `${API_URL}/updateDetails/${pageId}`,
                     requestData,
                     {
-                        headers:{
+                        headers: {
                             Authorization:
                                 `Bearer ${token}`,
                             "Content-Type":
@@ -862,69 +1360,146 @@ export default function UpdatePage(){
                     }
                 );
 
-            if(response.data?.status){
 
-                updateLocalPageStatus(
-                    response.data.status
-                );
-            }
+            const responseData =
+                response.data || {};
 
-            if(
+
+            const savedTitle =
+                responseData.title ??
+                requestData.title;
+
+
+            const savedParticipants =
                 Array.isArray(
-                    response.data?.participants
+                    responseData.participants
                 )
-            ){
-
-                setParticipants(
-                    response.data.participants
-                        .map(
-                            participant=>
-                                typeof participant==="string"
-                                    ? participant
-                                    : participant?.email
+                    ? responseData.participants
+                        .map(participant =>
+                            typeof participant === "string"
+                                ? participant
+                                : participant?.email
                         )
                         .filter(Boolean)
-                );
-            }
+                    : requestData.participants;
 
-            if(response.data?.title){
 
-                setTitle(
-                    response.data.title
-                );
+            const savedContent =
+                responseData.pageContent ??
+                requestData.pageContent;
 
-                dispatchPageTitle(
-                    response.data.title
-                );
-            }
 
-            logButtonEvent({
-                buttonNo:"HB24",
-                buttonName:"Update Page Button",
-                request,
-                response:response.data,
-                status:response.status
-            });
-
-            toast.success(
-                "Page updated successfully."
+            setTitle(
+                savedTitle
             );
 
-        }catch(error){
+
+            setParticipants(
+                savedParticipants
+            );
+
+
+            setPageContent(
+                savedContent
+            );
+
+
+            if (editorRef.current) {
+
+                editorRef.current.innerHTML =
+                    savedContent;
+            }
+
+
+            setOriginalPage({
+                title:
+                    savedTitle,
+
+                participants:
+                    [
+                        ...savedParticipants
+                    ],
+
+                pageContent:
+                    savedContent
+            });
+
+
+            /*
+             * Backend normally keeps the page PSV.
+             * If the backend returns a status,
+             * use that status.
+             */
+
+            if (responseData.status) {
+
+                const returnedStatus =
+                    getStatusValue(
+                        responseData.status
+                    );
+
+                setPageStatus(
+                    returnedStatus
+                );
+
+                dispatchPageStatus(
+                    returnedStatus
+                );
+            }
+
+
+            dispatchPageTitle(
+                savedTitle
+            );
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Stay on the page after Save.
+             *
+             * Editing ends.
+             * Edit button becomes available again.
+             */
+
+            updateEditMode(false);
+
 
             logButtonEvent({
-                buttonNo:"HB24",
-                buttonName:"Update Page Button",
+                buttonNo: "HB24",
+                buttonName:
+                    "Update Page Button",
                 request,
                 response:
-                    error.response?.data||
+                    responseData,
+                status:
+                    response.status
+            });
+
+
+            toast.success(
+                "Page saved successfully."
+            );
+
+        } catch (error) {
+
+            logButtonEvent({
+                buttonNo: "HB24",
+                buttonName:
+                    "Update Page Button",
+                request,
+                response:
+                    error.response?.data ||
                     error.message,
                 status:
-                    error.response?.status||
+                    error.response?.status ||
                     500
             });
 
-            if(error.response?.status===401){
+
+            if (
+                error.response?.status === 401
+            ) {
 
                 toast.error(
                     "Session expired. Please login again."
@@ -934,82 +1509,166 @@ export default function UpdatePage(){
 
                 navigate("/");
 
-            }else if(error.response?.status===403){
+            } else if (
+                error.response?.status === 403
+            ) {
 
                 toast.error(
                     "You are not authorized to update this page."
                 );
 
-            }else if(error.response?.status===404){
+            } else if (
+                error.response?.status === 404
+            ) {
 
                 toast.error(
                     "Page not found."
                 );
 
-            }else{
+            } else {
 
                 toast.error(
-                    error.response?.data?.message||
-                    error.response?.data||
-                    "Unable to update page."
+                    error.response?.data?.message ||
+                    error.response?.data ||
+                    "Unable to save page changes."
                 );
             }
 
-        }finally{
+        } finally {
 
             setSaving(false);
         }
     };
 
-    const handlePublish=async()=>{
 
-        if(
-            saving||
-            publishing||
-            archiving
-        ){
+    /* =========================================================
+       CANCEL EDIT
+    ========================================================= */
+
+    const handleCancelEdit = () => {
+
+        if (!editMode) {
+            navigate(-1);
             return;
         }
 
-        if(!token){
+
+        setTitle(
+            originalPage.title
+        );
+
+
+        setParticipants([
+            ...originalPage.participants
+        ]);
+
+
+        setPageContent(
+            originalPage.pageContent
+        );
+
+
+        if (editorRef.current) {
+
+            editorRef.current.innerHTML =
+                originalPage.pageContent;
+        }
+
+
+        setParticipantInput("");
+
+        setParticipantSuggestions([]);
+
+        setShowParticipantSuggestions(false);
+
+
+        updateEditMode(false);
+
+
+        dispatchPageTitle(
+            originalPage.title
+        );
+
+
+        toast.info(
+            "Edit cancelled."
+        );
+    };
+
+
+    /* =========================================================
+       PUBLISH
+    ========================================================= */
+
+    const handlePublish = async () => {
+
+        if (isBusy) {
+            return;
+        }
+
+
+        if (!token) {
 
             navigate("/");
 
             return;
         }
 
-        if(
-            pageStatus==="PPB"||
-            pageStatus==="PPA"||
-            pageStatus==="PSA"
-        ){
+
+        if (!isSaved) {
+
+            toast.info(
+                "Only saved pages can be published."
+            );
 
             return;
         }
 
-        if(!validatePage()){
+
+        /*
+         * Do not publish while editing.
+         * User must Save first.
+         */
+
+        if (editMode) {
+
+            toast.info(
+                "Please save your changes before publishing."
+            );
+
             return;
         }
 
-        const requestData=
+
+        if (!validatePage()) {
+            return;
+        }
+
+
+        const requestData =
             getRequestData();
 
-        const request={
-            method:"PUT",
-            url:`${API_URL}/publish/${pageId}`,
-            data:requestData
+
+        const request = {
+            method: "PUT",
+            url:
+                `${API_URL}/publish/${pageId}`,
+            data:
+                requestData
         };
 
-        try{
+
+        try {
 
             setPublishing(true);
 
-            const response=
+
+            const response =
                 await axios.put(
                     `${API_URL}/publish/${pageId}`,
                     requestData,
                     {
-                        headers:{
+                        headers: {
                             Authorization:
                                 `Bearer ${token}`,
                             "Content-Type":
@@ -1018,73 +1677,96 @@ export default function UpdatePage(){
                     }
                 );
 
-            const returnedStatus=
+
+            const responseData =
+                response.data || {};
+
+
+            const returnedStatus =
                 getStatusValue(
-                    response.data?.status
+                    responseData.status
                 );
 
+
             updateLocalPageStatus(
-                returnedStatus==="PSV"
+                returnedStatus === "PSV"
                     ? "PPB"
                     : returnedStatus
             );
 
-            if(
-                Array.isArray(
-                    response.data?.participants
-                )
-            ){
 
-                setParticipants(
-                    response.data.participants
-                        .map(
-                            participant=>
-                                typeof participant==="string"
-                                    ? participant
-                                    : participant?.email
-                        )
-                        .filter(Boolean)
-                );
-            }
-
-            if(response.data?.title){
+            if (responseData.title) {
 
                 setTitle(
-                    response.data.title
+                    responseData.title
                 );
 
                 dispatchPageTitle(
-                    response.data.title
+                    responseData.title
                 );
             }
 
+
+            if (
+                Array.isArray(
+                    responseData.participants
+                )
+            ) {
+
+                const updatedParticipants =
+                    responseData.participants
+                        .map(participant =>
+                            typeof participant === "string"
+                                ? participant
+                                : participant?.email
+                        )
+                        .filter(Boolean);
+
+
+                setParticipants(
+                    updatedParticipants
+                );
+            }
+
+
+            updateEditMode(false);
+
+
             logButtonEvent({
-                buttonNo:"FB42",
-                buttonName:"Publish MOM Button",
+                buttonNo: "FB42",
+                buttonName:
+                    "Publish MOM Button",
                 request,
-                response:response.data,
-                status:response.status
+                response:
+                    responseData,
+                status:
+                    response.status
             });
+
 
             toast.success(
                 "MOM published and mailed to all participants."
             );
 
-        }catch(error){
+        } catch (error) {
 
             logButtonEvent({
-                buttonNo:"FB42",
-                buttonName:"Publish MOM Button",
+                buttonNo: "FB42",
+                buttonName:
+                    "Publish MOM Button",
                 request,
                 response:
-                    error.response?.data||
+                    error.response?.data ||
                     error.message,
                 status:
-                    error.response?.status||
+                    error.response?.status ||
                     500
             });
 
-            if(error.response?.status===401){
+
+            if (
+                error.response?.status === 401
+            ) {
 
                 toast.error(
                     "Session expired. Please login again."
@@ -1094,276 +1776,283 @@ export default function UpdatePage(){
 
                 navigate("/");
 
-            }else if(error.response?.status===403){
+            } else if (
+                error.response?.status === 403
+            ) {
 
                 toast.error(
                     "You are not authorized to publish this page."
                 );
 
-            }else if(error.response?.status===404){
+            } else {
 
                 toast.error(
-                    "Publish endpoint or page not found."
-                );
-
-            }else{
-
-                toast.error(
-                    error.response?.data?.message||
-                    error.response?.data||
+                    error.response?.data?.message ||
+                    error.response?.data ||
                     "Unable to publish page."
                 );
             }
 
-        }finally{
+        } finally {
 
             setPublishing(false);
         }
     };
 
-    const handleArchive=async()=>{
 
-        if(
-            saving||
-            publishing||
-            archiving
-        ){
+    /* =========================================================
+       ARCHIVE
+    ========================================================= */
+
+    const handleArchive = async () => {
+
+        if (isBusy) {
             return;
         }
 
-        if(!token){
+
+        if (!token) {
 
             navigate("/");
 
             return;
         }
 
-        if(
-            pageStatus==="PSA"||
-            pageStatus==="PPA"
-        ){
+
+        if (isArchived) {
+
+            toast.info(
+                "This page is already archived."
+            );
 
             return;
         }
 
-        const request={
-            method:"PUT",
-            url:`${API_URL}/archive/${pageId}`
+
+        if (editMode) {
+
+            toast.info(
+                "Please save or cancel your changes before archiving."
+            );
+
+            return;
+        }
+
+
+        const request = {
+            method: "PUT",
+            url:
+                `${API_URL}/archive/${pageId}`
         };
 
-        try{
+
+        try {
 
             setArchiving(true);
 
-            const response=
+
+            const response =
                 await axios.put(
                     `${API_URL}/archive/${pageId}`,
                     {},
                     {
-                        headers:{
+                        headers: {
                             Authorization:
                                 `Bearer ${token}`
                         }
                     }
                 );
 
-            const returnedStatus=
+
+            const returnedStatus =
                 getStatusValue(
                     response.data?.status
                 );
+
 
             updateLocalPageStatus(
                 returnedStatus
             );
 
+
+            updateEditMode(false);
+
+
             logButtonEvent({
-                buttonNo:"FB43",
-                buttonName:"Archive Button",
+                buttonNo: "FB43",
+                buttonName:
+                    "Archive Button",
                 request,
-                response:response.data,
-                status:response.status
+                response:
+                    response.data,
+                status:
+                    response.status
             });
+
 
             toast.success(
                 "Page archived successfully."
             );
 
-        }catch(error){
+        } catch (error) {
 
             logButtonEvent({
-                buttonNo:"FB43",
-                buttonName:"Archive Button",
+                buttonNo: "FB43",
+                buttonName:
+                    "Archive Button",
                 request,
                 response:
-                    error.response?.data||
+                    error.response?.data ||
                     error.message,
                 status:
-                    error.response?.status||
+                    error.response?.status ||
                     500
             });
 
-            if(error.response?.status===401){
 
-                toast.error(
-                    "Session expired. Please login again."
-                );
+            toast.error(
+                error.response?.data?.message ||
+                error.response?.data ||
+                "Unable to archive page."
+            );
 
-                localStorage.clear();
-
-                navigate("/");
-
-            }else if(error.response?.status===403){
-
-                toast.error(
-                    "You are not authorized to archive this page."
-                );
-
-            }else if(error.response?.status===404){
-
-                toast.error(
-                    "Page not found."
-                );
-
-            }else{
-
-                toast.error(
-                    error.response?.data?.message||
-                    error.response?.data||
-                    "Unable to archive page."
-                );
-            }
-
-        }finally{
+        } finally {
 
             setArchiving(false);
         }
     };
 
-    const handleUnarchive=async()=>{
 
-        if(
-            saving||
-            publishing||
-            archiving
-        ){
+    /* =========================================================
+       UNARCHIVE
+    ========================================================= */
+
+    const handleUnarchive = async () => {
+
+        if (isBusy) {
             return;
         }
 
-        if(!token){
+
+        if (!token) {
 
             navigate("/");
 
             return;
         }
 
-        const request={
-            method:"PUT",
-            url:`${API_URL}/unarchive/${pageId}`
+
+        if (!isArchived) {
+
+            toast.info(
+                "This page is not archived."
+            );
+
+            return;
+        }
+
+
+        const request = {
+            method: "PUT",
+            url:
+                `${API_URL}/archive/${pageId}`
         };
 
-        try{
+
+        try {
 
             setArchiving(true);
 
-            const response=
+
+            const response =
                 await axios.put(
                     `${API_URL}/archive/${pageId}`,
                     {},
                     {
-                        headers:{
+                        headers: {
                             Authorization:
                                 `Bearer ${token}`
                         }
                     }
                 );
 
-            const returnedStatus=
+
+            const returnedStatus =
                 getStatusValue(
                     response.data?.status
                 );
+
 
             updateLocalPageStatus(
                 returnedStatus
             );
 
+
+            updateEditMode(false);
+
+
             logButtonEvent({
-                buttonNo:"FB44",
-                buttonName:"Unarchive Button",
+                buttonNo: "FB44",
+                buttonName:
+                    "Unarchive Button",
                 request,
-                response:response.data,
-                status:response.status
+                response:
+                    response.data,
+                status:
+                    response.status
             });
+
 
             toast.success(
                 "Page unarchived successfully."
             );
 
-        }catch(error){
+        } catch (error) {
 
             logButtonEvent({
-                buttonNo:"FB44",
-                buttonName:"Unarchive Button",
+                buttonNo: "FB44",
+                buttonName:
+                    "Unarchive Button",
                 request,
                 response:
-                    error.response?.data||
+                    error.response?.data ||
                     error.message,
                 status:
-                    error.response?.status||
+                    error.response?.status ||
                     500
             });
 
-            if(error.response?.status===401){
 
-                toast.error(
-                    "Session expired. Please login again."
-                );
+            toast.error(
+                error.response?.data?.message ||
+                error.response?.data ||
+                "Unable to unarchive page."
+            );
 
-                localStorage.clear();
-
-                navigate("/");
-
-            }else if(error.response?.status===403){
-
-                toast.error(
-                    "You are not authorized to unarchive this page."
-                );
-
-            }else if(error.response?.status===404){
-
-                toast.error(
-                    "Unarchive endpoint or page not found."
-                );
-
-            }else{
-
-                toast.error(
-                    error.response?.data?.message||
-                    error.response?.data||
-                    "Unable to unarchive page."
-                );
-            }
-
-        }finally{
+        } finally {
 
             setArchiving(false);
         }
     };
 
-    const handleCopyDetails=async()=>{
 
-        const contentElement=
-            editorRef.current;
+    /* =========================================================
+       COPY
+    ========================================================= */
 
-        const contentText=
-            contentElement?.innerText||
+    const handleCopyDetails = async () => {
+
+        const contentText =
+            editorRef.current?.innerText ||
             "";
 
-        const details=[
+
+        const details = [
             `Title: ${title.trim()}`,
             `Status: ${getStatusLabel(pageStatus)}`,
             `Participants:`,
             ...participants.map(
-                participant=>
+                participant =>
                     `- ${participant}`
             ),
             "",
@@ -1371,53 +2060,68 @@ export default function UpdatePage(){
             contentText.trim()
         ].join("\n");
 
-        try{
+
+        try {
 
             await navigator.clipboard.writeText(
                 details
             );
 
+
             logButtonEvent({
-                buttonNo:"FB45",
-                buttonName:"Copy Page Details Button",
-                request:{
-                    action:"Copy Page Details",
+                buttonNo: "FB45",
+                buttonName:
+                    "Copy Page Details Button",
+                request: {
+                    action:
+                        "Copy Page Details",
                     pageId,
                     title,
                     participants,
-                    status:pageStatus
+                    status:
+                        pageStatus
                 },
-                response:{
+                response: {
                     message:
                         "Page details copied successfully"
                 },
-                status:200
+                status: 200
             });
+
 
             toast.success(
                 "Page details copied successfully."
             );
 
-        }catch(error){
+        } catch (error) {
 
-            const textArea=
-                document.createElement("textarea");
+            const textarea =
+                document.createElement(
+                    "textarea"
+                );
 
-            textArea.value=details;
+
+            textarea.value =
+                details;
+
 
             document.body.appendChild(
-                textArea
+                textarea
             );
 
-            textArea.select();
+
+            textarea.select();
+
 
             document.execCommand(
                 "copy"
             );
 
+
             document.body.removeChild(
-                textArea
+                textarea
             );
+
 
             toast.success(
                 "Page details copied successfully."
@@ -1425,18 +2129,30 @@ export default function UpdatePage(){
         }
     };
 
-    const handleAttachClick=()=>{
 
-        if(
-            saving||
-            publishing||
-            archiving||
-            uploadingAttachment
-        ){
+    /* =========================================================
+       ATTACHMENT BUTTON
+    ========================================================= */
+
+    const handleAttachClick = () => {
+
+        if (isBusy) {
             return;
         }
 
-        if(isArchived){
+
+        if (!editMode) {
+
+            toast.info(
+                "Click Edit before adding attachments."
+            );
+
+            return;
+        }
+
+
+        if (isArchived) {
+
             toast.info(
                 "Archived pages cannot have attachments added."
             );
@@ -1444,140 +2160,356 @@ export default function UpdatePage(){
             return;
         }
 
-        if(fileInputRef.current){
-            fileInputRef.current.click();
-        }
-    };
 
-    const handleFileChange=async(event)=>{
+        if (!isSaved) {
 
-        const files=
-            Array.from(
-                event.target.files||[]
+            toast.info(
+                "Only saved pages can have attachments added."
             );
 
-        if(files.length===0){
             return;
         }
 
-        if(!token){
 
-            navigate("/");
+        fileInputRef.current?.click();
+    };
 
-            return;
-        }
 
-        try{
+    /* =========================================================
+       FILE UPLOAD
+    ========================================================= */
 
-            setUploadingAttachment(true);
+    const handleFileChange =
+        async event => {
 
-            for(const file of files){
-
-                const formData=
-                    new FormData();
-
-                formData.append(
-                    "file",
-                    file
+            const files =
+                Array.from(
+                    event.target.files || []
                 );
 
-                const request={
-                    method:"POST",
-                    url:`${ATTACHMENTS_API_URL}/${pageId}`,
-                    fileName:file.name,
-                    fileType:file.type,
-                    fileSize:file.size
-                };
 
-                try{
+            if (!files.length) {
+                return;
+            }
 
-                    const response=
-                        await axios.post(
+
+            if (
+                !editMode ||
+                !isSaved ||
+                isArchived
+            ) {
+
+                toast.info(
+                    "Attachments can only be added while editing a saved page."
+                );
+
+                return;
+            }
+
+
+            if (!token) {
+
+                navigate("/");
+
+                return;
+            }
+
+
+            try {
+
+                setUploadingAttachment(true);
+
+
+                for (const file of files) {
+
+                    const formData =
+                        new FormData();
+
+
+                    formData.append(
+                        "file",
+                        file
+                    );
+
+
+                    const request = {
+                        method: "POST",
+                        url:
                             `${ATTACHMENTS_API_URL}/${pageId}`,
-                            formData,
-                            {
-                                headers:{
-                                    Authorization:
-                                        `Bearer ${token}`
+                        fileName:
+                            file.name,
+                        fileType:
+                            file.type,
+                        fileSize:
+                            file.size
+                    };
+
+
+                    try {
+
+                        const response =
+                            await axios.post(
+                                `${ATTACHMENTS_API_URL}/${pageId}`,
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization:
+                                            `Bearer ${token}`
+                                    }
                                 }
-                            }
+                            );
+
+
+                        setAttachments(
+                            previous => [
+                                ...previous,
+                                response.data
+                            ]
                         );
 
-                    setAttachments(prev=>[
-                        ...prev,
-                        response.data
-                    ]);
 
-                    logButtonEvent({
-                        buttonNo:"FB46",
-                        buttonName:"Attach File Button",
-                        request,
-                        response:response.data,
-                        status:response.status
-                    });
+                        logButtonEvent({
+                            buttonNo: "FB46",
+                            buttonName:
+                                "Attach File Button",
+                            request,
+                            response:
+                                response.data,
+                            status:
+                                response.status
+                        });
 
-                }catch(error){
+                    } catch (error) {
 
-                    logButtonEvent({
-                        buttonNo:"FB46",
-                        buttonName:"Attach File Button",
-                        request,
-                        response:
-                            error.response?.data||
-                            error.message,
-                        status:
-                            error.response?.status||
-                            500
-                    });
+                        logButtonEvent({
+                            buttonNo: "FB46",
+                            buttonName:
+                                "Attach File Button",
+                            request,
+                            response:
+                                error.response?.data ||
+                                error.message,
+                            status:
+                                error.response?.status ||
+                                500
+                        });
 
-                    toast.error(
-                        `Unable to upload ${file.name}.`
-                    );
+
+                        toast.error(
+                            `Unable to upload ${file.name}.`
+                        );
+                    }
+                }
+
+
+                toast.success(
+                    "Attachment upload completed."
+                );
+
+            } finally {
+
+                setUploadingAttachment(false);
+
+
+                if (fileInputRef.current) {
+
+                    fileInputRef.current.value =
+                        "";
                 }
             }
-
-            toast.success(
-                "Attachment upload completed."
-            );
-
-        }finally{
-
-            setUploadingAttachment(false);
-
-            if(fileInputRef.current){
-                fileInputRef.current.value="";
-            }
-        }
-    };
-
-    const getStatusLabel=(status)=>{
-
-        const statusMap={
-            PSV:"Saved",
-            PPB:"Published",
-            PSA:"Saved Archived",
-            PPA:"Published Archived"
         };
 
-        return(
-            statusMap[status]||
-            status||
-            "Unknown"
-        );
-    };
 
-    const handleBack=()=>{
+    /* =========================================================
+       FOOTER ACTIONS
+    ========================================================= */
+
+    useEffect(() => {
+
+        const handleFooterAction =
+            event => {
+
+                const action =
+                    event.detail?.action;
+
+
+                switch (action) {
+
+                    case "edit":
+
+                        if (
+                            isSaved &&
+                            !isArchived &&
+                            !editMode &&
+                            !isBusy
+                        ) {
+
+                            updateEditMode(true);
+
+                            setTimeout(() => {
+
+                                editorRef.current?.focus();
+
+                            }, 50);
+                        }
+
+                        break;
+
+
+                    case "save":
+
+                        if (
+                            isSaved &&
+                            editMode &&
+                            !isBusy
+                        ) {
+
+                            handleSubmit();
+                        }
+
+                        break;
+
+
+                    case "publish":
+
+                        if (
+                            isSaved &&
+                            !editMode &&
+                            !isBusy
+                        ) {
+
+                            handlePublish();
+                        }
+
+                        break;
+
+
+                    case "archive":
+
+                        if (
+                            !isArchived &&
+                            !editMode &&
+                            !isBusy
+                        ) {
+
+                            handleArchive();
+                        }
+
+                        break;
+
+
+                    case "unarchive":
+
+                        if (
+                            isArchived &&
+                            !isBusy
+                        ) {
+
+                            handleUnarchive();
+                        }
+
+                        break;
+
+
+                    case "copy":
+
+                        if (!isBusy) {
+
+                            handleCopyDetails();
+                        }
+
+                        break;
+
+
+                    case "attach":
+
+                        if (!isBusy) {
+
+                            handleAttachClick();
+                        }
+
+                        break;
+
+
+                    case "cancel":
+
+                        if (editMode) {
+
+                            handleCancelEdit();
+
+                        } else {
+
+                            navigate(-1);
+                        }
+
+                        break;
+
+
+                    case "back":
+
+                        if (!isBusy) {
+
+                            navigate(-1);
+                        }
+
+                        break;
+
+
+                    default:
+                        break;
+                }
+            };
+
+
+        window.addEventListener(
+            "footerPageAction",
+            handleFooterAction
+        );
+
+
+        return () => {
+
+            window.removeEventListener(
+                "footerPageAction",
+                handleFooterAction
+            );
+        };
+
+    }, [
+        pageStatus,
+        editMode,
+        isArchived,
+        isSaved,
+        isBusy,
+        title,
+        participants,
+        pageContent,
+        originalPage,
+        updateEditMode
+    ]);
+
+
+    /* =========================================================
+       BACK
+    ========================================================= */
+
+    const handleBack = () => {
+
+        if (isBusy) {
+            return;
+        }
 
         navigate(-1);
     };
 
-    const isArchived=
-        pageStatus==="PSA"||
-        pageStatus==="PPA";
 
-    if(loading){
+    /* =========================================================
+       LOADING
+    ========================================================= */
 
-        return(
+    if (loading) {
+
+        return (
             <div className="update-page-container">
 
                 <div className="update-page-loading">
@@ -1588,9 +2520,16 @@ export default function UpdatePage(){
         );
     }
 
-    return(
+
+    /* =========================================================
+       UI
+    ========================================================= */
+
+    return (
 
         <div className="update-page-container">
+
+            {/* HIDDEN FILE INPUT */}
 
             <input
                 ref={fileInputRef}
@@ -1598,13 +2537,19 @@ export default function UpdatePage(){
                 multiple
                 onChange={handleFileChange}
                 style={{
-                    display:"none"
+                    display: "none"
                 }}
             />
+
 
             <div className="update-page-scroll">
 
                 <div className="update-page">
+
+
+                    {/* =================================================
+                       PARTICIPANTS
+                    ================================================= */}
 
                     <div
                         ref={participantRef}
@@ -1615,70 +2560,85 @@ export default function UpdatePage(){
                             Participants
                         </div>
 
+
                         <div className="update-page-participants-box">
 
                             {participants.map(
-                                (participant,index)=>(
+                                (participant, index) => (
 
                                     <div
                                         className="update-page-participant-chip"
-                                        key={
-                                            `${participant}-${index}`
-                                        }
+                                        key={`${participant}-${index}`}
                                     >
 
                                         <div className="update-page-participant-chip-info">
 
                                             <span className="update-page-participant-name">
-                                                {getParticipantName(
-                                                    participant
-                                                )}
+
+                                                {
+                                                    getParticipantName(
+                                                        participant
+                                                    )
+                                                }
+
                                             </span>
 
+
                                             <span className="update-page-participant-email">
-                                                {getParticipantEmail(
-                                                    participant
-                                                )}
+
+                                                {
+                                                    getParticipantEmail(
+                                                        participant
+                                                    )
+                                                }
+
                                             </span>
 
                                         </div>
 
+
                                         <button
                                             type="button"
                                             className="update-page-participant-remove"
-                                            onClick={()=>
+                                            onClick={() =>
                                                 handleRemoveParticipant(
                                                     index
                                                 )
                                             }
                                             disabled={
-                                                saving||
-                                                publishing||
-                                                archiving||
-                                                isArchived
+                                                !editMode ||
+                                                isBusy ||
+                                                isArchived ||
+                                                !isSaved
                                             }
                                         >
                                             ×
                                         </button>
 
                                     </div>
-
                                 )
                             )}
+
+
+                            {/* INPUT */}
 
                             <div className="update-page-participant-input-wrapper">
 
                                 <input
                                     type="text"
-                                    value={participantInput}
+                                    value={
+                                        participantInput
+                                    }
                                     onChange={
                                         handleParticipantInput
                                     }
-                                    onFocus={()=>{
+                                    onFocus={() => {
 
-                                        if(
-                                            participantSuggestions.length>0
-                                        ){
+                                        if (
+                                            editMode &&
+                                            isSaved &&
+                                            participantSuggestions.length > 0
+                                        ) {
 
                                             setShowParticipantSuggestions(
                                                 true
@@ -1686,118 +2646,140 @@ export default function UpdatePage(){
                                         }
                                     }}
                                     placeholder={
-                                        participants.length===0
+                                        participants.length === 0
                                             ? "Add participants..."
                                             : "Add another participant..."
                                     }
                                     disabled={
-                                        saving||
-                                        publishing||
-                                        archiving||
-                                        isArchived
+                                        !editMode ||
+                                        isBusy ||
+                                        isArchived ||
+                                        !isSaved
                                     }
                                 />
 
-                                {searchingParticipants&&(
+
+                                {searchingParticipants && (
 
                                     <div className="update-page-participant-searching">
                                         Searching...
                                     </div>
-
                                 )}
 
-                                {showParticipantSuggestions&&
-                                    participantSuggestions.length>0&&(
 
-                                    <div className="update-page-participant-suggestions">
+                                {showParticipantSuggestions &&
+                                    participantSuggestions.length > 0 && (
 
-                                        {participantSuggestions.map(
-                                            user=>(
+                                        <div className="update-page-participant-suggestions">
 
-                                                <button
-                                                    type="button"
-                                                    className="update-page-participant-suggestion"
-                                                    key={
-                                                        user.userId||
-                                                        user.id||
-                                                        user.email
-                                                    }
-                                                    onMouseDown={
-                                                        event=>{
+                                            {participantSuggestions.map(
+                                                user => (
 
-                                                            event.preventDefault();
-
-                                                            handleParticipantSelect(
-                                                                user
-                                                            );
+                                                    <button
+                                                        type="button"
+                                                        className="update-page-participant-suggestion"
+                                                        key={
+                                                            user.userId ||
+                                                            user.id ||
+                                                            user.email
                                                         }
-                                                    }
-                                                >
+                                                        onMouseDown={
+                                                            event => {
 
-                                                    <div className="update-page-participant-avatar">
+                                                                event.preventDefault();
 
-                                                        {String(
-                                                            user.userName||
-                                                            user.username||
-                                                            user.name||
-                                                            user.email||
-                                                            "U"
-                                                        )
-                                                            .charAt(0)
-                                                            .toUpperCase()}
-
-                                                    </div>
-
-                                                    <div className="update-page-participant-suggestion-info">
-
-                                                        <span>
-                                                            {
-                                                                user.userName||
-                                                                user.username||
-                                                                user.name||
-                                                                user.email
+                                                                handleParticipantSelect(
+                                                                    user
+                                                                );
                                                             }
-                                                        </span>
+                                                        }
+                                                    >
 
-                                                        <small>
-                                                            {user.email}
-                                                        </small>
+                                                        <div className="update-page-participant-avatar">
 
-                                                    </div>
+                                                            {String(
+                                                                user.userName ||
+                                                                user.username ||
+                                                                user.name ||
+                                                                user.email ||
+                                                                "U"
+                                                            )
+                                                                .charAt(0)
+                                                                .toUpperCase()}
 
-                                                </button>
+                                                        </div>
 
-                                            )
-                                        )}
 
-                                    </div>
+                                                        <div className="update-page-participant-suggestion-info">
 
-                                )}
+                                                            <span>
+
+                                                                {
+                                                                    user.userName ||
+                                                                    user.username ||
+                                                                    user.name ||
+                                                                    user.email
+                                                                }
+
+                                                            </span>
+
+
+                                                            <small>
+
+                                                                {
+                                                                    user.email
+                                                                }
+
+                                                            </small>
+
+                                                        </div>
+
+                                                    </button>
+                                                )
+                                            )}
+
+                                        </div>
+                                    )}
 
                             </div>
 
                         </div>
 
+
                         <div className="update-page-participants-help">
+
                             Select users who should receive this published MOM by email.
+
                         </div>
 
                     </div>
+
+
+                    {/* =================================================
+                       MOM EDITOR
+                    ================================================= */}
 
                     <div
                         ref={editorRef}
                         className="update-page-editor"
                         contentEditable={
-                            !saving&&
-                            !publishing&&
-                            !archiving&&
-                            !isArchived
+                            editMode &&
+                            !isBusy &&
+                            !isArchived &&
+                            isSaved
                         }
                         suppressContentEditableWarning
-                        onInput={handleEditorInput}
+                        onInput={
+                            handleEditorInput
+                        }
                     />
 
-                    {attachments.length>0&&(
+
+                    {/* =================================================
+                       ATTACHMENTS
+                    ================================================= */}
+
+                    {attachments.length > 0 && (
 
                         <div className="update-page-attachments">
 
@@ -1805,48 +2787,56 @@ export default function UpdatePage(){
                                 Attachments
                             </div>
 
+
                             {attachments.map(
-                                (attachment,index)=>(
+                                (attachment, index) => (
 
                                     <div
                                         className="update-page-attachment-item"
                                         key={
-                                            attachment.attachmentId||
+                                            attachment.attachmentId ||
+                                            attachment.id ||
                                             index
                                         }
                                     >
 
                                         <span>
-                                            {attachment.fileName||
-                                                attachment.name||
-                                                "Attachment"}
+                                            {
+                                                attachment.fileName ||
+                                                attachment.name ||
+                                                "Attachment"
+                                            }
                                         </span>
 
+
                                         <span>
-                                            {attachment.fileSize
-                                                ? `${Math.ceil(
-                                                    attachment.fileSize/1024
-                                                )} KB`
-                                                : ""}
+
+                                            {
+                                                attachment.fileSize
+                                                    ? `${Math.ceil(
+                                                        attachment.fileSize / 1024
+                                                    )} KB`
+                                                    : ""
+                                            }
+
                                         </span>
 
                                     </div>
-
                                 )
                             )}
 
                         </div>
-
                     )}
 
                 </div>
-
             </div>
 
-            {(saving||
-                publishing||
-                archiving||
-                uploadingAttachment)&&(
+
+            {/* =========================================================
+               LOADING OVERLAY
+            ========================================================= */}
+
+            {isBusy && (
 
                 <div className="update-page-saving">
 
@@ -1856,11 +2846,15 @@ export default function UpdatePage(){
                             ? "Updating page status..."
                             : uploadingAttachment
                                 ? "Uploading attachment..."
-                                : "Saving..."}
+                                : "Saving page changes..."}
 
                 </div>
-
             )}
+
+
+            {/* =========================================================
+               BOTTOM ACTION BAR
+            ========================================================= */}
 
             <div className="update-page-action-bar">
 
@@ -1868,15 +2862,11 @@ export default function UpdatePage(){
                     type="button"
                     className="update-page-action-button update-page-back-button"
                     onClick={handleBack}
-                    disabled={
-                        saving||
-                        publishing||
-                        archiving||
-                        uploadingAttachment
-                    }
+                    disabled={isBusy}
                 >
                     Back
                 </button>
+
 
                 <div className="update-page-action-right">
 
@@ -1885,11 +2875,9 @@ export default function UpdatePage(){
                         className="update-page-action-button update-page-save-button"
                         onClick={handleSubmit}
                         disabled={
-                            saving||
-                            publishing||
-                            archiving||
-                            uploadingAttachment||
-                            isArchived
+                            !editMode ||
+                            !isSaved ||
+                            isBusy
                         }
                     >
                         {saving
@@ -1897,25 +2885,20 @@ export default function UpdatePage(){
                             : "Save"}
                     </button>
 
+
                     <button
                         type="button"
                         className="update-page-action-button update-page-publish-button"
                         onClick={handlePublish}
                         disabled={
-                            saving||
-                            publishing||
-                            archiving||
-                            uploadingAttachment||
-                            pageStatus==="PPB"||
-                            pageStatus==="PSA"||
-                            pageStatus==="PPA"
+                            !isSaved ||
+                            editMode ||
+                            isBusy
                         }
                     >
                         {publishing
                             ? "Publishing..."
-                            : pageStatus==="PPB"
-                                ? "Published"
-                                : "Publish"}
+                            : "Publish"}
                     </button>
 
                 </div>

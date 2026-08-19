@@ -12,6 +12,9 @@ const ALL_NOTEBOOKS_API =
 const PAGES_API =
     "http://localhost:8080/api/pages/allPages";
 
+const UNMAP_PAGE_API =
+    "http://localhost:8080/api/pages/unmap";
+
 export default function RecentNotebooks({
     searchKeyword,
     superUser = false
@@ -21,19 +24,38 @@ export default function RecentNotebooks({
 
     const [notebooks, setNotebooks] = useState([]);
     const [pages, setPages] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [pagesLoading, setPagesLoading] = useState(true);
+
     const [error, setError] = useState("");
     const [pagesError, setPagesError] = useState("");
+
     const [showAllNotebooks, setShowAllNotebooks] = useState(false);
     const [expandedNotebookId, setExpandedNotebookId] = useState(null);
 
+    /*
+     * Stores the page currently being unmapped.
+     * Used to disable only that particular button.
+     */
+    const [unmappingPageId, setUnmappingPageId] = useState(null);
+
     const token = localStorage.getItem("token");
 
+    /* =========================================================
+       LOAD DATA
+    ========================================================= */
+
     useEffect(() => {
+
         fetchNotebooks();
         fetchPages();
+
     }, [superUser]);
+
+    /* =========================================================
+       FETCH NOTEBOOKS
+    ========================================================= */
 
     const fetchNotebooks = async () => {
 
@@ -47,6 +69,7 @@ export default function RecentNotebooks({
                 : MY_NOTEBOOKS_API;
 
             const pageSize = 100;
+
             let currentPage = 0;
             let allNotebooks = [];
             let totalPages = 1;
@@ -125,6 +148,7 @@ export default function RecentNotebooks({
             );
 
             console.log("Response");
+
             console.log(error.response?.data);
 
             console.groupEnd();
@@ -141,6 +165,10 @@ export default function RecentNotebooks({
         }
     };
 
+    /* =========================================================
+       FETCH PAGES
+    ========================================================= */
+
     const fetchPages = async () => {
 
         try {
@@ -149,6 +177,7 @@ export default function RecentNotebooks({
             setPagesError("");
 
             const pageSize = 100;
+
             let currentPage = 0;
             let allPages = [];
             let totalPages = 1;
@@ -238,6 +267,10 @@ export default function RecentNotebooks({
         }
     };
 
+    /* =========================================================
+       SEARCH
+    ========================================================= */
+
     const keyword =
         searchKeyword?.trim().toLowerCase() || "";
 
@@ -288,9 +321,14 @@ export default function RecentNotebooks({
             ? filteredNotebooks
             : filteredNotebooks.slice(0, 6);
 
+    /* =========================================================
+       NOTEBOOK ACTIONS
+    ========================================================= */
+
     const handleViewAllNotebooks = () => {
 
         setShowAllNotebooks(prev => !prev);
+
         setExpandedNotebookId(null);
     };
 
@@ -307,6 +345,10 @@ export default function RecentNotebooks({
         );
     };
 
+    /* =========================================================
+       GET PAGES OF NOTEBOOK
+    ========================================================= */
+
     const getNotebookPages = notebookId => {
 
         return pages.filter(page => {
@@ -319,9 +361,14 @@ export default function RecentNotebooks({
                 page.notebook?.id ||
                 "";
 
-            return String(pageNotebookId) === String(notebookId);
+            return String(pageNotebookId) ===
+                String(notebookId);
         });
     };
+
+    /* =========================================================
+       NOTEBOOK STATUS
+    ========================================================= */
 
     const getNotebookStatus = notebook => {
 
@@ -357,6 +404,10 @@ export default function RecentNotebooks({
         return normalizedStatus;
     };
 
+    /* =========================================================
+       PAGE CLICK
+    ========================================================= */
+
     const handlePageClick = pageId => {
 
         if (!pageId) {
@@ -368,8 +419,135 @@ export default function RecentNotebooks({
         );
     };
 
+    /* =========================================================
+       UNMAP PAGE
+    ========================================================= */
+
+    const handleUnmapPage = async (
+        event,
+        pageId,
+        notebookId
+    ) => {
+
+        /*
+         * Prevent the page row click.
+         */
+        event.stopPropagation();
+
+        if (!pageId) {
+            return;
+        }
+
+        const confirmed = window.confirm(
+            "Are you sure you want to unmap this page from the notebook?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            setUnmappingPageId(pageId);
+
+            console.group("UH-RN3 - Unmap Page");
+
+            console.log("Request");
+
+            console.log({
+                method: "PUT",
+                url: `${UNMAP_PAGE_API}/${pageId}`,
+                pageId,
+                notebookId
+            });
+
+            const response = await axios.put(
+                `${UNMAP_PAGE_API}/${pageId}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            console.log("Response");
+
+            console.log(response.data);
+
+            console.groupEnd();
+
+            /*
+             * Update local page state.
+             *
+             * The backend has already removed the notebook
+             * relationship. We now remove the notebook
+             * relationship locally as well.
+             */
+            setPages(prevPages =>
+                prevPages.map(page => {
+
+                    if (
+                        String(page.pageId) ===
+                        String(pageId)
+                    ) {
+
+                        return {
+                            ...page,
+
+                            notebookId: null,
+
+                            notebook: null,
+
+                            notebooks: null
+                        };
+                    }
+
+                    return page;
+                })
+            );
+
+        } catch (error) {
+
+            console.group("UH-RN3 - Unmap Page Error");
+
+            console.log("Request");
+
+            console.log({
+                method: "PUT",
+                url: `${UNMAP_PAGE_API}/${pageId}`,
+                pageId,
+                notebookId
+            });
+
+            console.log("Response");
+
+            console.log(error.response?.data);
+
+            console.groupEnd();
+
+            window.alert(
+                error.response?.data?.message ||
+                error.response?.data ||
+                "Unable to unmap page from notebook."
+            );
+
+        } finally {
+
+            setUnmappingPageId(null);
+        }
+    };
+
+    /* =========================================================
+       RENDER
+    ========================================================= */
+
     return (
         <div className="recent-notebooks-card">
+
+            {/* =================================================
+                HEADER
+            ================================================= */}
 
             <div className="recent-notebooks-header">
 
@@ -395,6 +573,10 @@ export default function RecentNotebooks({
 
             </div>
 
+            {/* =================================================
+                LOADING
+            ================================================= */}
+
             {loading ? (
 
                 <div className="recent-notebooks-state">
@@ -409,19 +591,35 @@ export default function RecentNotebooks({
 
             ) : error ? (
 
+                /* =================================================
+                   ERROR
+                ================================================= */
+
                 <div className="recent-notebooks-state recent-notebooks-error">
+
                     {error}
+
                 </div>
 
             ) : visibleNotebooks.length === 0 ? (
 
+                /* =================================================
+                   EMPTY
+                ================================================= */
+
                 <div className="recent-notebooks-state">
+
                     {superUser
                         ? "No notebooks found."
                         : "No recent notebooks found."}
+
                 </div>
 
             ) : (
+
+                /* =================================================
+                   NOTEBOOK LIST
+                ================================================= */
 
                 <div
                     className={
@@ -460,6 +658,10 @@ export default function RecentNotebooks({
                                 className="recent-notebook-wrapper"
                                 key={notebookId}
                             >
+
+                                {/* =================================================
+                                   NOTEBOOK ROW
+                                ================================================= */}
 
                                 <button
                                     type="button"
@@ -513,9 +715,17 @@ export default function RecentNotebooks({
 
                                 </button>
 
+                                {/* =================================================
+                                   EXPANDED PAGES
+                                ================================================= */}
+
                                 {isExpanded && (
 
                                     <div className="recent-notebook-pages-dropdown">
+
+                                        {/* =================================================
+                                           PAGE HEADER
+                                        ================================================= */}
 
                                         <div className="recent-notebook-pages-header">
 
@@ -528,6 +738,10 @@ export default function RecentNotebooks({
                                             </span>
 
                                         </div>
+
+                                        {/* =================================================
+                                           PAGE LOADING
+                                        ================================================= */}
 
                                         {pagesLoading ? (
 
@@ -543,17 +757,33 @@ export default function RecentNotebooks({
 
                                         ) : pagesError ? (
 
+                                            /* =================================================
+                                               PAGE ERROR
+                                            ================================================= */
+
                                             <div className="recent-notebook-pages-state recent-notebook-pages-error">
+
                                                 {pagesError}
+
                                             </div>
 
                                         ) : notebookPages.length === 0 ? (
 
+                                            /* =================================================
+                                               NO PAGES
+                                            ================================================= */
+
                                             <div className="recent-notebook-pages-state">
+
                                                 No pages mapped to this notebook.
+
                                             </div>
 
                                         ) : (
+
+                                            /* =================================================
+                                               PAGE LIST
+                                            ================================================= */
 
                                             <div className="recent-notebook-pages-list">
 
@@ -570,53 +800,116 @@ export default function RecentNotebooks({
                                                         page.status ||
                                                         "PSV";
 
+                                                    const isUnmapping =
+                                                        String(
+                                                            unmappingPageId
+                                                        ) ===
+                                                        String(pageId);
+
                                                     return (
 
-                                                        <button
-                                                            type="button"
+                                                        <div
                                                             className="recent-notebook-page-row"
                                                             key={pageId}
-                                                            onClick={() =>
-                                                                handlePageClick(
-                                                                    pageId
-                                                                )
-                                                            }
                                                         >
 
-                                                            <div className="recent-notebook-page-icon">
-                                                                📄
-                                                            </div>
+                                                            {/* =================================================
+                                                               PAGE MAIN CLICK AREA
+                                                            ================================================= */}
 
-                                                            <div className="recent-notebook-page-info">
+                                                            <div
+                                                                className="recent-notebook-page-main"
+                                                                onClick={() =>
+                                                                    handlePageClick(
+                                                                        pageId
+                                                                    )
+                                                                }
+                                                                role="button"
+                                                                tabIndex={0}
+                                                                onKeyDown={event => {
 
-                                                                <span className="recent-notebook-page-title">
-                                                                    {pageTitle}
-                                                                </span>
+                                                                    if (
+                                                                        event.key ===
+                                                                        "Enter"
+                                                                    ) {
 
-                                                                <span className="recent-notebook-page-id">
-                                                                    {pageId}
-                                                                </span>
+                                                                        handlePageClick(
+                                                                            pageId
+                                                                        );
+                                                                    }
 
-                                                            </div>
-
-                                                            <span
-                                                                className={`recent-notebook-page-status ${String(
-                                                                    pageStatus
-                                                                )
-                                                                    .toLowerCase()
-                                                                    .replace(
-                                                                        /\s+/g,
-                                                                        "-"
-                                                                    )}`}
+                                                                }}
                                                             >
-                                                                {pageStatus}
-                                                            </span>
 
-                                                            <span className="recent-notebook-page-arrow">
-                                                                ›
-                                                            </span>
+                                                                <div className="recent-notebook-page-icon">
+                                                                    📄
+                                                                </div>
 
-                                                        </button>
+                                                                <div className="recent-notebook-page-info">
+
+                                                                    <span className="recent-notebook-page-title">
+                                                                        {pageTitle}
+                                                                    </span>
+
+                                                                    <span className="recent-notebook-page-id">
+                                                                        {pageId}
+                                                                    </span>
+
+                                                                </div>
+
+                                                                <span
+                                                                    className={`recent-notebook-page-status ${String(
+                                                                        pageStatus
+                                                                    )
+                                                                        .toLowerCase()
+                                                                        .replace(
+                                                                            /\s+/g,
+                                                                            "-"
+                                                                        )}`}
+                                                                >
+                                                                    {pageStatus}
+                                                                </span>
+
+                                                                <span className="recent-notebook-page-arrow">
+                                                                    ›
+                                                                </span>
+
+                                                            </div>
+
+                                                            {/* =================================================
+                                                               UNMAP BUTTON
+                                                            ================================================= */}
+
+                                                            {!superUser && (
+
+                                                                <button
+                                                                    type="button"
+                                                                    className={`recent-notebook-unmap-button ${
+                                                                        isUnmapping
+                                                                            ? "recent-notebook-unmap-button-loading"
+                                                                            : ""
+                                                                    }`}
+                                                                    disabled={
+                                                                        isUnmapping
+                                                                    }
+                                                                    onClick={event =>
+                                                                        handleUnmapPage(
+                                                                            event,
+                                                                            pageId,
+                                                                            notebookId
+                                                                        )
+                                                                    }
+                                                                >
+
+                                                                    {isUnmapping
+                                                                        ? "Unmapping..."
+                                                                        : "Unmap"}
+
+                                                                </button>
+
+                                                            )}
+
+                                                        </div>
 
                                                     );
 
@@ -640,6 +933,10 @@ export default function RecentNotebooks({
 
             )}
 
+            {/* =================================================
+                VIEW ALL
+            ================================================= */}
+
             {filteredNotebooks.length > 6 &&
                 !loading &&
                 !error && (
@@ -649,9 +946,11 @@ export default function RecentNotebooks({
                         className="recent-notebooks-view-more"
                         onClick={handleViewAllNotebooks}
                     >
+
                         {showAllNotebooks
                             ? "Show Less"
                             : `View All Notebooks (${filteredNotebooks.length})`}
+
                     </button>
 
                 )}

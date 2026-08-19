@@ -4,15 +4,13 @@ import com.example.mom.dto.Users.UsersCreationRequestDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 public interface UsersFacade {
 
     Page<UsersCreationResponseDto> getAllUsers(int page, int size, String search, String authority, String status, String sortBy, String sortDir);
 
     UsersCreationResponseDto getUserById(String userId);
 
-    UsersCreationResponseDto updateUserDetails(UsersCreationRequestDto usersCreationRequestDto);
+    UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto);
 
     UsersCreationResponseDto updateUserStatus(String userId);
 }

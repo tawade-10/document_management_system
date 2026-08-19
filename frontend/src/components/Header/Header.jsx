@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import "./Header.css";
+
 import { CgProfile } from "react-icons/cg";
+
 import {
     FaSearch,
     FaUndo,
@@ -26,12 +28,16 @@ import {
     FaFilter,
     FaSignOutAlt
 } from "react-icons/fa";
+
 import { MdFormatColorText } from "react-icons/md";
+
 import axios from "axios";
 import { toast } from "react-toastify";
+
 import ToggleButton from "../ToggleButton/ToggleButton";
 import CreateNotebookPopup from "../CreateNotebookPopup/CreateNotebookPopup";
 import CreatePagePopup from "../CreatePagePopup/CreatePagePopup";
+
 
 export default function Header({
     searchKeyword,
@@ -47,53 +53,111 @@ export default function Header({
     pageTitle = "",
     createdAt = ""
 }) {
+
     const API_URL = "http://localhost:8080/api/auth";
 
     const navigate = useNavigate();
     const location = useLocation();
+
     const { pageId } = useParams();
 
-    const [headerPageTitle, setHeaderPageTitle] = useState(pageTitle);
+    const [headerPageTitle, setHeaderPageTitle] =
+        useState(pageTitle);
+
     const [, forceUpdate] = useState(0);
 
-    const [showSort, setShowSort] = useState(false);
-    const [showFilter, setShowFilter] = useState(false);
-    const [showCreateNotebook, setShowCreateNotebook] = useState(false);
-    const [showCreatePage, setShowCreatePage] = useState(false);
+    const [showSort, setShowSort] =
+        useState(false);
 
-    const [openSortDropdown, setOpenSortDropdown] = useState(null);
-    const [openFilterDropdown, setOpenFilterDropdown] = useState(null);
+    const [showFilter, setShowFilter] =
+        useState(false);
 
-    const [fontFamily, setFontFamily] = useState("Calibri");
-    const [fontSize, setFontSize] = useState("12");
-    const [showFontDropdown, setShowFontDropdown] = useState(false);
-    const [showSizeDropdown, setShowSizeDropdown] = useState(false);
-    const [showMoreTools, setShowMoreTools] = useState(false);
+    const [showCreateNotebook, setShowCreateNotebook] =
+        useState(false);
 
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("userName");
+    const [showCreatePage, setShowCreatePage] =
+        useState(false);
 
-    const authorityString = localStorage.getItem("authority") || "";
+    const [openSortDropdown, setOpenSortDropdown] =
+        useState(null);
 
-    const authorities = authorityString
-        .split(",")
-        .map(role => role.trim().toUpperCase())
-        .filter(Boolean);
+    const [openFilterDropdown, setOpenFilterDropdown] =
+        useState(null);
+
+    const [fontFamily, setFontFamily] =
+        useState("Calibri");
+
+    const [fontSize, setFontSize] =
+        useState("12");
+
+    const [showFontDropdown, setShowFontDropdown] =
+        useState(false);
+
+    const [showSizeDropdown, setShowSizeDropdown] =
+        useState(false);
+
+    const [showMoreTools, setShowMoreTools] =
+        useState(false);
+
+
+    const token =
+        localStorage.getItem("token");
+
+    const username =
+        localStorage.getItem("userName");
+
+    const authorityString =
+        localStorage.getItem("authority") || "";
+
+
+    const authorities =
+        authorityString
+            .split(",")
+            .map(role =>
+                role.trim().toUpperCase()
+            )
+            .filter(Boolean);
+
 
     const currentRole =
-        localStorage.getItem("currentRole") || "USER";
+        localStorage.getItem("currentRole") ||
+        "USER";
 
-    const isAdmin = currentRole === "ADMIN";
-    const isSuperUser = currentRole === "SUPER_USER";
-    const isUser = currentRole === "USER";
+
+    const isAdmin =
+        currentRole === "ADMIN";
+
+    const isSuperUser =
+        currentRole === "SUPER_USER";
+
+    const isUser =
+        currentRole === "USER";
+
 
     const permissions = {
-        canManageUsers: isAdmin,
-        canCreateNotebook: isUser || isSuperUser,
-        canCreatePage: isUser || isSuperUser,
-        canViewPages: isUser || isSuperUser,
-        canSort: isAdmin || isSuperUser || isUser,
-        canFilter: isAdmin || isSuperUser || isUser,
+
+        canManageUsers:
+            isAdmin,
+
+        canCreateNotebook:
+            isUser || isSuperUser,
+
+        canCreatePage:
+            isUser || isSuperUser,
+
+        canViewPages:
+            isUser || isSuperUser,
+
+        canSort:
+            isAdmin ||
+            isSuperUser ||
+            isUser,
+
+        canFilter:
+            isAdmin ||
+            isSuperUser ||
+            isUser,
+
         canToggleRole:
             !isAdmin &&
             authorities.includes("USER") &&
@@ -101,57 +165,71 @@ export default function Header({
     };
 
     const userSortByOptions = [
+
         {
             value: "userId",
             label: "User ID"
         },
+
         {
             value: "userName",
             label: "User Name"
         },
+
         {
             value: "email",
             label: "Email"
         },
+
         {
             value: "authorityProfiles.authorityName",
             label: "Authority"
         },
+
         {
             value: "status.description",
             label: "Status"
         },
+
         {
             value: "createdAt",
             label: "Created Date"
         }
     ];
 
+
     const notebookSortByOptions = [
+
         {
             value: "notebookId",
             label: "Notebook ID"
         },
+
         {
             value: "title",
             label: "Title"
         },
+
         {
             value: "createdAt",
             label: "Created Date"
         }
     ];
 
+
     const sortOrderOptions = [
+
         {
             value: "asc",
             label: "A → Z"
         },
+
         {
             value: "desc",
             label: "Z → A"
         }
     ];
+
 
     const authorityOptions = [
         "ADMIN",
@@ -159,10 +237,12 @@ export default function Header({
         "USER"
     ];
 
+
     const userStatusOptions = [
         "UAC",
         "UIA"
     ];
+
 
     const notebookStatusOptions = [
         "NAC",
@@ -177,6 +257,7 @@ export default function Header({
         "Georgia",
         "Tahoma"
     ];
+
 
     const fontSizeOptions = [
         "8",
@@ -193,15 +274,21 @@ export default function Header({
         "32"
     ];
 
-    const currentSortOptions = isAdmin
-        ? userSortByOptions
-        : notebookSortByOptions;
 
-    const currentStatusOptions = isAdmin
-        ? userStatusOptions
-        : notebookStatusOptions;
+    const currentSortOptions =
+        isAdmin
+            ? userSortByOptions
+            : notebookSortByOptions;
+
+
+    const currentStatusOptions =
+        isAdmin
+            ? userStatusOptions
+            : notebookStatusOptions;
+
 
     const getSearchPlaceholder = () => {
+
         if (isAdmin) {
             return "Search Users...";
         }
@@ -209,20 +296,28 @@ export default function Header({
         return "Search Notebooks...";
     };
 
+
     const getSortByLabel = () => {
-        const selected = currentSortOptions.find(
-            option => option.value === sortBy
-        );
+
+        const selected =
+            currentSortOptions.find(
+                option =>
+                    option.value === sortBy
+            );
 
         return selected
             ? selected.label
             : currentSortOptions[0].label;
     };
 
+
     const getSortOrderLabel = () => {
-        const selected = sortOrderOptions.find(
-            option => option.value === sortDir
-        );
+
+        const selected =
+            sortOrderOptions.find(
+                option =>
+                    option.value === sortDir
+            );
 
         return selected
             ? selected.label
@@ -236,98 +331,177 @@ export default function Header({
         response,
         status
     }) => {
-        console.group(`${buttonNo} - ${buttonName}`);
+
+        console.group(
+            `${buttonNo} - ${buttonName}`
+        );
+
         console.log("Request");
         console.log(request);
+
         console.log("Response");
         console.log(response);
+
         console.log("Status Code");
         console.log(status);
+
         console.groupEnd();
     };
 
     useEffect(() => {
+
         const refresh = () => {
-            forceUpdate(prev => prev + 1);
+
+            forceUpdate(
+                prev => prev + 1
+            );
         };
 
-        window.addEventListener("login", refresh);
-        window.addEventListener("roleChanged", refresh);
+
+        window.addEventListener(
+            "login",
+            refresh
+        );
+
+        window.addEventListener(
+            "roleChanged",
+            refresh
+        );
+
 
         return () => {
-            window.removeEventListener("login", refresh);
-            window.removeEventListener("roleChanged", refresh);
+
+            window.removeEventListener(
+                "login",
+                refresh
+            );
+
+            window.removeEventListener(
+                "roleChanged",
+                refresh
+            );
         };
+
     }, []);
 
     useEffect(() => {
-        const fetchPageHeaderDetails = async () => {
-            if (!pageId) {
-                setHeaderPageTitle(pageTitle || "");
-                return;
-            }
 
-            try {
-                const response = await axios.get(
-                    `http://localhost:8080/api/pages/${pageId}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
+        const fetchPageHeaderDetails =
+            async () => {
+                if (!pageId) {
 
-                console.group(
-                    "HB33 - Load Page Header Details"
-                );
+                    setHeaderPageTitle(
+                        pageTitle || ""
+                    );
 
-                console.log("Request");
+                    return;
+                }
 
-                console.log({
-                    method: "GET",
-                    url: `http://localhost:8080/api/pages/${pageId}`
-                });
 
-                console.log("Response");
+                try {
 
-                console.log(response.data);
+                    const response =
+                        await axios.get(
+                            `http://localhost:8080/api/pages/${pageId}`,
+                            {
+                                headers: {
+                                    Authorization:
+                                        `Bearer ${token}`
+                                }
+                            }
+                        );
 
-                console.groupEnd();
 
-                setHeaderPageTitle(
-                    response.data?.title || ""
-                );
-            } catch (error) {
-                console.group(
-                    "HB33 - Load Page Header Details"
-                );
+                    console.group(
+                        "HB33 - Load Page Header Details"
+                    );
 
-                console.log("Response");
 
-                console.log(error.response?.data);
+                    console.log("Request");
 
-                console.groupEnd();
+                    console.log({
+                        method: "GET",
+                        url:
+                            `http://localhost:8080/api/pages/${pageId}`
+                    });
 
-                setHeaderPageTitle(pageTitle || "");
-            }
-        };
+
+                    console.log("Response");
+
+                    console.log(
+                        response.data
+                    );
+
+
+                    console.groupEnd();
+
+
+                    setHeaderPageTitle(
+                        response.data?.title ||
+                        ""
+                    );
+
+                } catch (error) {
+
+                    console.group(
+                        "HB33 - Load Page Header Details"
+                    );
+
+
+                    console.log(
+                        "Response"
+                    );
+
+                    console.log(
+                        error.response?.data
+                    );
+
+
+                    console.groupEnd();
+
+
+                    setHeaderPageTitle(
+                        pageTitle || ""
+                    );
+                }
+            };
+
 
         fetchPageHeaderDetails();
-    }, [pageId, pageTitle, token]);
+
+    }, [
+        pageId,
+        pageTitle,
+        token
+    ]);
 
     useEffect(() => {
+
         setShowSort(false);
+
         setShowFilter(false);
+
         setShowCreateNotebook(false);
+
         setShowCreatePage(false);
+
         setOpenSortDropdown(null);
+
         setOpenFilterDropdown(null);
+
         setShowFontDropdown(false);
+
         setShowSizeDropdown(false);
+
         setShowMoreTools(false);
-    }, [location.pathname, currentRole]);
+
+    }, [
+        location.pathname,
+        currentRole
+    ]);
 
     useEffect(() => {
+
         if (
             !setSortBy ||
             !setSortDir ||
@@ -337,45 +511,70 @@ export default function Header({
             return;
         }
 
+
         if (isAdmin) {
+
             if (
                 !userSortByOptions.some(
-                    option => option.value === sortBy
+                    option =>
+                        option.value === sortBy
                 )
             ) {
-                setSortBy("userName");
+
+                setSortBy(
+                    "userName"
+                );
             }
+
 
             if (
                 statusFilter.some(
                     status =>
-                        !userStatusOptions.includes(status)
+                        !userStatusOptions.includes(
+                            status
+                        )
                 )
             ) {
+
                 setStatusFilter([]);
             }
+
         } else {
+
             if (
                 !notebookSortByOptions.some(
-                    option => option.value === sortBy
+                    option =>
+                        option.value === sortBy
                 )
             ) {
-                setSortBy("createdAt");
+
+                setSortBy(
+                    "createdAt"
+                );
             }
+
 
             if (
                 statusFilter.some(
                     status =>
-                        !notebookStatusOptions.includes(status)
+                        !notebookStatusOptions.includes(
+                            status
+                        )
                 )
             ) {
+
                 setStatusFilter([]);
             }
 
-            if (authorityFilter.length > 0) {
+
+            if (
+                authorityFilter.length > 0
+            ) {
+
                 setAuthorityFilter([]);
             }
         }
+
     }, [
         currentRole,
         isAdmin,
@@ -392,120 +591,204 @@ export default function Header({
         command,
         value = null
     ) => {
+
+        if (!pageId) {
+            return;
+        }
+
         window.dispatchEvent(
-            new CustomEvent("editorCommand", {
-                detail: {
-                    command,
-                    value
+            new CustomEvent(
+                "editorCommand",
+                {
+                    detail: {
+                        command,
+                        value
+                    }
                 }
-            })
+            )
         );
     };
 
+
     const handleEditorUndo = () => {
-        dispatchEditorCommand("undo");
+
+        if (!pageId) {
+            return;
+        }
+
+
+        dispatchEditorCommand(
+            "undo"
+        );
+
 
         logButtonEvent({
+
             buttonNo: "HB30",
-            buttonName: "Editor Undo Button",
+
+            buttonName:
+                "Editor Undo Button",
+
             request: {
                 action: "undo",
-                page: location.pathname
+                page:
+                    location.pathname
             },
+
             response: {
                 message:
                     "Editor undo command triggered"
             },
+
             status: 200
         });
     };
 
+
     const handleEditorRedo = () => {
-        dispatchEditorCommand("redo");
+
+        if (!pageId) {
+            return;
+        }
+
+
+        dispatchEditorCommand(
+            "redo"
+        );
+
 
         logButtonEvent({
+
             buttonNo: "HB31",
-            buttonName: "Editor Redo Button",
+
+            buttonName:
+                "Editor Redo Button",
+
             request: {
                 action: "redo",
-                page: location.pathname
+                page:
+                    location.pathname
             },
+
             response: {
                 message:
                     "Editor redo command triggered"
             },
+
             status: 200
         });
     };
 
+
     const handleBold = () => {
-        dispatchEditorCommand("bold");
+
+        dispatchEditorCommand(
+            "bold"
+        );
     };
+
 
     const handleItalic = () => {
-        dispatchEditorCommand("italic");
+
+        dispatchEditorCommand(
+            "italic"
+        );
     };
+
 
     const handleUnderline = () => {
-        dispatchEditorCommand("underline");
+
+        dispatchEditorCommand(
+            "underline"
+        );
     };
 
+
     const handleHighlight = () => {
+
         dispatchEditorCommand(
             "hiliteColor",
             "#fff59d"
         );
     };
 
+
     const handleTextColor = () => {
+
         dispatchEditorCommand(
             "foreColor",
             "#000000"
         );
     };
 
+
     const handleAlignLeft = () => {
-        dispatchEditorCommand("justifyLeft");
+
+        dispatchEditorCommand(
+            "justifyLeft"
+        );
     };
+
 
     const handleAlignCenter = () => {
-        dispatchEditorCommand("justifyCenter");
+
+        dispatchEditorCommand(
+            "justifyCenter"
+        );
     };
+
 
     const handleAlignRight = () => {
-        dispatchEditorCommand("justifyRight");
+
+        dispatchEditorCommand(
+            "justifyRight"
+        );
     };
 
+
     const handleBulletList = () => {
+
         dispatchEditorCommand(
             "insertUnorderedList"
         );
     };
 
+
     const handleNumberList = () => {
+
         dispatchEditorCommand(
             "insertOrderedList"
         );
     };
 
+
     const handleTable = () => {
+
         dispatchEditorCommand(
             "insertTable"
         );
     };
 
+
     const handleFontChange = value => {
+
         setFontFamily(value);
+
         setShowFontDropdown(false);
+
         dispatchEditorCommand(
             "fontName",
             value
         );
     };
 
+
     const handleFontSizeChange = value => {
+
         setFontSize(value);
+
         setShowSizeDropdown(false);
+
         dispatchEditorCommand(
             "fontSize",
             value
@@ -513,110 +796,194 @@ export default function Header({
     };
 
     const handleHome = () => {
+
         const role =
             localStorage.getItem(
                 "currentRole"
             ) || "USER";
 
+
         if (role === "ADMIN") {
+
             navigate("/admin");
+
         } else if (
             role === "SUPER_USER"
         ) {
-            navigate("/superuser-homepage");
-        } else if (role === "USER") {
-            navigate("/user-homepage");
+
+            navigate(
+                "/superuser-homepage"
+            );
+
+        } else if (
+            role === "USER"
+        ) {
+
+            navigate(
+                "/user-homepage"
+            );
+
         } else {
+
             navigate("/");
         }
     };
 
     const handleBack = () => {
-        if (window.history.length > 1) {
+
+        if (
+            window.history.length > 1
+        ) {
+
             navigate(-1);
+
         } else {
-            navigate("/user-homepage");
+
+            navigate(
+                "/user-homepage"
+            );
         }
     };
 
     const handleCreateNotebookButton = () => {
+
         const nextState =
             !showCreateNotebook;
 
-        setShowCreateNotebook(nextState);
+
+        setShowCreateNotebook(
+            nextState
+        );
+
         setShowCreatePage(false);
+
         setShowSort(false);
+
         setShowFilter(false);
 
+
         logButtonEvent({
+
             buttonNo: "HB21",
-            buttonName: "Create Notebook Button",
+
+            buttonName:
+                "Create Notebook Button",
+
             request: {
-                action: nextState
-                    ? "Open Popup"
-                    : "Close Popup",
-                from: location.pathname,
+
+                action:
+                    nextState
+                        ? "Open Popup"
+                        : "Close Popup",
+
+                from:
+                    location.pathname,
+
                 currentRole
             },
+
             response: {
-                message: nextState
-                    ? "Create Notebook popup opened"
-                    : "Create Notebook popup closed"
+
+                message:
+                    nextState
+                        ? "Create Notebook popup opened"
+                        : "Create Notebook popup closed"
             },
+
             status: 200
         });
     };
 
     const handleCreatePageButton = () => {
+
         const nextState =
             !showCreatePage;
 
-        setShowCreatePage(nextState);
+
+        setShowCreatePage(
+            nextState
+        );
+
         setShowCreateNotebook(false);
+
         setShowSort(false);
+
         setShowFilter(false);
 
+
         logButtonEvent({
+
             buttonNo: "HB22",
-            buttonName: "Create Page Button",
+
+            buttonName:
+                "Create Page Button",
+
             request: {
-                action: nextState
-                    ? "Open Popup"
-                    : "Close Popup",
-                from: location.pathname,
+
+                action:
+                    nextState
+                        ? "Open Popup"
+                        : "Close Popup",
+
+                from:
+                    location.pathname,
+
                 currentRole
             },
+
             response: {
-                message: nextState
-                    ? "Create Page popup opened"
-                    : "Create Page popup closed"
+
+                message:
+                    nextState
+                        ? "Create Page popup opened"
+                        : "Create Page popup closed"
             },
+
             status: 200
         });
     };
 
     const handleSortButton = () => {
-        setShowSort(prev => !prev);
+
+        setShowSort(
+            prev => !prev
+        );
+
         setShowFilter(false);
+
         setShowCreateNotebook(false);
+
         setShowCreatePage(false);
     };
 
     const handleFilterButton = () => {
-        setShowFilter(prev => !prev);
+
+        setShowFilter(
+            prev => !prev
+        );
+
         setShowSort(false);
+
         setShowCreateNotebook(false);
+
         setShowCreatePage(false);
     };
 
     const toggleAuthority = value => {
-        if (authorityFilter.includes(value)) {
+
+        if (
+            authorityFilter.includes(value)
+        ) {
+
             setAuthorityFilter(
                 authorityFilter.filter(
-                    item => item !== value
+                    item =>
+                        item !== value
                 )
             );
+
         } else {
+
             setAuthorityFilter([
                 ...authorityFilter,
                 value
@@ -625,13 +992,20 @@ export default function Header({
     };
 
     const toggleStatus = value => {
-        if (statusFilter.includes(value)) {
+
+        if (
+            statusFilter.includes(value)
+        ) {
+
             setStatusFilter(
                 statusFilter.filter(
-                    item => item !== value
+                    item =>
+                        item !== value
                 )
             );
+
         } else {
+
             setStatusFilter([
                 ...statusFilter,
                 value
@@ -639,64 +1013,102 @@ export default function Header({
         }
     };
 
-    const handleSortDropdown = dropdownName => {
-        setOpenSortDropdown(prev =>
-            prev === dropdownName
-                ? null
-                : dropdownName
-        );
-    };
+    const handleSortDropdown =
+        dropdownName => {
+
+            setOpenSortDropdown(
+                prev =>
+                    prev === dropdownName
+                        ? null
+                        : dropdownName
+            );
+        };
+
 
     const applySort = () => {
+
         logButtonEvent({
+
             buttonNo: "HB11",
-            buttonName: "Sort Button",
+
+            buttonName:
+                "Sort Button",
+
             request: {
+
                 currentRole,
+
                 sortBy,
+
                 sortDir
             },
+
             response: {
-                message: isAdmin
-                    ? "User sorting applied"
-                    : "Notebook sorting applied"
+
+                message:
+                    isAdmin
+                        ? "User sorting applied"
+                        : "Notebook sorting applied"
             },
+
             status: 200
         });
 
+
         setOpenSortDropdown(null);
+
         setShowSort(false);
     };
 
     const applyFilter = () => {
+
         logButtonEvent({
+
             buttonNo: "HB12",
-            buttonName: "Filter Button",
+
+            buttonName:
+                "Filter Button",
+
             request: {
+
                 currentRole,
+
                 authorityFilter,
+
                 statusFilter
             },
+
             response: {
-                message: isAdmin
-                    ? "User filtering applied"
-                    : "Notebook filtering applied"
+
+                message:
+                    isAdmin
+                        ? "User filtering applied"
+                        : "Notebook filtering applied"
             },
+
             status: 200
         });
 
+
         setOpenFilterDropdown(null);
+
         setShowFilter(false);
     };
 
+
     const resetFilter = () => {
+
         setAuthorityFilter([]);
+
         setStatusFilter([]);
+
         setOpenFilterDropdown(null);
     };
 
     const handleLogout = async () => {
+
         try {
+
             await axios.post(
                 `${API_URL}/logout`,
                 {},
@@ -708,19 +1120,26 @@ export default function Header({
                 }
             );
 
+
             toast.success(
                 "Logged out successfully."
             );
+
         } catch {
+
             toast.error(
                 "Logout failed."
             );
+
         } finally {
+
             localStorage.clear();
+
 
             window.dispatchEvent(
                 new Event("login")
             );
+
 
             navigate("/");
         }
@@ -732,13 +1151,16 @@ export default function Header({
         "/reset-password"
     ];
 
+
     if (
         hideHeaderRoutes.includes(
             location.pathname
         )
     ) {
+
         return null;
     }
+
 
     return (
         <>
@@ -755,6 +1177,7 @@ export default function Header({
                         <FaHome />
                     </button>
 
+
                     <button
                         type="button"
                         className="header-icon-btn"
@@ -764,23 +1187,29 @@ export default function Header({
                         <FaArrowLeft />
                     </button>
 
+
                     {permissions.canManageUsers && (
+
                         <button
                             type="button"
                             className="header-icon-btn"
                             data-tooltip="Create User"
-                            onClick={() => {
+                            onClick={() =>
                                 navigate(
                                     "/admin/create-user"
-                                );
-                            }}
+                                )
+                            }
                         >
                             <FaUserPlus />
                         </button>
+
                     )}
 
+
                     {permissions.canCreateNotebook && (
+
                         <div className="header-popup-container">
+
                             <button
                                 type="button"
                                 className="header-icon-btn green-icon"
@@ -792,7 +1221,9 @@ export default function Header({
                                 <FaBook />
                             </button>
 
+
                             {showCreateNotebook && (
+
                                 <CreateNotebookPopup
                                     onClose={() =>
                                         setShowCreateNotebook(
@@ -809,12 +1240,18 @@ export default function Header({
                                         logButtonEvent
                                     }
                                 />
+
                             )}
+
                         </div>
+
                     )}
 
+
                     {permissions.canCreatePage && (
+
                         <div className="header-popup-container">
+
                             <button
                                 type="button"
                                 className="header-icon-btn green-icon"
@@ -826,7 +1263,9 @@ export default function Header({
                                 <FaFileAlt />
                             </button>
 
+
                             {showCreatePage && (
+
                                 <CreatePagePopup
                                     onClose={() =>
                                         setShowCreatePage(
@@ -843,11 +1282,21 @@ export default function Header({
                                         logButtonEvent
                                     }
                                 />
+
                             )}
+
                         </div>
+
                     )}
 
+
+                    {/* ==================================================
+                        PAGE TITLE
+                        Only displayed when a page is opened.
+                    ================================================== */}
+
                     {pageId && (
+
                         <div
                             className="header-editable-page-title"
                             title={
@@ -855,6 +1304,7 @@ export default function Header({
                                 "Page Name"
                             }
                         >
+
                             <input
                                 type="text"
                                 value={
@@ -867,10 +1317,13 @@ export default function Header({
                                 }
                                 placeholder="Page Name"
                             />
+
                         </div>
+
                     )}
 
                 </div>
+
 
                 <div className="header-center">
 
@@ -892,7 +1345,10 @@ export default function Header({
                             }
                         />
 
-                        <FaSearch className="search-icon" />
+
+                        <FaSearch
+                            className="search-icon"
+                        />
 
                     </div>
 
@@ -901,6 +1357,7 @@ export default function Header({
                 <div className="header-right">
 
                     {permissions.canSort && (
+
                         <div className="header-popup-container">
 
                             <button
@@ -914,14 +1371,19 @@ export default function Header({
                                 <FaSort />
                             </button>
 
+
                             {showSort && (
+
                                 <div className="header-popup">
 
                                     <div className="popup-title">
+
                                         {isAdmin
                                             ? "Sort Users"
                                             : "Sort Notebooks"}
+
                                     </div>
+
 
                                     <div className="popup-body">
 
@@ -930,6 +1392,7 @@ export default function Header({
                                             <label>
                                                 Sort By
                                             </label>
+
 
                                             <div className="custom-dropdown">
 
@@ -942,6 +1405,7 @@ export default function Header({
                                                         )
                                                     }
                                                 >
+
                                                     <span>
                                                         {
                                                             getSortByLabel()
@@ -951,13 +1415,18 @@ export default function Header({
                                                     <span>
                                                         ▼
                                                     </span>
+
                                                 </button>
+
 
                                                 {openSortDropdown ===
                                                     "sortBy" && (
+
                                                     <div className="custom-dropdown-options">
+
                                                         {currentSortOptions.map(
                                                             option => (
+
                                                                 <button
                                                                     type="button"
                                                                     key={
@@ -970,32 +1439,42 @@ export default function Header({
                                                                             : "custom-dropdown-option"
                                                                     }
                                                                     onClick={() => {
+
                                                                         setSortBy(
                                                                             option.value
                                                                         );
+
                                                                         setOpenSortDropdown(
                                                                             null
                                                                         );
+
                                                                     }}
                                                                 >
+
                                                                     {
                                                                         option.label
                                                                     }
+
                                                                 </button>
+
                                                             )
                                                         )}
+
                                                     </div>
+
                                                 )}
 
                                             </div>
 
                                         </div>
 
+
                                         <div className="popup-section">
 
                                             <label>
                                                 Order
                                             </label>
+
 
                                             <div className="custom-dropdown">
 
@@ -1008,6 +1487,7 @@ export default function Header({
                                                         )
                                                     }
                                                 >
+
                                                     <span>
                                                         {
                                                             getSortOrderLabel()
@@ -1017,13 +1497,18 @@ export default function Header({
                                                     <span>
                                                         ▼
                                                     </span>
+
                                                 </button>
+
 
                                                 {openSortDropdown ===
                                                     "order" && (
+
                                                     <div className="custom-dropdown-options">
+
                                                         {sortOrderOptions.map(
                                                             option => (
+
                                                                 <button
                                                                     type="button"
                                                                     key={
@@ -1036,21 +1521,29 @@ export default function Header({
                                                                             : "custom-dropdown-option"
                                                                     }
                                                                     onClick={() => {
+
                                                                         setSortDir(
                                                                             option.value
                                                                         );
+
                                                                         setOpenSortDropdown(
                                                                             null
                                                                         );
+
                                                                     }}
                                                                 >
+
                                                                     {
                                                                         option.label
                                                                     }
+
                                                                 </button>
+
                                                             )
                                                         )}
+
                                                     </div>
+
                                                 )}
 
                                             </div>
@@ -1059,9 +1552,11 @@ export default function Header({
 
                                     </div>
 
+
                                     <div className="popup-buttons">
 
                                         <button
+                                            type="button"
                                             className="apply-btn"
                                             onClick={
                                                 applySort
@@ -1070,15 +1565,20 @@ export default function Header({
                                             Apply
                                         </button>
 
+
                                         <button
+                                            type="button"
                                             className="cancel-btn"
                                             onClick={() => {
+
                                                 setShowSort(
                                                     false
                                                 );
+
                                                 setOpenSortDropdown(
                                                     null
                                                 );
+
                                             }}
                                         >
                                             Cancel
@@ -1087,12 +1587,16 @@ export default function Header({
                                     </div>
 
                                 </div>
+
                             )}
 
                         </div>
+
                     )}
 
+
                     {permissions.canFilter && (
+
                         <div className="header-popup-container">
 
                             <button
@@ -1106,32 +1610,41 @@ export default function Header({
                                 <FaFilter />
                             </button>
 
+
                             {showFilter && (
+
                                 <div className="header-popup filter-popup">
 
                                     <div className="popup-title">
+
                                         {isAdmin
                                             ? "Filter Users"
                                             : "Filter Notebooks"}
+
                                     </div>
+
 
                                     <div className="popup-body">
 
                                         {isAdmin && (
+
                                             <div className="popup-section">
 
                                                 <label>
                                                     Authorities
                                                 </label>
 
+
                                                 {authorityOptions.map(
                                                     authority => (
+
                                                         <label
                                                             key={
                                                                 authority
                                                             }
                                                             className="checkbox-item"
                                                         >
+
                                                             <input
                                                                 type="checkbox"
                                                                 checked={authorityFilter.includes(
@@ -1144,17 +1657,22 @@ export default function Header({
                                                                 }
                                                             />
 
+
                                                             <span>
                                                                 {
                                                                     authority
                                                                 }
                                                             </span>
+
                                                         </label>
+
                                                     )
                                                 )}
 
                                             </div>
+
                                         )}
+
 
                                         <div className="popup-section">
 
@@ -1162,14 +1680,17 @@ export default function Header({
                                                 Status
                                             </label>
 
+
                                             {currentStatusOptions.map(
                                                 status => (
+
                                                     <label
                                                         key={
                                                             status
                                                         }
                                                         className="checkbox-item"
                                                     >
+
                                                         <input
                                                             type="checkbox"
                                                             checked={statusFilter.includes(
@@ -1182,18 +1703,25 @@ export default function Header({
                                                             }
                                                         />
 
+
                                                         <span>
+
                                                             {isAdmin
+
                                                                 ? status ===
                                                                   "UAC"
                                                                     ? "Active"
                                                                     : "Inactive"
+
                                                                 : status ===
                                                                   "NAC"
-                                                                ? "Active"
-                                                                : "Archived"}
+                                                                    ? "Active"
+                                                                    : "Archived"}
+
                                                         </span>
+
                                                     </label>
+
                                                 )
                                             )}
 
@@ -1201,9 +1729,11 @@ export default function Header({
 
                                     </div>
 
+
                                     <div className="popup-buttons">
 
                                         <button
+                                            type="button"
                                             className="apply-btn"
                                             onClick={
                                                 applyFilter
@@ -1212,7 +1742,9 @@ export default function Header({
                                             Apply
                                         </button>
 
+
                                         <button
+                                            type="button"
                                             className="reset-btn"
                                             onClick={
                                                 resetFilter
@@ -1221,15 +1753,20 @@ export default function Header({
                                             Reset
                                         </button>
 
+
                                         <button
+                                            type="button"
                                             className="cancel-btn"
                                             onClick={() => {
+
                                                 setShowFilter(
                                                     false
                                                 );
+
                                                 setOpenFilterDropdown(
                                                     null
                                                 );
+
                                             }}
                                         >
                                             Cancel
@@ -1238,24 +1775,35 @@ export default function Header({
                                     </div>
 
                                 </div>
+
                             )}
 
                         </div>
+
                     )}
+
 
                     {permissions.canToggleRole && (
                         <ToggleButton />
                     )}
 
+
                     <span className="welcome-user">
+
                         Welcome,&nbsp;
-                        <b>{username}</b>
+
+                        <b>
+                            {username}
+                        </b>
+
                     </span>
+
 
                     <CgProfile
                         size={24}
                         className="profile-icon"
                     />
+
 
                     <button
                         type="button"
@@ -1272,334 +1820,446 @@ export default function Header({
 
             </header>
 
-            <div className="editor-toolbar">
 
-                <div className="editor-toolbar-left">
+            {/* ============================================================
+                EDITOR TOOLBAR
 
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Undo"
-                        onClick={
-                            handleEditorUndo
-                        }
-                    >
-                        <FaUndo />
-                    </button>
+                IMPORTANT:
+                This entire toolbar is rendered ONLY when pageId exists.
 
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Redo"
-                        onClick={
-                            handleEditorRedo
-                        }
-                    >
-                        <FaRedo />
-                    </button>
+                Therefore:
+                /admin                         -> hidden
+                /user-homepage                 -> hidden
+                /superuser-homepage            -> hidden
+                /admin/create-user             -> hidden
+                /view-user/:userId             -> hidden
+                /pages/:pageId                 -> visible
+                ============================================================ */}
 
-                    <div className="editor-divider" />
+            {pageId && (
 
-                    <div className="editor-dropdown-container">
+                <div className="editor-toolbar">
 
-                        <button
-                            type="button"
-                            className="editor-font-button"
-                            onClick={() => {
-                                setShowFontDropdown(
-                                    prev => !prev
-                                );
-                                setShowSizeDropdown(
-                                    false
-                                );
-                                setShowMoreTools(
-                                    false
-                                );
-                            }}
-                        >
-                            <span>
-                                {fontFamily}
-                            </span>
+                    <div className="editor-toolbar-left">
 
-                            <span>
-                                ▼
-                            </span>
-                        </button>
-
-                        {showFontDropdown && (
-                            <div className="editor-dropdown-menu font-menu">
-                                {fontOptions.map(
-                                    font => (
-                                        <button
-                                            type="button"
-                                            key={
-                                                font
-                                            }
-                                            className="editor-dropdown-item"
-                                            style={{
-                                                fontFamily:
-                                                    font
-                                            }}
-                                            onClick={() =>
-                                                handleFontChange(
-                                                    font
-                                                )
-                                            }
-                                        >
-                                            {font}
-                                        </button>
-                                    )
-                                )}
-                            </div>
-                        )}
-
-                    </div>
-
-                    <div className="editor-dropdown-container size-container">
-
-                        <button
-                            type="button"
-                            className="editor-size-button"
-                            onClick={() => {
-                                setShowSizeDropdown(
-                                    prev => !prev
-                                );
-                                setShowFontDropdown(
-                                    false
-                                );
-                                setShowMoreTools(
-                                    false
-                                );
-                            }}
-                        >
-                            <span>
-                                {fontSize}
-                            </span>
-
-                            <span>
-                                ▼
-                            </span>
-                        </button>
-
-                        {showSizeDropdown && (
-                            <div className="editor-dropdown-menu size-menu">
-                                {fontSizeOptions.map(
-                                    size => (
-                                        <button
-                                            type="button"
-                                            key={
-                                                size
-                                            }
-                                            className="editor-dropdown-item"
-                                            onClick={() =>
-                                                handleFontSizeChange(
-                                                    size
-                                                )
-                                            }
-                                        >
-                                            {size}
-                                        </button>
-                                    )
-                                )}
-                            </div>
-                        )}
-
-                    </div>
-
-                    <div className="editor-divider" />
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Bold"
-                        onClick={
-                            handleBold
-                        }
-                    >
-                        <FaBold />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Italic"
-                        onClick={
-                            handleItalic
-                        }
-                    >
-                        <FaItalic />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Underline"
-                        onClick={
-                            handleUnderline
-                        }
-                    >
-                        <FaUnderline />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Highlight"
-                        onClick={
-                            handleHighlight
-                        }
-                    >
-                        <FaHighlighter />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Text Color"
-                        onClick={
-                            handleTextColor
-                        }
-                    >
-                        <MdFormatColorText />
-                    </button>
-
-                    <div className="editor-divider" />
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Align Left"
-                        onClick={
-                            handleAlignLeft
-                        }
-                    >
-                        <FaAlignLeft />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Align Center"
-                        onClick={
-                            handleAlignCenter
-                        }
-                    >
-                        <FaAlignCenter />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Align Right"
-                        onClick={
-                            handleAlignRight
-                        }
-                    >
-                        <FaAlignRight />
-                    </button>
-
-                    <div className="editor-divider" />
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Bulleted List"
-                        onClick={
-                            handleBulletList
-                        }
-                    >
-                        <FaListUl />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Numbered List"
-                        onClick={
-                            handleNumberList
-                        }
-                    >
-                        <FaListOl />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="editor-tool-button"
-                        data-tooltip="Insert Table"
-                        onClick={
-                            handleTable
-                        }
-                    >
-                        <FaTable />
-                    </button>
-
-                    <div className="editor-divider" />
-
-                    <div className="editor-dropdown-container">
+                        {/* ================= UNDO ================= */}
 
                         <button
                             type="button"
                             className="editor-tool-button"
-                            data-tooltip="More"
-                            onClick={() => {
-                                setShowMoreTools(
-                                    prev => !prev
-                                );
-                                setShowFontDropdown(
-                                    false
-                                );
-                                setShowSizeDropdown(
-                                    false
-                                );
-                            }}
+                            data-tooltip="Undo"
+                            onClick={
+                                handleEditorUndo
+                            }
                         >
-                            <FaEllipsisH />
+                            <FaUndo />
                         </button>
 
-                        {showMoreTools && (
-                            <div className="editor-more-menu">
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        dispatchEditorCommand(
-                                            "removeFormat"
+                        {/* ================= REDO ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Redo"
+                            onClick={
+                                handleEditorRedo
+                            }
+                        >
+                            <FaRedo />
+                        </button>
+
+
+                        <div className="editor-divider" />
+
+
+                        {/* ================= FONT ================= */}
+
+                        <div className="editor-dropdown-container">
+
+                            <button
+                                type="button"
+                                className="editor-font-button"
+                                onClick={() => {
+
+                                    setShowFontDropdown(
+                                        prev => !prev
+                                    );
+
+                                    setShowSizeDropdown(
+                                        false
+                                    );
+
+                                    setShowMoreTools(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                <span>
+                                    {fontFamily}
+                                </span>
+
+                                <span>
+                                    ▼
+                                </span>
+
+                            </button>
+
+
+                            {showFontDropdown && (
+
+                                <div className="editor-dropdown-menu font-menu">
+
+                                    {fontOptions.map(
+                                        font => (
+
+                                            <button
+                                                type="button"
+                                                key={
+                                                    font
+                                                }
+                                                className="editor-dropdown-item"
+                                                style={{
+                                                    fontFamily:
+                                                        font
+                                                }}
+                                                onClick={() =>
+                                                    handleFontChange(
+                                                        font
+                                                    )
+                                                }
+                                            >
+                                                {
+                                                    font
+                                                }
+                                            </button>
+
                                         )
-                                    }
-                                >
-                                    Clear Formatting
-                                </button>
+                                    )}
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        dispatchEditorCommand(
-                                            "strikeThrough"
+                                </div>
+
+                            )}
+
+                        </div>
+
+
+                        {/* ================= FONT SIZE ================= */}
+
+                        <div className="editor-dropdown-container size-container">
+
+                            <button
+                                type="button"
+                                className="editor-size-button"
+                                onClick={() => {
+
+                                    setShowSizeDropdown(
+                                        prev => !prev
+                                    );
+
+                                    setShowFontDropdown(
+                                        false
+                                    );
+
+                                    setShowMoreTools(
+                                        false
+                                    );
+
+                                }}
+                            >
+
+                                <span>
+                                    {fontSize}
+                                </span>
+
+                                <span>
+                                    ▼
+                                </span>
+
+                            </button>
+
+
+                            {showSizeDropdown && (
+
+                                <div className="editor-dropdown-menu size-menu">
+
+                                    {fontSizeOptions.map(
+                                        size => (
+
+                                            <button
+                                                type="button"
+                                                key={
+                                                    size
+                                                }
+                                                className="editor-dropdown-item"
+                                                onClick={() =>
+                                                    handleFontSizeChange(
+                                                        size
+                                                    )
+                                                }
+                                            >
+                                                {
+                                                    size
+                                                }
+                                            </button>
+
                                         )
-                                    }
-                                >
-                                    Strikethrough
-                                </button>
+                                    )}
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        dispatchEditorCommand(
-                                            "justifyFull"
-                                        )
-                                    }
-                                >
-                                    Justify
-                                </button>
+                                </div>
 
-                            </div>
-                        )}
+                            )}
+
+                        </div>
+
+
+                        <div className="editor-divider" />
+
+
+                        {/* ================= BOLD ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Bold"
+                            onClick={
+                                handleBold
+                            }
+                        >
+                            <FaBold />
+                        </button>
+
+
+                        {/* ================= ITALIC ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Italic"
+                            onClick={
+                                handleItalic
+                            }
+                        >
+                            <FaItalic />
+                        </button>
+
+
+                        {/* ================= UNDERLINE ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Underline"
+                            onClick={
+                                handleUnderline
+                            }
+                        >
+                            <FaUnderline />
+                        </button>
+
+
+                        {/* ================= HIGHLIGHT ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Highlight"
+                            onClick={
+                                handleHighlight
+                            }
+                        >
+                            <FaHighlighter />
+                        </button>
+
+
+                        {/* ================= TEXT COLOR ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Text Color"
+                            onClick={
+                                handleTextColor
+                            }
+                        >
+                            <MdFormatColorText />
+                        </button>
+
+
+                        <div className="editor-divider" />
+
+
+                        {/* ================= ALIGN LEFT ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Align Left"
+                            onClick={
+                                handleAlignLeft
+                            }
+                        >
+                            <FaAlignLeft />
+                        </button>
+
+
+                        {/* ================= ALIGN CENTER ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Align Center"
+                            onClick={
+                                handleAlignCenter
+                            }
+                        >
+                            <FaAlignCenter />
+                        </button>
+
+
+                        {/* ================= ALIGN RIGHT ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Align Right"
+                            onClick={
+                                handleAlignRight
+                            }
+                        >
+                            <FaAlignRight />
+                        </button>
+
+
+                        <div className="editor-divider" />
+
+
+                        {/* ================= BULLET LIST ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Bulleted List"
+                            onClick={
+                                handleBulletList
+                            }
+                        >
+                            <FaListUl />
+                        </button>
+
+
+                        {/* ================= NUMBER LIST ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Numbered List"
+                            onClick={
+                                handleNumberList
+                            }
+                        >
+                            <FaListOl />
+                        </button>
+
+
+                        {/* ================= TABLE ================= */}
+
+                        <button
+                            type="button"
+                            className="editor-tool-button"
+                            data-tooltip="Insert Table"
+                            onClick={
+                                handleTable
+                            }
+                        >
+                            <FaTable />
+                        </button>
+
+
+                        <div className="editor-divider" />
+
+
+                        {/* ================= MORE ================= */}
+
+                        <div className="editor-dropdown-container">
+
+                            <button
+                                type="button"
+                                className="editor-tool-button"
+                                data-tooltip="More"
+                                onClick={() => {
+
+                                    setShowMoreTools(
+                                        prev => !prev
+                                    );
+
+                                    setShowFontDropdown(
+                                        false
+                                    );
+
+                                    setShowSizeDropdown(
+                                        false
+                                    );
+
+                                }}
+                            >
+                                <FaEllipsisH />
+                            </button>
+
+
+                            {showMoreTools && (
+
+                                <div className="editor-more-menu">
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            dispatchEditorCommand(
+                                                "removeFormat"
+                                            )
+                                        }
+                                    >
+                                        Clear Formatting
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            dispatchEditorCommand(
+                                                "strikeThrough"
+                                            )
+                                        }
+                                    >
+                                        Strikethrough
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            dispatchEditorCommand(
+                                                "justifyFull"
+                                            )
+                                        }
+                                    >
+                                        Justify
+                                    </button>
+
+                                </div>
+
+                            )}
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
+            )}
+
         </>
     );
 }

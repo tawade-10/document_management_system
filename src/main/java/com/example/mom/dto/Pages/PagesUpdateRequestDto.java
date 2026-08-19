@@ -7,11 +7,21 @@ import java.util.List;
 
 public class PagesUpdateRequestDto {
 
+    private String title;
+
     @NotEmpty(message = "Please add at least one participant")
     private List<String> participants;
 
     @NotBlank(message = "Page content cannot be empty")
     private String pageContent;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public List<String> getParticipants() {
         return participants;

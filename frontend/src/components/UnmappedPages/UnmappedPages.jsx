@@ -270,7 +270,7 @@ export default function UnmappedPages({ searchKeyword }) {
             setMappingPageId(pageId);
 
             const requestUrl =
-                `${MAP_PAGE_API}/${pageId}/notebook/${notebookId}`;
+                `${MAP_PAGE_API}/map/${pageId}/notebook/${notebookId}`;
 
             console.group("UH-UP3 - Map Page To Notebook");
 

@@ -34,5 +34,7 @@ public interface PagesFacade {
 
     PagesUpdateResponseDto mapPageToNotebook(String pageId, String notebookId);
 
+    PagesUpdateResponseDto unmapPageFromNotebook(String pageId);
+
     List<PagesUpdateResponseDto> getAllPagesByNotebook(String notebookId);
 }

@@ -6,8 +6,6 @@ import com.example.mom.service.Users.UsersService;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class UsersFacadeImpl implements UsersFacade{
 
@@ -28,8 +26,8 @@ public class UsersFacadeImpl implements UsersFacade{
     }
 
     @Override
-    public UsersCreationResponseDto updateUserDetails(UsersCreationRequestDto usersCreationRequestDto) {
-        return usersService.updateUserDetails(usersCreationRequestDto);
+    public UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto) {
+        return usersService.updateUserDetails(userId,usersCreationRequestDto);
     }
 
     @Override

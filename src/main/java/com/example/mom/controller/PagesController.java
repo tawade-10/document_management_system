@@ -117,11 +117,18 @@ public class PagesController {
         return ResponseEntity.ok(archivedPagesByUser);
     }
 
-    @PutMapping("/{pageId}/notebook/{notebookId}")
+    @PutMapping("/map/{pageId}/notebook/{notebookId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PagesUpdateResponseDto> mapPageToNotebook(@PathVariable String pageId, @PathVariable String notebookId){
         PagesUpdateResponseDto mappedPage = pagesFacade.mapPageToNotebook(pageId, notebookId);
         return ResponseEntity.ok(mappedPage);
+    }
+
+    @PutMapping("/unmap/{pageId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<PagesUpdateResponseDto> unmapPageFromNotebook(@PathVariable String pageId){
+        PagesUpdateResponseDto unmappedPage = pagesFacade.unmapPageFromNotebook(pageId);
+        return ResponseEntity.ok(unmappedPage);
     }
 
     @GetMapping("/{notebookId}/pages")

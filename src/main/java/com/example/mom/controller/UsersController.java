@@ -41,10 +41,10 @@ public class UsersController {
         return ResponseEntity.ok(userById);
     }
 
-    @PutMapping("/update")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UsersCreationResponseDto> updateUserDetails(@RequestBody UsersCreationRequestDto usersCreationRequestDto){
-        UsersCreationResponseDto updatedUserDetails = usersFacade.updateUserDetails(usersCreationRequestDto);
+    @PutMapping("/update/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsersCreationResponseDto> updateUserDetails(@PathVariable String userId, @RequestBody UsersCreationRequestDto usersCreationRequestDto) {
+        UsersCreationResponseDto updatedUserDetails = usersFacade.updateUserDetails(userId, usersCreationRequestDto);
         return ResponseEntity.ok(updatedUserDetails);
     }
 

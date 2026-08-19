@@ -54,23 +54,24 @@ public class UsersServiceImpl implements UsersService{
     }
 
     @Override
-    public UsersCreationResponseDto updateUserDetails(UsersCreationRequestDto usersCreationRequestDto) {
+    public UsersCreationResponseDto updateUserDetails(String userId, UsersCreationRequestDto usersCreationRequestDto) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-        String email = authentication.getName();
-
-        Users user = usersRepo.findByEmail(email)
+        Users user = usersRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
-        user.setUserName(usersCreationRequestDto.getUserName());
-        user.setEmail(usersCreationRequestDto.getEmail());
-        user.setUpdatedAt(LocalDateTime.now());
+        if (usersCreationRequestDto.getUserName() == null ||
+                usersCreationRequestDto.getUserName().trim().isEmpty()) {
+            throw new RuntimeException("User name cannot be empty");
+        }
 
+        if (usersCreationRequestDto.getEmail() == null ||
+                usersCreationRequestDto.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("Email cannot be empty");
+        }
+
+        user.setUserName(usersCreationRequestDto.getUserName().trim());
+        user.setEmail(usersCreationRequestDto.getEmail().trim());
+        user.setUpdatedAt(LocalDateTime.now());
         Users updatedUser = usersRepo.save(user);
         return new UsersCreationResponseDto(updatedUser);
     }

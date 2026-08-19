@@ -136,31 +136,67 @@ public class PagesServiceImpl implements PagesService{
     @Override
     public PagesUpdateResponseDto editPageDetails(String pageId, PagesUpdateRequestDto pagesUpdateRequestDto) {
 
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new RuntimeException("User not authenticated");
-//        }
-//
-//        String email = authentication.getName();
-//
-//        Users loggedInUser = usersRepo.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("User not found!"));
-//
-//        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
-//                .orElseThrow(() -> new RuntimeException("Cannot update Page Details!"));
-//
-//        page.setTitle(pagesUpdateRequestDto.getTitle());
-//        page.setParticipants(
-//                String.join(",", pagesUpdateRequestDto.getParticipants())
-//        );
-//        page.setUpdatedAt(LocalDateTime.now());
-//        page.setPageContent(pagesUpdateRequestDto.getPageContent());
-//
-//        Pages editedPage = pagesRepo.save(page);
-//
-//        return new PagesUpdateResponseDto(editedPage);
-        return null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Cannot update Page Details!"));
+
+        String currentStatus = page.getStatus().getStatusId();
+
+        if (!"PSV".equals(currentStatus)) {
+            throw new RuntimeException("Only saved and unarchived pages can be edited.");
+        }
+
+        if (pagesUpdateRequestDto.getTitle() != null
+                && !pagesUpdateRequestDto.getTitle().isBlank()) {
+
+            page.setTitle(pagesUpdateRequestDto.getTitle().trim());
+        }
+
+        if (pagesUpdateRequestDto.getParticipants() == null
+                || pagesUpdateRequestDto.getParticipants().isEmpty()) {
+
+            throw new RuntimeException("Please add at least one participant.");
+        }
+
+        String participants = pagesUpdateRequestDto
+                .getParticipants()
+                .stream()
+                .map(String::trim)
+                .filter(participant -> !participant.isBlank())
+                .distinct()
+                .collect(Collectors.joining(","));
+
+        if (participants.isBlank()) {
+            throw new RuntimeException("Please add at least one valid participant.");
+        }
+
+        if (pagesUpdateRequestDto.getPageContent() == null
+                || pagesUpdateRequestDto.getPageContent().isBlank()) {
+
+            throw new RuntimeException("Page content cannot be empty.");
+        }
+
+        page.setParticipants(participants);
+        page.setPageContent(pagesUpdateRequestDto.getPageContent());
+        page.setUpdatedAt(LocalDateTime.now());
+
+        Status savedStatus = statusRepo.findById("PSV")
+                .orElseThrow(() -> new RuntimeException("Invalid Status!"));
+
+        page.setStatus(savedStatus);
+        Pages savedPage = pagesRepo.save(page);
+
+        return new PagesUpdateResponseDto(savedPage);
     }
 
     @Override
@@ -435,6 +471,30 @@ public class PagesServiceImpl implements PagesService{
         Pages mappedPage = pagesRepo.save(page);
 
         return new PagesUpdateResponseDto(mappedPage);
+    }
+
+    @Override
+    public PagesUpdateResponseDto unmapPageFromNotebook(String pageId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        Users loggedInUser = usersRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        Pages page = pagesRepo.findByPageIdAndCreatedBy(pageId, loggedInUser)
+                .orElseThrow(() -> new RuntimeException("Page not found or access denied."));
+
+        page.setNotebooks(null);
+
+        Pages saved = pagesRepo.save(page);
+
+        return new PagesUpdateResponseDto(saved);
     }
 
     @Override

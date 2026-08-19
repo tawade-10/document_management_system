@@ -82,6 +82,11 @@ public class PagesFacadeImpl implements PagesFacade{
     }
 
     @Override
+    public PagesUpdateResponseDto unmapPageFromNotebook(String pageId) {
+        return pagesService.unmapPageFromNotebook(pageId);
+    }
+
+    @Override
     public List<PagesUpdateResponseDto> getAllPagesByNotebook(String notebookId) {
         return pagesService.getAllPagesByNotebook(notebookId);
     }
