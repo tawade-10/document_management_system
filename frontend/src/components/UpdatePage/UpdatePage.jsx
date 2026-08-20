@@ -1340,7 +1340,6 @@ export default function UpdatePage() {
                 requestData
         };
 
-
         try {
 
             setSaving(true);
@@ -2850,11 +2849,6 @@ export default function UpdatePage() {
 
                 </div>
             )}
-
-
-            {/* =========================================================
-               BOTTOM ACTION BAR
-            ========================================================= */}
 
             <div className="update-page-action-bar">
 

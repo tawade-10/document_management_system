@@ -1,24 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 import "./RecentPages.css";
 
 const USER_PAGES_API =
     "http://localhost:8080/api/pages/myPages";
 
-export default function RecentPages({ searchKeyword }) {
+const PAGE_SIZE = 100;
+const MAX_VISIBLE_PAGES = 6;
+
+export default function RecentPages({
+    searchKeyword
+}) {
 
     const navigate = useNavigate();
 
     const [pages, setPages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [showAllPages, setShowAllPages] = useState(false);
+    const [showAllPages, setShowAllPages] =
+        useState(false);
 
-    const token = localStorage.getItem("token");
+    const token =
+        localStorage.getItem("token");
+
+    /* =========================================================
+       FETCH PAGES
+    ========================================================= */
 
     useEffect(() => {
+
         fetchRecentPages();
+
     }, []);
 
     const fetchRecentPages = async () => {
@@ -28,7 +47,6 @@ export default function RecentPages({ searchKeyword }) {
             setLoading(true);
             setError("");
 
-            const pageSize = 100;
             let currentPage = 0;
             let allPages = [];
             let totalPages = 1;
@@ -37,20 +55,22 @@ export default function RecentPages({ searchKeyword }) {
 
                 const params = {
                     page: currentPage,
-                    size: pageSize,
+                    size: PAGE_SIZE,
                     sortBy: "createdAt",
                     sortDir: "desc"
                 };
 
-                const response = await axios.get(
-                    USER_PAGES_API,
-                    {
-                        params,
-                        headers: {
-                            Authorization: `Bearer ${token}`
+                const response =
+                    await axios.get(
+                        USER_PAGES_API,
+                        {
+                            params,
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
                         }
-                    }
-                );
+                    );
 
                 console.group(
                     `UH-RP1 - Load My Pages Page ${currentPage + 1}`
@@ -71,7 +91,9 @@ export default function RecentPages({ searchKeyword }) {
                 console.groupEnd();
 
                 const content =
-                    Array.isArray(response.data?.content)
+                    Array.isArray(
+                        response.data?.content
+                    )
                         ? response.data.content
                         : [];
 
@@ -81,11 +103,15 @@ export default function RecentPages({ searchKeyword }) {
                 ];
 
                 totalPages =
-                    Number(response.data?.totalPages) || 1;
+                    Number(
+                        response.data?.totalPages
+                    ) || 1;
 
                 currentPage++;
 
-            } while (currentPage < totalPages);
+            } while (
+                currentPage < totalPages
+            );
 
             console.log(
                 "UH-RP1 - Total My Pages Loaded:",
@@ -96,11 +122,15 @@ export default function RecentPages({ searchKeyword }) {
 
         } catch (error) {
 
-            console.group("UH-RP1 - Load My Pages Error");
+            console.group(
+                "UH-RP1 - Load My Pages Error"
+            );
 
             console.log("Response");
 
-            console.log(error.response?.data);
+            console.log(
+                error.response?.data
+            );
 
             console.groupEnd();
 
@@ -116,71 +146,125 @@ export default function RecentPages({ searchKeyword }) {
         }
     };
 
+    /* =========================================================
+       SEARCH
+    ========================================================= */
+
     const keyword =
         searchKeyword?.trim().toLowerCase() || "";
 
-    const filteredPages = pages.filter(page => {
+    const filteredPages = useMemo(() => {
 
-        if (!keyword) {
-            return true;
-        }
+        return pages.filter(page => {
 
-        const pageId =
-            String(
-                page.pageId || ""
-            ).toLowerCase();
+            if (!keyword) {
+                return true;
+            }
 
-        const pageTitle =
-            String(
-                page.title || ""
-            ).toLowerCase();
+            const pageId =
+                String(
+                    page.pageId || ""
+                ).toLowerCase();
 
-        const createdBy =
-            String(
-                page.createdBy || ""
-            ).toLowerCase();
+            const pageTitle =
+                String(
+                    page.title || ""
+                ).toLowerCase();
 
-        const notebookId =
-            String(
-                page.notebookId ||
-                page.notebooks?.notebookId ||
-                page.notebook?.notebookId ||
-                ""
-            ).toLowerCase();
+            const createdBy =
+                String(
+                    page.createdBy || ""
+                ).toLowerCase();
 
-        const notebookName =
-            String(
-                page.notebookName ||
-                page.notebooks?.name ||
-                page.notebook?.name ||
-                ""
-            ).toLowerCase();
+            const notebookId =
+                String(
+                    page.notebookId ||
+                    page.notebooks?.notebookId ||
+                    page.notebook?.notebookId ||
+                    ""
+                ).toLowerCase();
 
-        const pageStatus =
-            String(
-                page.status || ""
-            ).toLowerCase();
+            const notebookName =
+                String(
+                    page.notebookName ||
+                    page.notebooks?.name ||
+                    page.notebook?.name ||
+                    ""
+                ).toLowerCase();
 
-        const participants =
-            String(
-                page.participants || ""
-            ).toLowerCase();
+            const pageStatus =
+                String(
+                    page.status || ""
+                ).toLowerCase();
 
-        return (
-            pageId.includes(keyword) ||
-            pageTitle.includes(keyword) ||
-            createdBy.includes(keyword) ||
-            notebookId.includes(keyword) ||
-            notebookName.includes(keyword) ||
-            pageStatus.includes(keyword) ||
-            participants.includes(keyword)
-        );
-    });
+            const participants =
+                String(
+                    page.participants || ""
+                ).toLowerCase();
+
+            return (
+                pageId.includes(keyword) ||
+                pageTitle.includes(keyword) ||
+                createdBy.includes(keyword) ||
+                notebookId.includes(keyword) ||
+                notebookName.includes(keyword) ||
+                pageStatus.includes(keyword) ||
+                participants.includes(keyword)
+            );
+
+        });
+
+    }, [pages, keyword]);
 
     const visiblePages =
         showAllPages
             ? filteredPages
-            : filteredPages.slice(0, 6);
+            : filteredPages.slice(
+                0,
+                MAX_VISIBLE_PAGES
+            );
+
+    /* =========================================================
+       BB63 - VIEW ALL PAGES
+    ========================================================= */
+
+    const handleViewAll = () => {
+
+        const nextState =
+            !showAllPages;
+
+        console.group(
+            "BB63 - View All Pages Button"
+        );
+
+        console.log("Button Event");
+
+        console.log({
+            buttonNo: "BB63",
+            buttonName:
+                "View All Pages / Show Less",
+            action:
+                nextState
+                    ? "SHOW_ALL"
+                    : "SHOW_LESS",
+            totalPages:
+                filteredPages.length
+        });
+
+        console.log("Response");
+
+        console.log({
+            showAllPages: nextState
+        });
+
+        console.groupEnd();
+
+        setShowAllPages(nextState);
+    };
+
+    /* =========================================================
+       BB64 - RECENT PAGE ROW
+    ========================================================= */
 
     const handlePageClick = pageId => {
 
@@ -188,16 +272,40 @@ export default function RecentPages({ searchKeyword }) {
             return;
         }
 
+        console.group(
+            "BB64 - Recent Page Row Button"
+        );
+
+        console.log("Button Event");
+
+        console.log({
+            buttonNo: "BB64",
+            buttonName:
+                "Recent Page Row",
+            pageId,
+            action: "VIEW_PAGE"
+        });
+
+        console.log("Response");
+
+        console.log({
+            navigationPath:
+                `/user-homepage/view-page/${pageId}`
+        });
+
+        console.groupEnd();
+
         navigate(
             `/user-homepage/view-page/${pageId}`
         );
     };
 
-    const handleViewAll = () => {
-        setShowAllPages(prev => !prev);
-    };
+    /* =========================================================
+       RENDER
+    ========================================================= */
 
     return (
+
         <div className="recent-pages-card">
 
             <div className="recent-pages-header">
@@ -290,7 +398,9 @@ export default function RecentPages({ searchKeyword }) {
                                 className="recent-page-row"
                                 key={pageId}
                                 onClick={() =>
-                                    handlePageClick(pageId)
+                                    handlePageClick(
+                                        pageId
+                                    )
                                 }
                             >
 

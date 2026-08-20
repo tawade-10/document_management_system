@@ -11,33 +11,25 @@ export default function UserHomePage() {
 
     return (
         <div className="user-home-page">
-
             <div className="user-home-content">
-
                 <div className="user-home-grid">
-
                     <section className="user-home-section">
                         <RecentNotebooks
                             searchKeyword={searchKeyword}
                         />
                     </section>
-
                     <section className="user-home-section">
                         <RecentPages
                             searchKeyword={searchKeyword}
                         />
                     </section>
-
                     <section className="user-home-section">
                         <UnmappedPages
                             searchKeyword={searchKeyword}
                         />
                     </section>
-
                 </div>
-
             </div>
-
         </div>
     );
 }

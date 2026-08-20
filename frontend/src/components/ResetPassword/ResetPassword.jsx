@@ -2,28 +2,40 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./ResetPassword.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+    useNavigate,
+    useSearchParams
+} from "react-router-dom";
 
 export default function ResetPassword() {
 
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] =
+        useState("");
 
-    // First Login Fields
     const [email, setEmail] = useState("");
-    const [temporaryPassword, setTemporaryPassword] = useState("");
+    const [temporaryPassword, setTemporaryPassword] =
+        useState("");
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [showConfirmPassword, setShowConfirmPassword] =
+        useState(false);
+
+    const [showTemporaryPassword, setShowTemporaryPassword] =
+        useState(false);
 
     const [msg, setMsg] = useState("");
     const [loading, setLoading] = useState(false);
 
     const [searchParams] = useSearchParams();
-    const token = searchParams.get("token");
 
-    const isForgotPassword = token !== null;
+    const token =
+        searchParams.get("token");
+
+    const isForgotPassword =
+        token !== null;
 
     const navigate = useNavigate();
 
@@ -34,39 +46,60 @@ export default function ResetPassword() {
         response,
         status
     }) => {
-        console.group(`${buttonNo} - ${buttonName}`);
+
+        console.group(
+            `${buttonNo} - ${buttonName}`
+        );
+
         console.log("Request");
         console.log(request);
+
         console.log("Response");
         console.log(response);
+
         console.log("Status Code");
         console.log(status);
+
         console.groupEnd();
     };
 
     const handleSubmit = async (e) => {
 
         e.preventDefault();
+
         setMsg("");
 
         if (password !== confirmPassword) {
 
             logButtonEvent({
-                buttonNo: "BB12",
-                buttonName: "Reset Password Button",
+
+                buttonNo: "BB15",
+
+                buttonName:
+                    isForgotPassword
+                        ? "Reset Password Button"
+                        : "Create Password Button",
+
                 request: {
                     email,
                     temporaryPassword,
                     password,
                     confirmPassword
                 },
+
                 response: {
-                    message: "Passwords do not match"
+                    message:
+                        "Passwords do not match"
                 },
+
                 status: 400
+
             });
 
-            setMsg("Passwords do not match!");
+            setMsg(
+                "Passwords do not match!"
+            );
+
             return;
         }
 
@@ -77,69 +110,107 @@ export default function ResetPassword() {
         if (isForgotPassword) {
 
             request = {
+
                 method: "POST",
+
                 url:
                     `http://localhost:8080/api/auth/reset-password` +
                     `?token=${token}` +
                     `&newPassword=${password}`
+
             };
 
         } else {
 
             request = {
+
                 method: "POST",
-                url: "http://localhost:8080/api/auth/create-password",
+
+                url:
+                    "http://localhost:8080/api/auth/create-password",
+
                 data: {
                     temporaryPassword,
                     newPassword: password
                 }
+
             };
+
+        }
 
         try {
 
-            const response = isForgotPassword
-                ? await axios.post(request.url)
-                : await axios.post(request.url, request.data);
+            const response =
+                isForgotPassword
+                    ? await axios.post(
+                        request.url
+                    )
+                    : await axios.post(
+                        request.url,
+                        request.data
+                    );
 
             logButtonEvent({
-                buttonNo: "BB12",
-                buttonName: isForgotPassword
-                    ? "Reset Password Button"
-                    : "Create Password Button",
+
+                buttonNo: "BB15",
+
+                buttonName:
+                    isForgotPassword
+                        ? "Reset Password Button"
+                        : "Create Password Button",
+
                 request,
-                response: response.data,
-                status: response.status
+
+                response:
+                    response.data,
+
+                status:
+                    response.status
+
             });
 
             setMsg(
+
                 isForgotPassword
                     ? "Password reset successful!"
                     : "Password created successfully!"
+
             );
 
             setTimeout(() => {
+
                 navigate("/");
+
             }, 1500);
 
         } catch (error) {
 
             logButtonEvent({
-                buttonNo: "BB12",
-                buttonName: isForgotPassword
-                    ? "Reset Password Button"
-                    : "Create Password Button",
+
+                buttonNo: "BB15",
+
+                buttonName:
+                    isForgotPassword
+                        ? "Reset Password Button"
+                        : "Create Password Button",
+
                 request,
+
                 response:
                     error.response?.data ||
                     error.message,
+
                 status:
                     error.response?.status ||
                     500
+
             });
 
             setMsg(
+
                 error.response?.data ||
                 "Unable to update password."
+
             );
 
         } finally {
@@ -150,13 +221,19 @@ export default function ResetPassword() {
     };
 
     return (
+
         <div className="rp-container">
+
             <div className="rp-card">
 
                 <h2 className="rp-title">
-                    {isForgotPassword
-                        ? "Reset Password"
-                        : "Create Password"}
+
+                    {
+                        isForgotPassword
+                            ? "Reset Password"
+                            : "Create Password"
+                    }
+
                 </h2>
 
                 <form
@@ -165,8 +242,11 @@ export default function ResetPassword() {
                 >
 
                     {/* First Login Only */}
+
                     {!isForgotPassword && (
+
                         <>
+
                             <label className="rp-label">
                                 Email
                             </label>
@@ -177,7 +257,9 @@ export default function ResetPassword() {
                                 placeholder="Enter Email"
                                 value={email}
                                 onChange={(e) =>
-                                    setEmail(e.target.value)
+                                    setEmail(
+                                        e.target.value
+                                    )
                                 }
                                 required
                             />
@@ -207,170 +289,251 @@ export default function ResetPassword() {
 
                                 <span
                                     className="rp-password-icon"
-                                    onClick={() =>
+                                    onClick={() => {
+
+                                        const buttonNo =
+                                            showTemporaryPassword
+                                                ? "BB10"
+                                                : "BB9";
+
+                                        const buttonName =
+                                            showTemporaryPassword
+                                                ? "Hide Temporary Password Button (Eye Icon)"
+                                                : "Show Temporary Password Button (Eye Icon)";
+
+                                        logButtonEvent({
+
+                                            buttonNo,
+
+                                            buttonName,
+
+                                            request: {
+                                                action:
+                                                    showTemporaryPassword
+                                                        ? "Hide Temporary Password"
+                                                        : "Show Temporary Password"
+                                            },
+
+                                            response: {
+                                                message:
+                                                    showTemporaryPassword
+                                                        ? "Temporary Password Hidden"
+                                                        : "Temporary Password Visible"
+                                            },
+
+                                            status: 200
+
+                                        });
+
                                         setShowTemporaryPassword(
                                             !showTemporaryPassword
-                                        )
-                                    }
+                                        );
+
+                                    }}
                                 >
-                                    {showTemporaryPassword
-                                        ? <FaEyeSlash/>
-                                        : <FaEye/>
+
+                                    {
+                                        showTemporaryPassword
+                                            ? <FaEyeSlash />
+                                            : <FaEye />
                                     }
+
                                 </span>
 
                             </div>
+
                         </>
+
                     )}
-                                    <label className="rp-label">
-                                        New Password
-                                    </label>
 
-                                    <div className="rp-password-field">
+                    <label className="rp-label">
+                        New Password
+                    </label>
 
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            className="rp-input"
-                                            placeholder="Enter New Password"
-                                            value={password}
-                                            onChange={(e) =>
-                                                setPassword(e.target.value)
-                                            }
-                                            required
-                                        />
+                    <div className="rp-password-field">
 
-                                        <span
-                                            className="rp-password-icon"
-                                            onClick={() => {
+                        <input
+                            type={
+                                showPassword
+                                    ? "text"
+                                    : "password"
+                            }
+                            className="rp-input"
+                            placeholder="Enter New Password"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(
+                                    e.target.value
+                                )
+                            }
+                            required
+                        />
 
-                                                const buttonNo =
-                                                    showPassword
-                                                        ? "BB9"
-                                                        : "BB8";
+                        <span
+                            className="rp-password-icon"
+                            onClick={() => {
 
-                                                const buttonName =
-                                                    showPassword
-                                                        ? "Hide New Password Button (Eye Icon)"
-                                                        : "Show New Password Button (Eye Icon)";
+                                const buttonNo =
+                                    showPassword
+                                        ? "BB12"
+                                        : "BB11";
 
-                                                logButtonEvent({
-                                                    buttonNo,
-                                                    buttonName,
-                                                    request: {
-                                                        action: showPassword
-                                                            ? "Hide Password"
-                                                            : "Show Password"
-                                                    },
-                                                    response: {
-                                                        message: showPassword
-                                                            ? "Password Hidden"
-                                                            : "Password Visible"
-                                                    },
-                                                    status: 200
-                                                });
+                                const buttonName =
+                                    showPassword
+                                        ? "Hide New Password Button (Eye Icon)"
+                                        : "Show New Password Button (Eye Icon)";
 
-                                                setShowPassword(!showPassword);
+                                logButtonEvent({
 
-                                            }}
-                                        >
-                                            {showPassword
-                                                ? <FaEyeSlash/>
-                                                : <FaEye/>
-                                            }
-                                        </span>
+                                    buttonNo,
 
-                                    </div>
+                                    buttonName,
 
-                                    <label className="rp-label">
-                                        Confirm Password
-                                    </label>
+                                    request: {
+                                        action:
+                                            showPassword
+                                                ? "Hide Password"
+                                                : "Show Password"
+                                    },
 
-                                    <div className="rp-password-field">
+                                    response: {
+                                        message:
+                                            showPassword
+                                                ? "Password Hidden"
+                                                : "Password Visible"
+                                    },
 
-                                        <input
-                                            type={
-                                                showConfirmPassword
-                                                    ? "text"
-                                                    : "password"
-                                            }
-                                            className="rp-input"
-                                            placeholder="Confirm Password"
-                                            value={confirmPassword}
-                                            onChange={(e) =>
-                                                setConfirmPassword(e.target.value)
-                                            }
-                                            required
-                                        />
+                                    status: 200
 
-                                        <span
-                                            className="rp-password-icon"
-                                            onClick={() => {
+                                });
 
-                                                const buttonNo =
-                                                    showConfirmPassword
-                                                        ? "BB11"
-                                                        : "BB10";
+                                setShowPassword(
+                                    !showPassword
+                                );
 
-                                                const buttonName =
-                                                    showConfirmPassword
-                                                        ? "Hide Confirm Password Button (Eye Icon)"
-                                                        : "Show Confirm Password Button (Eye Icon)";
+                            }}
+                        >
 
-                                                logButtonEvent({
-                                                    buttonNo,
-                                                    buttonName,
-                                                    request: {
-                                                        action: showConfirmPassword
-                                                            ? "Hide Password"
-                                                            : "Show Password"
-                                                    },
-                                                    response: {
-                                                        message: showConfirmPassword
-                                                            ? "Password Hidden"
-                                                            : "Password Visible"
-                                                    },
-                                                    status: 200
-                                                });
+                            {
+                                showPassword
+                                    ? <FaEyeSlash />
+                                    : <FaEye />
+                            }
 
-                                                setShowConfirmPassword(
-                                                    !showConfirmPassword
-                                                );
+                        </span>
 
-                                            }}
-                                        >
-                                            {showConfirmPassword
-                                                ? <FaEyeSlash/>
-                                                : <FaEye/>
-                                            }
-                                        </span>
+                    </div>
 
-                                    </div>
+                    <label className="rp-label">
+                        Confirm Password
+                    </label>
 
-                                    <button
-                                        type="submit"
-                                        className="rp-submit"
-                                        disabled={loading}
-                                    >
-                                        {loading
-                                            ? "Updating..."
-                                            : isForgotPassword
-                                                ? "Reset Password"
-                                                : "Create Password"}
-                                    </button>
-                                </form>
-                                {msg && (
-                                    <p
-                                        className={`rp-message ${
-                                            msg.toLowerCase().includes("successful")
-                                                ? "success"
-                                                : "error"
-                                        }`}
-                                    >
-                                        {msg}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    );
-                }
-            }
+                    <div className="rp-password-field">
+
+                        <input
+                            type={
+                                showConfirmPassword
+                                    ? "text"
+                                    : "password"
+                            }
+                            className="rp-input"
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) =>
+                                setConfirmPassword(
+                                    e.target.value
+                                )
+                            }
+                            required
+                        />
+
+                        <span
+                            className="rp-password-icon"
+                            onClick={() => {
+
+                                const buttonNo =
+                                    showConfirmPassword
+                                        ? "BB14"
+                                        : "BB13";
+
+                                const buttonName =
+                                    showConfirmPassword
+                                        ? "Hide Confirm Password Button (Eye Icon)"
+                                        : "Show Confirm Password Button (Eye Icon)";
+
+                                logButtonEvent({
+
+                                    buttonNo,
+
+                                    buttonName,
+
+                                    request: {
+                                        action:
+                                            showConfirmPassword
+                                                ? "Hide Password"
+                                                : "Show Password"
+                                    },
+
+                                    response: {
+                                        message:
+                                            showConfirmPassword
+                                                ? "Password Hidden"
+                                                : "Password Visible"
+                                    },
+
+                                    status: 200
+
+                                });
+
+                                setShowConfirmPassword(
+                                    !showConfirmPassword
+                                );
+
+                            }}
+                        >
+
+                            {
+                                showConfirmPassword
+                                    ? <FaEyeSlash />
+                                    : <FaEye />
+                            }
+
+                        </span>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="rp-submit"
+                        disabled={loading}
+                    >
+
+                        {
+                            loading
+                                ? "Updating..."
+                                : isForgotPassword
+                                    ? "Reset Password"
+                                    : "Create Password"
+                        }
+
+                    </button>
+
+                </form>
+
+                {msg && (
+                    <p
+                        className={`rp-message ${
+                            msg
+                                .toLowerCase()
+                                .includes("successful")
+                                ? "success"
+                                : "error"
+                        }`}
+                    >
+                        {msg}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}

@@ -13,14 +13,22 @@ export default function Login() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
     const [loginData, setLoginData] = useState({
         email: "",
         password: ""
     });
+
     const [errors, setErrors] = useState({});
     const [loginError, setLoginError] = useState("");
 
-    const logButtonEvent = ({buttonNo,buttonName,request,response,status}) => {
+    const logButtonEvent = ({
+        buttonNo,
+        buttonName,
+        request,
+        response,
+        status
+    }) => {
         console.group(`${buttonNo} - ${buttonName}`);
         console.log("Request");
         console.log(request);
@@ -33,38 +41,72 @@ export default function Login() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
         setLoginData({
             ...loginData,
             [name]: value
         });
+
         setErrors({
             ...errors,
             [name]: ""
         });
+
         setLoginError("");
     };
 
     const validate = () => {
+
         let temp = {};
+
         if (!loginData.email.trim()) {
             temp.email = "Email is required";
         } else if (
-            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(loginData.email)
+            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(
+                loginData.email
+            )
         ) {
             temp.email = "Invalid Email Address";
         }
+
         if (!loginData.password.trim()) {
             temp.password = "Password is required";
         }
+
         setErrors(temp);
+
         return Object.keys(temp).length === 0;
     };
 
     const handleReset = () => {
+
+        const request = {
+            action: "Reset Fields",
+            fields: [
+                "email",
+                "password",
+                "errors",
+                "loginError"
+            ]
+        };
+
+        const response = {
+            message: "Login fields and errors reset successfully"
+        };
+
+        logButtonEvent({
+            buttonNo: "BB5",
+            buttonName: "Reset Fields",
+            request,
+            response,
+            status: 200
+        });
+
         setLoginData({
             email: "",
             password: ""
         });
+
         setErrors({});
         setLoginError("");
     };
@@ -72,7 +114,9 @@ export default function Login() {
     const storeUserData = (data, currentRole) => {
 
         const authorityString =
-            (data.authorityName || "").toUpperCase().trim();
+            (data.authorityName || "")
+                .toUpperCase()
+                .trim();
 
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
@@ -82,129 +126,204 @@ export default function Login() {
         localStorage.setItem("currentRole", currentRole);
     };
 
-   const handleLogin = async (e) => {
-       e.preventDefault();
-       if (!validate()) return;
-       const request = {
-           method: "POST",
-           url: `${API_URL}/login`,
-           payload: loginData
-       };
-       try {
-           setLoading(true);
-           const response = await axios.post(`${API_URL}/login`,loginData);
-           logButtonEvent({
-               buttonNo: "BB1",
-               buttonName: "Login Button",
-               request,
-               response: response.data,
-               status: response.status
-           });
-           const data = response.data;
-           const authority =
-               (data.authorityName || "")
-                   .toUpperCase()
-                   .trim();
-           if (
-               authority.includes("USER") ||
-               authority.includes("SUPER_USER")
-           ) {
-               storeUserData(data, "USER");
-               window.dispatchEvent(new Event("login"));
-               toast.success("Login Successful");
-               navigate("/user-homepage");
-           } else {
-               setLoginError(
-                   "You are not authorized to access the User Portal."
-               );
-           }
-       } catch (error) {
-           logButtonEvent({
-               buttonNo: "BB1",
-               buttonName: "Login Button",
-               request,
-               response: error.response?.data || error.message,
-               status: error.response?.status || 500
-           });
-           setLoginError(error.response?.data?.message ||"Invalid Email or Password");
-       } finally {
-           setLoading(false);
-       }
-   };
+    const handleLogin = async (e) => {
 
- const handleAdminLogin = async (e) => {
+        e.preventDefault();
 
-     e.preventDefault();
+        if (!validate()) return;
 
-     if (!validate()) return;
+        const request = {
+            method: "POST",
+            url: `${API_URL}/login`,
+            payload: loginData
+        };
 
-     const request = {
-         method: "POST",
-         url: `${API_URL}/login`,
-         payload: loginData
-     };
+        try {
 
-     try {
-         setLoading(true);
-         const response = await axios.post(
-             `${API_URL}/login`,
-             loginData
-         );
-         const data = response.data;
-         const authority =
-             (data.authorityName || "")
-                 .toUpperCase()
-                 .trim();
-         const roles = authority
-             .split(",")
-             .map(role => role.trim());
-         if (roles.includes("ADMIN")) {
-             logButtonEvent({
-                 buttonNo: "BB5",
-                 buttonName: "Admin Control",
-                 request,
-                 response: data,
-                 status: response.status
-             });
-             storeUserData(data, "ADMIN");
-             window.dispatchEvent(new Event("login"));
-             toast.success("Admin Login Successful");
-             navigate("/admin");
-         } else {
-             logButtonEvent({
-                 buttonNo: "BB5",
-                 buttonName: "Admin Control",
-                 request,
-                 response: {
-                     message: "User is authenticated but does not have ADMIN authority."
-                 },
-                 status: "AUTHORIZATION FAILED (HTTP Response: 200)"
-             });
-             setLoginError("You are not authorized to access Admin Control.");
-         }
-     } catch (error) {
-         logButtonEvent({
-             buttonNo: "BB5",
-             buttonName: "Admin Control",
-             request,
-             response: error.response?.data || error.message,
-             status: error.response?.status || 500
-         });
-         setLoginError(error.response?.data?.message ||"Invalid Email or Password");
-     } finally {
-         setLoading(false);
-     }
- };
+            setLoading(true);
+
+            const response = await axios.post(
+                `${API_URL}/login`,
+                loginData
+            );
+
+            logButtonEvent({
+                buttonNo: "BB1",
+                buttonName: "Login Button",
+                request,
+                response: response.data,
+                status: response.status
+            });
+
+            const data = response.data;
+
+            const authority =
+                (data.authorityName || "")
+                    .toUpperCase()
+                    .trim();
+
+            if (
+                authority.includes("USER") ||
+                authority.includes("SUPER_USER")
+            ) {
+
+                storeUserData(data, "USER");
+
+                window.dispatchEvent(
+                    new Event("login")
+                );
+
+                toast.success("Login Successful");
+
+                navigate("/user-homepage");
+
+            } else {
+
+                setLoginError(
+                    "You are not authorized to access the User Portal."
+                );
+            }
+
+        } catch (error) {
+
+            logButtonEvent({
+                buttonNo: "BB1",
+                buttonName: "Login Button",
+                request,
+                response:
+                    error.response?.data ||
+                    error.message,
+                status:
+                    error.response?.status ||
+                    500
+            });
+
+            setLoginError(
+                error.response?.data?.message ||
+                "Invalid Email or Password"
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+    const handleAdminLogin = async (e) => {
+
+        e.preventDefault();
+
+        if (!validate()) return;
+
+        const request = {
+            method: "POST",
+            url: `${API_URL}/login`,
+            payload: loginData
+        };
+
+        try {
+
+            setLoading(true);
+
+            const response = await axios.post(
+                `${API_URL}/login`,
+                loginData
+            );
+
+            const data = response.data;
+
+            const authority =
+                (data.authorityName || "")
+                    .toUpperCase()
+                    .trim();
+
+            const roles = authority
+                .split(",")
+                .map(role => role.trim());
+
+            if (roles.includes("ADMIN")) {
+
+                logButtonEvent({
+                    buttonNo: "BB6",
+                    buttonName: "Admin Control",
+                    request,
+                    response: data,
+                    status: response.status
+                });
+
+                storeUserData(data, "ADMIN");
+
+                window.dispatchEvent(
+                    new Event("login")
+                );
+
+                toast.success(
+                    "Admin Login Successful"
+                );
+
+                navigate("/admin");
+
+            } else {
+
+                logButtonEvent({
+                    buttonNo: "BB6",
+                    buttonName: "Admin Control",
+                    request,
+                    response: {
+                        message:
+                            "User is authenticated but does not have ADMIN authority."
+                    },
+                    status:
+                        "AUTHORIZATION FAILED (HTTP Response: 200)"
+                });
+
+                setLoginError(
+                    "You are not authorized to access Admin Control."
+                );
+            }
+
+        } catch (error) {
+
+            logButtonEvent({
+                buttonNo: "BB6",
+                buttonName: "Admin Control",
+                request,
+                response:
+                    error.response?.data ||
+                    error.message,
+                status:
+                    error.response?.status ||
+                    500
+            });
+
+            setLoginError(
+                error.response?.data?.message ||
+                "Invalid Email or Password"
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
 
     return (
         <div className="container">
+
             <div className="form-container">
+
                 <div className="form">
+
                     <h2>User Login</h2>
+
                     <div className="email-field">
+
                         <span className="email-icon">
                             <MdEmail />
                         </span>
+
                         <input
                             type="email"
                             name="email"
@@ -212,88 +331,139 @@ export default function Login() {
                             value={loginData.email}
                             onChange={handleChange}
                         />
+
                     </div>
+
                     {errors.email &&
                         <span className="error">
                             {errors.email}
                         </span>
                     }
+
                     <div className="password-field">
+
                         <span className="lock-icon">
                             <FaLock />
                         </span>
+
                         <input
-                            type={showPassword ? "text" : "password"}
+                            type={
+                                showPassword
+                                    ? "text"
+                                    : "password"
+                            }
                             name="password"
                             placeholder="Enter your Password"
                             value={loginData.password}
                             onChange={handleChange}
                         />
-                        <span className="password-icon" onClick={() => {
-                                const buttonNo = showPassword ? "BB3" : "BB2";
-                                const buttonName = showPassword
-                                    ? "Hide Password Button (Eye Icon)"
-                                    : "Show Password Button (Eye Icon)";
+
+                        <span
+                            className="password-icon"
+                            onClick={() => {
+
+                                const buttonNo =
+                                    showPassword
+                                        ? "BB3"
+                                        : "BB2";
+
+                                const buttonName =
+                                    showPassword
+                                        ? "Hide Password Button (Eye Icon)"
+                                        : "Show Password Button (Eye Icon)";
+
                                 logButtonEvent({
+
                                     buttonNo,
+
                                     buttonName,
+
                                     request: {
-                                        action: showPassword
-                                            ? "Hide Password"
-                                            : "Show Password"
+                                        action:
+                                            showPassword
+                                                ? "Hide Password"
+                                                : "Show Password"
                                     },
+
                                     response: {
-                                        message: showPassword
-                                            ? "Password Hidden"
-                                            : "Password Visible"
+                                        message:
+                                            showPassword
+                                                ? "Password Hidden"
+                                                : "Password Visible"
                                     },
+
                                     status: 200
+
                                 });
-                                setShowPassword(!showPassword);
+
+                                setShowPassword(
+                                    !showPassword
+                                );
+
                             }}
                         >
                             {
-                                showPassword ? <FaEyeSlash /> : <FaEye />
+                                showPassword
+                                    ? <FaEyeSlash />
+                                    : <FaEye />
                             }
                         </span>
+
                     </div>
+
                     {errors.password &&
                         <span className="error">
                             {errors.password}
                         </span>
                     }
+
                     {loginError && (
                         <span className="login-error">
                             {loginError}
                         </span>
                     )}
+
                     <div className="reset-links">
+
                         <Link
                             to="/forgot-password"
                             onClick={() => {
+
                                 logButtonEvent({
+
                                     buttonNo: "BB4",
-                                    buttonName: "Forgot Password",
+
+                                    buttonName:
+                                        "Forgot Password",
+
                                     request: {
                                         action: "Navigate",
                                         from: "/"
                                     },
+
                                     response: {
-                                        message: "Navigating to Forgot Password Component"
+                                        message:
+                                            "Navigating to Forgot Password Component"
                                     },
+
                                     status: 200
+
                                 });
+
                             }}
                         >
                             Forgot Password?
                         </Link>
+
                         <span
                             className="reset-btn"
                             onClick={handleReset}
                         >
                             Reset Fields
                         </span>
+
                     </div>
+
                     <button
                         className="primary-btn"
                         onClick={handleLogin}
@@ -305,7 +475,9 @@ export default function Login() {
                                 : "Login"
                         }
                     </button>
+
                     <div className="admin-control-wrapper">
+
                         <button
                             className="admin-control-btn"
                             onClick={handleAdminLogin}
@@ -313,10 +485,13 @@ export default function Login() {
                         >
                             Admin Control
                         </button>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
     );
 }
-

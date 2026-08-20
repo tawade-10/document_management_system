@@ -69,7 +69,7 @@ export default function Footer() {
 
 
     /* =========================================================
-       LOGGING
+       BUTTON LOGGING
     ========================================================= */
 
     const logButtonEvent = ({
@@ -84,27 +84,31 @@ export default function Footer() {
             `${buttonNo} - ${buttonName}`
         );
 
+
         console.log(
             "Request",
             request
         );
+
 
         console.log(
             "Response",
             response
         );
 
+
         console.log(
             "Status Code",
             status
         );
+
 
         console.groupEnd();
     };
 
 
     /* =========================================================
-       STATUS EVENT
+       PAGE STATUS EVENT
     ========================================================= */
 
     useEffect(() => {
@@ -122,9 +126,18 @@ export default function Footer() {
                 );
 
 
+                /*
+                 * Page can only be edited while it is
+                 * in Saved (PSV) status.
+                 *
+                 * Once published or archived,
+                 * editing is automatically disabled.
+                 */
+
                 if (status !== "PSV") {
 
                     setEditMode(false);
+
 
                     window.dispatchEvent(
                         new CustomEvent(
@@ -169,6 +182,7 @@ export default function Footer() {
                 const newEditMode =
                     event.detail?.editMode === true;
 
+
                 setEditMode(
                     newEditMode
                 );
@@ -193,7 +207,7 @@ export default function Footer() {
 
 
     /* =========================================================
-       RESET WHEN LEAVING PAGE
+       RESET WHEN LEAVING VIEW PAGE
     ========================================================= */
 
     useEffect(() => {
@@ -203,6 +217,7 @@ export default function Footer() {
             setPageStatus(
                 "PSV"
             );
+
 
             setEditMode(
                 false
@@ -291,7 +306,7 @@ export default function Footer() {
 
 
     /* =========================================================
-       ACTION DISPATCH
+       FOOTER ACTION DISPATCH
     ========================================================= */
 
     const dispatchPageAction = ({
@@ -321,9 +336,19 @@ export default function Footer() {
         const response = {
 
             message:
-                `${buttonName} triggered successfully`
+                `${buttonName} triggered successfully`,
+
+            action,
+
+            buttonNo,
+
+            buttonName
         };
 
+
+        /*
+         * Universal console logging
+         */
 
         logButtonEvent({
             buttonNo,
@@ -334,15 +359,25 @@ export default function Footer() {
         });
 
 
+        /*
+         * Notify the View Page component
+         * about the Footer action.
+         */
+
         window.dispatchEvent(
             new CustomEvent(
                 "footerPageAction",
                 {
                     detail: {
+
                         action,
+
                         buttonNo,
+
                         buttonName,
+
                         pageStatus,
+
                         editMode
                     }
                 }
@@ -391,6 +426,7 @@ export default function Footer() {
                         </span>
 
                     </div>
+
                 )}
 
             </div>
@@ -407,21 +443,26 @@ export default function Footer() {
 
                     <>
 
-                        {/* COPY */}
+
+                        {/* =================================================
+                           FB68 - COPY PAGE DETAILS
+                        ================================================= */}
 
                         <button
                             type="button"
                             className="footer-btn copy"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "copy",
 
                                     buttonNo:
-                                        "FB45",
+                                        "FB68",
 
                                     buttonName:
                                         "Copy Page Details Button"
+
                                 })
                             }
                         >
@@ -429,21 +470,25 @@ export default function Footer() {
                         </button>
 
 
-                        {/* ATTACH */}
+                        {/* =================================================
+                           FB69 - ATTACH FILE
+                        ================================================= */}
 
                         <button
                             type="button"
                             className="footer-btn attach"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "attach",
 
                                     buttonNo:
-                                        "FB46",
+                                        "FB69",
 
                                     buttonName:
                                         "Attach File Button"
+
                                 })
                             }
                             disabled={
@@ -456,21 +501,25 @@ export default function Footer() {
                         </button>
 
 
-                        {/* SAVE */}
+                        {/* =================================================
+                           FB70 - SAVE
+                        ================================================= */}
 
                         <button
                             type="button"
                             className="footer-btn save"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "save",
 
                                     buttonNo:
-                                        "FB40",
+                                        "FB70",
 
                                     buttonName:
                                         "Save Button"
+
                                 })
                             }
                             disabled={
@@ -482,21 +531,25 @@ export default function Footer() {
                         </button>
 
 
-                        {/* EDIT */}
+                        {/* =================================================
+                           FB71 - EDIT
+                        ================================================= */}
 
                         <button
                             type="button"
                             className="footer-btn edit"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "edit",
 
                                     buttonNo:
-                                        "FB41",
+                                        "FB71",
 
                                     buttonName:
                                         "Edit Button"
+
                                 })
                             }
                             disabled={
@@ -512,21 +565,25 @@ export default function Footer() {
                         </button>
 
 
-                        {/* PUBLISH */}
+                        {/* =================================================
+                           FB72 - PUBLISH MOM
+                        ================================================= */}
 
                         <button
                             type="button"
                             className="footer-btn publish"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "publish",
 
                                     buttonNo:
-                                        "FB42",
+                                        "FB72",
 
                                     buttonName:
                                         "Publish MOM Button"
+
                                 })
                             }
                             disabled={
@@ -542,21 +599,25 @@ export default function Footer() {
                         </button>
 
 
-                        {/* ARCHIVE */}
+                        {/* =================================================
+                           FB73 - ARCHIVE
+                        ================================================= */}
 
                         <button
                             type="button"
                             className="footer-btn archive"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "archive",
 
                                     buttonNo:
-                                        "FB43",
+                                        "FB73",
 
                                     buttonName:
                                         "Archive Button"
+
                                 })
                             }
                             disabled={
@@ -566,23 +627,21 @@ export default function Footer() {
                         >
                             Archive
                         </button>
-
-
-                        {/* UNARCHIVE */}
-
                         <button
                             type="button"
                             className="footer-btn unarchive"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "unarchive",
 
                                     buttonNo:
-                                        "FB44",
+                                        "FB74",
 
                                     buttonName:
                                         "Unarchive Button"
+
                                 })
                             }
                             disabled={
@@ -592,25 +651,23 @@ export default function Footer() {
                         >
                             Unarchive
                         </button>
-
-
-                        {/* CANCEL */}
-
                         <button
                             type="button"
                             className="footer-btn cancel"
                             onClick={() =>
                                 dispatchPageAction({
+
                                     action:
                                         "cancel",
 
                                     buttonNo:
-                                        "BB18",
+                                        "FB75",
 
                                     buttonName:
                                         editMode
                                             ? "Cancel Edit Button"
                                             : "Cancel Button"
+
                                 })
                             }
                         >
@@ -620,16 +677,11 @@ export default function Footer() {
                                     : "Cancel"
                             }
                         </button>
-
                     </>
                 )}
-
             </div>
-
             <div className="footer-right">
-
             </div>
-
         </footer>
     );
 }

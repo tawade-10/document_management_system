@@ -95,7 +95,7 @@ const fetchUsers = async () => {
         );
 
         logButtonEvent({
-            buttonNo: "HB15",
+            buttonNo: "HB26",
             buttonName: "Load Users",
             request,
             response: response.data,
@@ -138,8 +138,8 @@ const handleUpdateStatus = async (user) => {
 
     const buttonNo =
         user.status === "UAC"
-            ? "BB20"
-            : "BB19";
+            ? "BB17"
+            : "BB18";
 
     const buttonName =
         user.status === "UAC"
@@ -152,6 +152,7 @@ const handleUpdateStatus = async (user) => {
     };
 
     try {
+
         const response = await axios.put(
             request.url,
             {},
@@ -161,6 +162,7 @@ const handleUpdateStatus = async (user) => {
                 }
             }
         );
+
         logButtonEvent({
             buttonNo,
             buttonName,
@@ -168,8 +170,11 @@ const handleUpdateStatus = async (user) => {
             response: response.data,
             status: response.status
         });
+
         fetchUsers();
+
     } catch (error) {
+
         logButtonEvent({
             buttonNo,
             buttonName,
@@ -181,8 +186,62 @@ const handleUpdateStatus = async (user) => {
                 error.response?.status ||
                 500
         });
-        toast.error(error.response?.data?.message ||"Unable to update user status.");
+
+        toast.error(
+            error.response?.data?.message ||
+            "Unable to update user status."
+        );
     }
+};
+
+const handlePrevious = () => {
+
+    if (page === 0) {
+        return;
+    }
+
+    const nextPage = page - 1;
+
+    logButtonEvent({
+        buttonNo: "BB19",
+        buttonName: "Previous Button",
+        request: {
+            action: "Previous Page",
+            currentPage: page + 1,
+            targetPage: nextPage + 1
+        },
+        response: {
+            message: "Moving to previous users page"
+        },
+        status: 200
+    });
+
+    setPage(nextPage);
+};
+
+const handleNext = () => {
+
+    if (page === totalPages - 1) {
+        return;
+    }
+
+    const nextPage = page + 1;
+
+    logButtonEvent({
+        buttonNo: "BB20",
+        buttonName: "Next Button",
+        request: {
+            action: "Next Page",
+            currentPage: page + 1,
+            targetPage: nextPage + 1
+        },
+        response: {
+            message: "Moving to next users page"
+        },
+        status: 200
+    });
+
+    setPage(nextPage);
 };
 
     if (loading) {
@@ -214,15 +273,19 @@ const handleUpdateStatus = async (user) => {
                         <th>Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
+
                     {
                         users.length>0
                         ?
                         users.map(user=>(
+
                            <tr
                                key={user.userId}
                                style={{ cursor: "pointer" }}
                                onClick={() => {
+
                                    logButtonEvent({
                                        buttonNo: "BB16",
                                        buttonName: "User Row Click",
@@ -236,14 +299,24 @@ const handleUpdateStatus = async (user) => {
                                        },
                                        status: 200
                                    });
-                                   navigate(`/admin/view-user/${user.userId}`);
+
+                                   navigate(
+                                       `/admin/view-user/${user.userId}`
+                                   );
+
                                }}
                            >
+
                                 <td>{user.userId}</td>
+
                                 <td>{user.userName}</td>
+
                                 <td>{user.email}</td>
+
                                 <td>{user.authorityName}</td>
+
                                 <td>
+
                                     <span
                                         className={
                                             user.status==="UAC"
@@ -261,34 +334,54 @@ const handleUpdateStatus = async (user) => {
                                             "Inactive"
                                         }
                                     </span>
+
                                 </td>
+
                                 <td>
+
                                     <button
                                         className={
-                                            user.status === "UAC" ? "deactivate-btn" : "activate-btn"
+                                            user.status === "UAC"
+                                                ? "deactivate-btn"
+                                                : "activate-btn"
                                         }
                                         onClick={(e) => {
+
                                             e.stopPropagation();
+
                                             handleUpdateStatus(user);
+
                                         }}
                                     >
-                                        {user.status === "UAC" ? "Deactivate" : "Activate"}
+                                        {
+                                            user.status === "UAC"
+                                                ? "Deactivate"
+                                                : "Activate"
+                                        }
                                     </button>
+
                                 </td>
+
                             </tr>
+
                         ))
                         :
                         <tr>
+
                             <td
                                 colSpan="5"
                                 className="text-center"
                             >
                                 No Users Found
                             </td>
+
                         </tr>
                     }
+
                 </tbody>
+
             </table>
+
            {
                totalPages > 0 &&
                 <div className="pagination-container">
@@ -296,7 +389,7 @@ const handleUpdateStatus = async (user) => {
                     <button
                         className="pagination-btn"
                         disabled={page===0}
-                        onClick={()=>setPage(page-1)}
+                        onClick={handlePrevious}
                     >
                         Previous
                     </button>
@@ -308,15 +401,12 @@ const handleUpdateStatus = async (user) => {
                     <button
                         className="pagination-btn"
                         disabled={page===totalPages-1}
-                        onClick={()=>setPage(page+1)}
+                        onClick={handleNext}
                     >
                         Next
                     </button>
-
                 </div>
             }
-
         </div>
     );
 }
-

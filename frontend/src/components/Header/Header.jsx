@@ -61,6 +61,11 @@ export default function Header({
 
     const { pageId } = useParams();
 
+
+    /* =========================================================
+       STATE
+    ========================================================= */
+
     const [headerPageTitle, setHeaderPageTitle] =
         useState(pageTitle);
 
@@ -100,6 +105,10 @@ export default function Header({
         useState(false);
 
 
+    /* =========================================================
+       LOCAL STORAGE
+    ========================================================= */
+
     const token =
         localStorage.getItem("token");
 
@@ -134,6 +143,10 @@ export default function Header({
         currentRole === "USER";
 
 
+    /* =========================================================
+       PERMISSIONS
+    ========================================================= */
+
     const permissions = {
 
         canManageUsers:
@@ -164,33 +177,32 @@ export default function Header({
             authorities.includes("SUPER_USER")
     };
 
-    const userSortByOptions = [
 
+    /* =========================================================
+       SORT / FILTER OPTIONS
+    ========================================================= */
+
+    const userSortByOptions = [
         {
             value: "userId",
             label: "User ID"
         },
-
         {
             value: "userName",
             label: "User Name"
         },
-
         {
             value: "email",
             label: "Email"
         },
-
         {
             value: "authorityProfiles.authorityName",
             label: "Authority"
         },
-
         {
             value: "status.description",
             label: "Status"
         },
-
         {
             value: "createdAt",
             label: "Created Date"
@@ -199,17 +211,14 @@ export default function Header({
 
 
     const notebookSortByOptions = [
-
         {
             value: "notebookId",
             label: "Notebook ID"
         },
-
         {
             value: "title",
             label: "Title"
         },
-
         {
             value: "createdAt",
             label: "Created Date"
@@ -218,12 +227,10 @@ export default function Header({
 
 
     const sortOrderOptions = [
-
         {
             value: "asc",
             label: "A → Z"
         },
-
         {
             value: "desc",
             label: "Z → A"
@@ -248,6 +255,11 @@ export default function Header({
         "NAC",
         "NAR"
     ];
+
+
+    /* =========================================================
+       EDITOR OPTIONS
+    ========================================================= */
 
     const fontOptions = [
         "Calibri",
@@ -287,6 +299,10 @@ export default function Header({
             : notebookStatusOptions;
 
 
+    /* =========================================================
+       HELPERS
+    ========================================================= */
+
     const getSearchPlaceholder = () => {
 
         if (isAdmin) {
@@ -324,6 +340,11 @@ export default function Header({
             : "A → Z";
     };
 
+
+    /* =========================================================
+       BUTTON LOGGER
+    ========================================================= */
+
     const logButtonEvent = ({
         buttonNo,
         buttonName,
@@ -347,6 +368,11 @@ export default function Header({
 
         console.groupEnd();
     };
+
+
+    /* =========================================================
+       REFRESH HEADER
+    ========================================================= */
 
     useEffect(() => {
 
@@ -384,10 +410,16 @@ export default function Header({
 
     }, []);
 
+
+    /* =========================================================
+       PAGE HEADER DETAILS
+    ========================================================= */
+
     useEffect(() => {
 
         const fetchPageHeaderDetails =
             async () => {
+
                 if (!pageId) {
 
                     setHeaderPageTitle(
@@ -412,28 +444,25 @@ export default function Header({
                         );
 
 
-                    console.group(
-                        "HB33 - Load Page Header Details"
-                    );
+                    logButtonEvent({
 
+                        buttonNo: "HB16",
 
-                    console.log("Request");
+                        buttonName:
+                            "Load Page Header Details",
 
-                    console.log({
-                        method: "GET",
-                        url:
-                            `http://localhost:8080/api/pages/${pageId}`
+                        request: {
+                            method: "GET",
+                            url:
+                                `http://localhost:8080/api/pages/${pageId}`
+                        },
+
+                        response:
+                            response.data,
+
+                        status:
+                            response.status
                     });
-
-
-                    console.log("Response");
-
-                    console.log(
-                        response.data
-                    );
-
-
-                    console.groupEnd();
 
 
                     setHeaderPageTitle(
@@ -443,21 +472,27 @@ export default function Header({
 
                 } catch (error) {
 
-                    console.group(
-                        "HB33 - Load Page Header Details"
-                    );
+                    logButtonEvent({
 
+                        buttonNo: "HB16",
 
-                    console.log(
-                        "Response"
-                    );
+                        buttonName:
+                            "Load Page Header Details",
 
-                    console.log(
-                        error.response?.data
-                    );
+                        request: {
+                            method: "GET",
+                            url:
+                                `http://localhost:8080/api/pages/${pageId}`
+                        },
 
+                        response:
+                            error.response?.data ||
+                            error.message,
 
-                    console.groupEnd();
+                        status:
+                            error.response?.status ||
+                            500
+                    });
 
 
                     setHeaderPageTitle(
@@ -474,6 +509,11 @@ export default function Header({
         pageTitle,
         token
     ]);
+
+
+    /* =========================================================
+       CLOSE POPUPS ON NAVIGATION / ROLE CHANGE
+    ========================================================= */
 
     useEffect(() => {
 
@@ -499,6 +539,11 @@ export default function Header({
         location.pathname,
         currentRole
     ]);
+
+
+    /* =========================================================
+       VALIDATE SORT / FILTER VALUES
+    ========================================================= */
 
     useEffect(() => {
 
@@ -587,6 +632,11 @@ export default function Header({
         setStatusFilter
     ]);
 
+
+    /* =========================================================
+       EDITOR COMMAND
+    ========================================================= */
+
     const dispatchEditorCommand = (
         command,
         value = null
@@ -610,6 +660,10 @@ export default function Header({
     };
 
 
+    /* =========================================================
+       EDITOR BUTTONS
+    ========================================================= */
+
     const handleEditorUndo = () => {
 
         if (!pageId) {
@@ -617,14 +671,12 @@ export default function Header({
         }
 
 
-        dispatchEditorCommand(
-            "undo"
-        );
+        dispatchEditorCommand("undo");
 
 
         logButtonEvent({
 
-            buttonNo: "HB30",
+            buttonNo: "HB38",
 
             buttonName:
                 "Editor Undo Button",
@@ -652,14 +704,12 @@ export default function Header({
         }
 
 
-        dispatchEditorCommand(
-            "redo"
-        );
+        dispatchEditorCommand("redo");
 
 
         logButtonEvent({
 
-            buttonNo: "HB31",
+            buttonNo: "HB39",
 
             buttonName:
                 "Editor Redo Button",
@@ -682,25 +732,82 @@ export default function Header({
 
     const handleBold = () => {
 
-        dispatchEditorCommand(
-            "bold"
-        );
+        dispatchEditorCommand("bold");
+
+        logButtonEvent({
+
+            buttonNo: "HB44",
+
+            buttonName:
+                "Bold Button",
+
+            request: {
+                action: "bold",
+                page:
+                    location.pathname
+            },
+
+            response: {
+                message:
+                    "Bold command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
     const handleItalic = () => {
 
-        dispatchEditorCommand(
-            "italic"
-        );
+        dispatchEditorCommand("italic");
+
+        logButtonEvent({
+
+            buttonNo: "HB45",
+
+            buttonName:
+                "Italic Button",
+
+            request: {
+                action: "italic",
+                page:
+                    location.pathname
+            },
+
+            response: {
+                message:
+                    "Italic command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
     const handleUnderline = () => {
 
-        dispatchEditorCommand(
-            "underline"
-        );
+        dispatchEditorCommand("underline");
+
+        logButtonEvent({
+
+            buttonNo: "HB46",
+
+            buttonName:
+                "Underline Button",
+
+            request: {
+                action: "underline",
+                page:
+                    location.pathname
+            },
+
+            response: {
+                message:
+                    "Underline command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -710,6 +817,26 @@ export default function Header({
             "hiliteColor",
             "#fff59d"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB47",
+
+            buttonName:
+                "Highlight Button",
+
+            request: {
+                action: "highlight",
+                color: "#fff59d"
+            },
+
+            response: {
+                message:
+                    "Highlight command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -719,6 +846,26 @@ export default function Header({
             "foreColor",
             "#000000"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB48",
+
+            buttonName:
+                "Text Color Button",
+
+            request: {
+                action: "textColor",
+                color: "#000000"
+            },
+
+            response: {
+                message:
+                    "Text color command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -727,6 +874,25 @@ export default function Header({
         dispatchEditorCommand(
             "justifyLeft"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB49",
+
+            buttonName:
+                "Align Left Button",
+
+            request: {
+                action: "justifyLeft"
+            },
+
+            response: {
+                message:
+                    "Left alignment command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -735,6 +901,25 @@ export default function Header({
         dispatchEditorCommand(
             "justifyCenter"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB50",
+
+            buttonName:
+                "Align Center Button",
+
+            request: {
+                action: "justifyCenter"
+            },
+
+            response: {
+                message:
+                    "Center alignment command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -743,6 +928,25 @@ export default function Header({
         dispatchEditorCommand(
             "justifyRight"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB51",
+
+            buttonName:
+                "Align Right Button",
+
+            request: {
+                action: "justifyRight"
+            },
+
+            response: {
+                message:
+                    "Right alignment command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -751,6 +955,26 @@ export default function Header({
         dispatchEditorCommand(
             "insertUnorderedList"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB52",
+
+            buttonName:
+                "Bulleted List Button",
+
+            request: {
+                action:
+                    "insertUnorderedList"
+            },
+
+            response: {
+                message:
+                    "Bulleted list command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -759,6 +983,26 @@ export default function Header({
         dispatchEditorCommand(
             "insertOrderedList"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB53",
+
+            buttonName:
+                "Numbered List Button",
+
+            request: {
+                action:
+                    "insertOrderedList"
+            },
+
+            response: {
+                message:
+                    "Numbered list command triggered"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -767,6 +1011,71 @@ export default function Header({
         dispatchEditorCommand(
             "insertTable"
         );
+
+        logButtonEvent({
+
+            buttonNo: "HB54",
+
+            buttonName:
+                "Insert Table Button",
+
+            request: {
+                action:
+                    "insertTable"
+            },
+
+            response: {
+                message:
+                    "Insert table command triggered"
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================================================
+       FONT
+    ========================================================= */
+
+    const handleFontDropdown = () => {
+
+        const nextState =
+            !showFontDropdown;
+
+
+        setShowFontDropdown(
+            nextState
+        );
+
+        setShowSizeDropdown(false);
+
+        setShowMoreTools(false);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB40",
+
+            buttonName:
+                "Font Family Dropdown Button",
+
+            request: {
+                action:
+                    nextState
+                        ? "Open Dropdown"
+                        : "Close Dropdown"
+            },
+
+            response: {
+                message:
+                    nextState
+                        ? "Font family dropdown opened"
+                        : "Font family dropdown closed"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -780,6 +1089,73 @@ export default function Header({
             "fontName",
             value
         );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB41",
+
+            buttonName:
+                "Font Family Option Button",
+
+            request: {
+                action: "Select Font",
+                font: value
+            },
+
+            response: {
+                message:
+                    "Font family selected",
+                font: value
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================================================
+       FONT SIZE
+    ========================================================= */
+
+    const handleSizeDropdown = () => {
+
+        const nextState =
+            !showSizeDropdown;
+
+
+        setShowSizeDropdown(
+            nextState
+        );
+
+        setShowFontDropdown(false);
+
+        setShowMoreTools(false);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB42",
+
+            buttonName:
+                "Font Size Dropdown Button",
+
+            request: {
+                action:
+                    nextState
+                        ? "Open Dropdown"
+                        : "Close Dropdown"
+            },
+
+            response: {
+                message:
+                    nextState
+                        ? "Font size dropdown opened"
+                        : "Font size dropdown closed"
+            },
+
+            status: 200
+        });
     };
 
 
@@ -793,7 +1169,34 @@ export default function Header({
             "fontSize",
             value
         );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB43",
+
+            buttonName:
+                "Font Size Option Button",
+
+            request: {
+                action: "Select Font Size",
+                size: value
+            },
+
+            response: {
+                message:
+                    "Font size selected",
+                size: value
+            },
+
+            status: 200
+        });
     };
+
+
+    /* =========================================================
+       HOME
+    ========================================================= */
 
     const handleHome = () => {
 
@@ -803,33 +1206,90 @@ export default function Header({
             ) || "USER";
 
 
+        let destination;
+
+
         if (role === "ADMIN") {
 
-            navigate("/admin");
+            destination = "/admin";
 
         } else if (
             role === "SUPER_USER"
         ) {
 
-            navigate(
-                "/superuser-homepage"
-            );
+            destination =
+                "/superuser-homepage";
 
         } else if (
             role === "USER"
         ) {
 
-            navigate(
-                "/user-homepage"
-            );
+            destination =
+                "/user-homepage";
 
         } else {
 
-            navigate("/");
+            destination = "/";
         }
+
+
+        logButtonEvent({
+
+            buttonNo: "HB16",
+
+            buttonName:
+                "Home Button",
+
+            request: {
+                action: "Navigate Home",
+                from:
+                    location.pathname,
+                currentRole: role
+            },
+
+            response: {
+                message:
+                    "Navigating Home",
+                destination
+            },
+
+            status: 200
+        });
+
+
+        navigate(destination);
     };
 
+
+    /* =========================================================
+       BACK
+    ========================================================= */
+
     const handleBack = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB17",
+
+            buttonName:
+                "Back Button",
+
+            request: {
+                action: "Navigate Back",
+                from:
+                    location.pathname
+            },
+
+            response: {
+                message:
+                    window.history.length > 1
+                        ? "Navigating to previous page"
+                        : "No previous history. Navigating to User Home"
+            },
+
+            status: 200
+        });
+
 
         if (
             window.history.length > 1
@@ -844,6 +1304,47 @@ export default function Header({
             );
         }
     };
+
+
+    /* =========================================================
+       CREATE USER
+    ========================================================= */
+
+    const handleCreateUser = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB18",
+
+            buttonName:
+                "Create User Button",
+
+            request: {
+                action: "Navigate",
+                from:
+                    location.pathname,
+                destination:
+                    "/admin/create-user"
+            },
+
+            response: {
+                message:
+                    "Navigating to Create User"
+            },
+
+            status: 200
+        });
+
+
+        navigate(
+            "/admin/create-user"
+        );
+    };
+
+
+    /* =========================================================
+       CREATE NOTEBOOK
+    ========================================================= */
 
     const handleCreateNotebookButton = () => {
 
@@ -864,13 +1365,12 @@ export default function Header({
 
         logButtonEvent({
 
-            buttonNo: "HB21",
+            buttonNo: "HB19",
 
             buttonName:
-                "Create Notebook Button",
+                "New Notebook Button",
 
             request: {
-
                 action:
                     nextState
                         ? "Open Popup"
@@ -883,7 +1383,6 @@ export default function Header({
             },
 
             response: {
-
                 message:
                     nextState
                         ? "Create Notebook popup opened"
@@ -893,6 +1392,11 @@ export default function Header({
             status: 200
         });
     };
+
+
+    /* =========================================================
+       CREATE PAGE
+    ========================================================= */
 
     const handleCreatePageButton = () => {
 
@@ -913,13 +1417,12 @@ export default function Header({
 
         logButtonEvent({
 
-            buttonNo: "HB22",
+            buttonNo: "HB20",
 
             buttonName:
-                "Create Page Button",
+                "New Page Button",
 
             request: {
-
                 action:
                     nextState
                         ? "Open Popup"
@@ -932,7 +1435,6 @@ export default function Header({
             },
 
             response: {
-
                 message:
                     nextState
                         ? "Create Page popup opened"
@@ -943,10 +1445,61 @@ export default function Header({
         });
     };
 
+
+    /* =========================================================
+       SEARCH
+    ========================================================= */
+
+    const handleSearchChange = e => {
+
+        const value =
+            e.target.value;
+
+
+        setSearchKeyword(value);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB21",
+
+            buttonName:
+                "Search Field / Search Button",
+
+            request: {
+                action:
+                    isAdmin
+                        ? "Search Users"
+                        : "Search Notebooks",
+
+                keyword: value,
+
+                currentRole
+            },
+
+            response: {
+                message:
+                    "Search keyword updated",
+                keyword: value
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================================================
+       SORT
+    ========================================================= */
+
     const handleSortButton = () => {
 
+        const nextState =
+            !showSort;
+
+
         setShowSort(
-            prev => !prev
+            nextState
         );
 
         setShowFilter(false);
@@ -954,74 +1507,82 @@ export default function Header({
         setShowCreateNotebook(false);
 
         setShowCreatePage(false);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB22",
+
+            buttonName:
+                "Sort Button",
+
+            request: {
+                action:
+                    nextState
+                        ? "Open Sort"
+                        : "Close Sort",
+
+                currentRole,
+
+                page:
+                    location.pathname
+            },
+
+            response: {
+                message:
+                    nextState
+                        ? "Sort popup opened"
+                        : "Sort popup closed"
+            },
+
+            status: 200
+        });
     };
 
-    const handleFilterButton = () => {
-
-        setShowFilter(
-            prev => !prev
-        );
-
-        setShowSort(false);
-
-        setShowCreateNotebook(false);
-
-        setShowCreatePage(false);
-    };
-
-    const toggleAuthority = value => {
-
-        if (
-            authorityFilter.includes(value)
-        ) {
-
-            setAuthorityFilter(
-                authorityFilter.filter(
-                    item =>
-                        item !== value
-                )
-            );
-
-        } else {
-
-            setAuthorityFilter([
-                ...authorityFilter,
-                value
-            ]);
-        }
-    };
-
-    const toggleStatus = value => {
-
-        if (
-            statusFilter.includes(value)
-        ) {
-
-            setStatusFilter(
-                statusFilter.filter(
-                    item =>
-                        item !== value
-                )
-            );
-
-        } else {
-
-            setStatusFilter([
-                ...statusFilter,
-                value
-            ]);
-        }
-    };
 
     const handleSortDropdown =
         dropdownName => {
 
+            const nextState =
+                openSortDropdown === dropdownName
+                    ? null
+                    : dropdownName;
+
+
             setOpenSortDropdown(
-                prev =>
-                    prev === dropdownName
-                        ? null
-                        : dropdownName
+                nextState
             );
+
+
+            logButtonEvent({
+
+                buttonNo:
+                    dropdownName === "sortBy"
+                        ? "HB23"
+                        : "HB24",
+
+                buttonName:
+                    dropdownName === "sortBy"
+                        ? "Sort By Dropdown Button"
+                        : "Sort Order Dropdown Button",
+
+                request: {
+                    action:
+                        nextState
+                            ? "Open Dropdown"
+                            : "Close Dropdown",
+
+                    dropdown:
+                        dropdownName
+                },
+
+                response: {
+                    message:
+                        "Sort dropdown toggled"
+                },
+
+                status: 200
+            });
         };
 
 
@@ -1029,22 +1590,18 @@ export default function Header({
 
         logButtonEvent({
 
-            buttonNo: "HB11",
+            buttonNo: "HB27",
 
             buttonName:
-                "Sort Button",
+                "Apply Sort Button",
 
             request: {
-
                 currentRole,
-
                 sortBy,
-
                 sortDir
             },
 
             response: {
-
                 message:
                     isAdmin
                         ? "User sorting applied"
@@ -1060,26 +1617,223 @@ export default function Header({
         setShowSort(false);
     };
 
-    const applyFilter = () => {
+
+    const cancelSort = () => {
 
         logButtonEvent({
 
-            buttonNo: "HB12",
+            buttonNo: "HB28",
+
+            buttonName:
+                "Cancel Sort Button",
+
+            request: {
+                currentRole,
+                sortBy,
+                sortDir,
+                action:
+                    "Cancel Sort"
+            },
+
+            response: {
+                message:
+                    "Sort popup cancelled"
+            },
+
+            status: 200
+        });
+
+
+        setShowSort(false);
+
+        setOpenSortDropdown(null);
+    };
+
+
+    /* =========================================================
+       FILTER
+    ========================================================= */
+
+    const handleFilterButton = () => {
+
+        const nextState =
+            !showFilter;
+
+
+        setShowFilter(
+            nextState
+        );
+
+        setShowSort(false);
+
+        setShowCreateNotebook(false);
+
+        setShowCreatePage(false);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB29",
 
             buttonName:
                 "Filter Button",
 
             request: {
+                action:
+                    nextState
+                        ? "Open Filter"
+                        : "Close Filter",
 
                 currentRole,
 
-                authorityFilter,
+                page:
+                    location.pathname
+            },
 
+            response: {
+                message:
+                    nextState
+                        ? "Filter popup opened"
+                        : "Filter popup closed"
+            },
+
+            status: 200
+        });
+    };
+
+
+    const toggleAuthority = value => {
+
+        let updatedFilter;
+
+
+        if (
+            authorityFilter.includes(value)
+        ) {
+
+            updatedFilter =
+                authorityFilter.filter(
+                    item =>
+                        item !== value
+                );
+
+        } else {
+
+            updatedFilter = [
+                ...authorityFilter,
+                value
+            ];
+        }
+
+
+        setAuthorityFilter(
+            updatedFilter
+        );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB30",
+
+            buttonName:
+                "Authority Filter Checkbox",
+
+            request: {
+                action:
+                    authorityFilter.includes(value)
+                        ? "Uncheck"
+                        : "Check",
+
+                authority: value,
+
+                currentSelection:
+                    updatedFilter
+            },
+
+            response: {
+                message:
+                    "Authority filter updated"
+            },
+
+            status: 200
+        });
+    };
+
+
+    const toggleStatus = value => {
+
+        let updatedFilter;
+
+
+        if (
+            statusFilter.includes(value)
+        ) {
+
+            updatedFilter =
+                statusFilter.filter(
+                    item =>
+                        item !== value
+                );
+
+        } else {
+
+            updatedFilter = [
+                ...statusFilter,
+                value
+            ];
+        }
+
+
+        setStatusFilter(
+            updatedFilter
+        );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB31",
+
+            buttonName:
+                "Status Filter Checkbox",
+
+            request: {
+                action:
+                    statusFilter.includes(value)
+                        ? "Uncheck"
+                        : "Check",
+
+                status: value,
+
+                currentSelection:
+                    updatedFilter
+            },
+
+            response: {
+                message:
+                    "Status filter updated"
+            },
+
+            status: 200
+        });
+    };
+
+
+    const applyFilter = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB32",
+
+            buttonName:
+                "Apply Filter Button",
+
+            request: {
+                currentRole,
+                authorityFilter,
                 statusFilter
             },
 
             response: {
-
                 message:
                     isAdmin
                         ? "User filtering applied"
@@ -1098,6 +1852,32 @@ export default function Header({
 
     const resetFilter = () => {
 
+        logButtonEvent({
+
+            buttonNo: "HB33",
+
+            buttonName:
+                "Reset Filter Button",
+
+            request: {
+                currentRole,
+
+                previousAuthorityFilter:
+                    authorityFilter,
+
+                previousStatusFilter:
+                    statusFilter
+            },
+
+            response: {
+                message:
+                    "Filters reset successfully"
+            },
+
+            status: 200
+        });
+
+
         setAuthorityFilter([]);
 
         setStatusFilter([]);
@@ -1105,27 +1885,145 @@ export default function Header({
         setOpenFilterDropdown(null);
     };
 
+
+    const cancelFilter = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB34",
+
+            buttonName:
+                "Cancel Filter Button",
+
+            request: {
+                currentRole,
+                authorityFilter,
+                statusFilter,
+                action:
+                    "Cancel Filter"
+            },
+
+            response: {
+                message:
+                    "Filter popup cancelled"
+            },
+
+            status: 200
+        });
+
+
+        setShowFilter(false);
+
+        setOpenFilterDropdown(null);
+    };
+
+
+    /* =========================================================
+       PROFILE
+    ========================================================= */
+
+    const handleProfile = () => {
+
+        logButtonEvent({
+
+            buttonNo: "HB36",
+
+            buttonName:
+                "Profile Button",
+
+            request: {
+                action:
+                    "Profile Click",
+
+                currentRole,
+
+                userName:
+                    username
+            },
+
+            response: {
+                message:
+                    "Profile button clicked"
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================================================
+       LOGOUT
+    ========================================================= */
+
     const handleLogout = async () => {
+
+        const request = {
+
+            method: "POST",
+
+            url:
+                `${API_URL}/logout`,
+
+            currentRole
+        };
+
 
         try {
 
-            await axios.post(
-                `${API_URL}/logout`,
-                {},
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
+            const response =
+                await axios.post(
+                    `${API_URL}/logout`,
+                    {},
+                    {
+                        headers: {
+                            Authorization:
+                                `Bearer ${token}`
+                        }
                     }
-                }
-            );
+                );
+
+
+            logButtonEvent({
+
+                buttonNo: "HB37",
+
+                buttonName:
+                    "Logout Button",
+
+                request,
+
+                response:
+                    response.data,
+
+                status:
+                    response.status
+            });
 
 
             toast.success(
                 "Logged out successfully."
             );
 
-        } catch {
+        } catch (error) {
+
+            logButtonEvent({
+
+                buttonNo: "HB37",
+
+                buttonName:
+                    "Logout Button",
+
+                request,
+
+                response:
+                    error.response?.data ||
+                    error.message,
+
+                status:
+                    error.response?.status ||
+                    500
+            });
+
 
             toast.error(
                 "Logout failed."
@@ -1145,6 +2043,143 @@ export default function Header({
         }
     };
 
+
+    /* =========================================================
+       MORE TOOLS
+    ========================================================= */
+
+    const handleMoreTools = () => {
+
+        const nextState =
+            !showMoreTools;
+
+
+        setShowMoreTools(
+            nextState
+        );
+
+        setShowFontDropdown(false);
+
+        setShowSizeDropdown(false);
+
+
+        logButtonEvent({
+
+            buttonNo: "HB55",
+
+            buttonName:
+                "More Tools Button",
+
+            request: {
+                action:
+                    nextState
+                        ? "Open More Tools"
+                        : "Close More Tools"
+            },
+
+            response: {
+                message:
+                    nextState
+                        ? "More tools menu opened"
+                        : "More tools menu closed"
+            },
+
+            status: 200
+        });
+    };
+
+
+    const handleClearFormatting = () => {
+
+        dispatchEditorCommand(
+            "removeFormat"
+        );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB56",
+
+            buttonName:
+                "Clear Formatting Button",
+
+            request: {
+                action:
+                    "removeFormat"
+            },
+
+            response: {
+                message:
+                    "Clear formatting command triggered"
+            },
+
+            status: 200
+        });
+    };
+
+
+    const handleStrikethrough = () => {
+
+        dispatchEditorCommand(
+            "strikeThrough"
+        );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB57",
+
+            buttonName:
+                "Strikethrough Button",
+
+            request: {
+                action:
+                    "strikeThrough"
+            },
+
+            response: {
+                message:
+                    "Strikethrough command triggered"
+            },
+
+            status: 200
+        });
+    };
+
+
+    const handleJustify = () => {
+
+        dispatchEditorCommand(
+            "justifyFull"
+        );
+
+
+        logButtonEvent({
+
+            buttonNo: "HB58",
+
+            buttonName:
+                "Justify Button",
+
+            request: {
+                action:
+                    "justifyFull"
+            },
+
+            response: {
+                message:
+                    "Justify command triggered"
+            },
+
+            status: 200
+        });
+    };
+
+
+    /* =========================================================
+       HIDDEN HEADER ROUTES
+    ========================================================= */
+
     const hideHeaderRoutes = [
         "/",
         "/forgot-password",
@@ -1162,12 +2197,24 @@ export default function Header({
     }
 
 
+    /* =========================================================
+       JSX
+    ========================================================= */
+
     return (
         <>
+
+            {/* =================================================
+                MAIN HEADER
+            ================================================= */}
+
             <header className="header">
+
+                {/* ================= LEFT ================= */}
 
                 <div className="header-left">
 
+                    {/* HB16 */}
                     <button
                         type="button"
                         className="header-icon-btn"
@@ -1178,6 +2225,7 @@ export default function Header({
                     </button>
 
 
+                    {/* HB17 */}
                     <button
                         type="button"
                         className="header-icon-btn"
@@ -1188,17 +2236,14 @@ export default function Header({
                     </button>
 
 
+                    {/* HB18 */}
                     {permissions.canManageUsers && (
 
                         <button
                             type="button"
                             className="header-icon-btn"
                             data-tooltip="Create User"
-                            onClick={() =>
-                                navigate(
-                                    "/admin/create-user"
-                                )
-                            }
+                            onClick={handleCreateUser}
                         >
                             <FaUserPlus />
                         </button>
@@ -1206,6 +2251,7 @@ export default function Header({
                     )}
 
 
+                    {/* HB19 */}
                     {permissions.canCreateNotebook && (
 
                         <div className="header-popup-container">
@@ -1248,6 +2294,7 @@ export default function Header({
                     )}
 
 
+                    {/* HB20 */}
                     {permissions.canCreatePage && (
 
                         <div className="header-popup-container">
@@ -1290,10 +2337,7 @@ export default function Header({
                     )}
 
 
-                    {/* ==================================================
-                        PAGE TITLE
-                        Only displayed when a page is opened.
-                    ================================================== */}
+                    {/* PAGE TITLE */}
 
                     {pageId && (
 
@@ -1325,10 +2369,13 @@ export default function Header({
                 </div>
 
 
+                {/* ================= CENTER ================= */}
+
                 <div className="header-center">
 
                     <div className="search-container">
 
+                        {/* HB21 */}
                         <input
                             className="search-input"
                             type="text"
@@ -1338,10 +2385,8 @@ export default function Header({
                             value={
                                 searchKeyword || ""
                             }
-                            onChange={e =>
-                                setSearchKeyword(
-                                    e.target.value
-                                )
+                            onChange={
+                                handleSearchChange
                             }
                         />
 
@@ -1354,7 +2399,14 @@ export default function Header({
 
                 </div>
 
+
+                {/* ================= RIGHT ================= */}
+
                 <div className="header-right">
+
+                    {/* =================================================
+                        HB22 - SORT
+                    ================================================= */}
 
                     {permissions.canSort && (
 
@@ -1387,6 +2439,8 @@ export default function Header({
 
                                     <div className="popup-body">
 
+                                        {/* SORT BY */}
+
                                         <div className="popup-section">
 
                                             <label>
@@ -1396,6 +2450,7 @@ export default function Header({
 
                                             <div className="custom-dropdown">
 
+                                                {/* HB23 */}
                                                 <button
                                                     type="button"
                                                     className="custom-dropdown-button"
@@ -1427,6 +2482,7 @@ export default function Header({
                                                         {currentSortOptions.map(
                                                             option => (
 
+                                                                /* HB25 */
                                                                 <button
                                                                     type="button"
                                                                     key={
@@ -1447,6 +2503,30 @@ export default function Header({
                                                                         setOpenSortDropdown(
                                                                             null
                                                                         );
+
+
+                                                                        logButtonEvent({
+
+                                                                            buttonNo:
+                                                                                "HB25",
+
+                                                                            buttonName:
+                                                                                "Sort By Option Button",
+
+                                                                            request: {
+                                                                                action:
+                                                                                    "Select Sort By",
+                                                                                value:
+                                                                                    option.value
+                                                                            },
+
+                                                                            response: {
+                                                                                message:
+                                                                                    "Sort By option selected"
+                                                                            },
+
+                                                                            status: 200
+                                                                        });
 
                                                                     }}
                                                                 >
@@ -1469,6 +2549,8 @@ export default function Header({
                                         </div>
 
 
+                                        {/* ORDER */}
+
                                         <div className="popup-section">
 
                                             <label>
@@ -1478,6 +2560,7 @@ export default function Header({
 
                                             <div className="custom-dropdown">
 
+                                                {/* HB24 */}
                                                 <button
                                                     type="button"
                                                     className="custom-dropdown-button"
@@ -1509,6 +2592,7 @@ export default function Header({
                                                         {sortOrderOptions.map(
                                                             option => (
 
+                                                                /* HB26 */
                                                                 <button
                                                                     type="button"
                                                                     key={
@@ -1529,6 +2613,30 @@ export default function Header({
                                                                         setOpenSortDropdown(
                                                                             null
                                                                         );
+
+
+                                                                        logButtonEvent({
+
+                                                                            buttonNo:
+                                                                                "HB26",
+
+                                                                            buttonName:
+                                                                                "Sort Order Option Button",
+
+                                                                            request: {
+                                                                                action:
+                                                                                    "Select Sort Order",
+                                                                                value:
+                                                                                    option.value
+                                                                            },
+
+                                                                            response: {
+                                                                                message:
+                                                                                    "Sort order selected"
+                                                                            },
+
+                                                                            status: 200
+                                                                        });
 
                                                                     }}
                                                                 >
@@ -1555,6 +2663,7 @@ export default function Header({
 
                                     <div className="popup-buttons">
 
+                                        {/* HB27 */}
                                         <button
                                             type="button"
                                             className="apply-btn"
@@ -1566,20 +2675,13 @@ export default function Header({
                                         </button>
 
 
+                                        {/* HB28 */}
                                         <button
                                             type="button"
                                             className="cancel-btn"
-                                            onClick={() => {
-
-                                                setShowSort(
-                                                    false
-                                                );
-
-                                                setOpenSortDropdown(
-                                                    null
-                                                );
-
-                                            }}
+                                            onClick={
+                                                cancelSort
+                                            }
                                         >
                                             Cancel
                                         </button>
@@ -1594,6 +2696,10 @@ export default function Header({
 
                     )}
 
+
+                    {/* =================================================
+                        HB29 - FILTER
+                    ================================================= */}
 
                     {permissions.canFilter && (
 
@@ -1626,6 +2732,8 @@ export default function Header({
 
                                     <div className="popup-body">
 
+                                        {/* AUTHORITY */}
+
                                         {isAdmin && (
 
                                             <div className="popup-section">
@@ -1638,6 +2746,7 @@ export default function Header({
                                                 {authorityOptions.map(
                                                     authority => (
 
+                                                        /* HB30 */
                                                         <label
                                                             key={
                                                                 authority
@@ -1647,9 +2756,11 @@ export default function Header({
 
                                                             <input
                                                                 type="checkbox"
-                                                                checked={authorityFilter.includes(
-                                                                    authority
-                                                                )}
+                                                                checked={
+                                                                    authorityFilter.includes(
+                                                                        authority
+                                                                    )
+                                                                }
                                                                 onChange={() =>
                                                                     toggleAuthority(
                                                                         authority
@@ -1674,6 +2785,8 @@ export default function Header({
                                         )}
 
 
+                                        {/* STATUS */}
+
                                         <div className="popup-section">
 
                                             <label>
@@ -1684,6 +2797,7 @@ export default function Header({
                                             {currentStatusOptions.map(
                                                 status => (
 
+                                                    /* HB31 */
                                                     <label
                                                         key={
                                                             status
@@ -1693,9 +2807,11 @@ export default function Header({
 
                                                         <input
                                                             type="checkbox"
-                                                            checked={statusFilter.includes(
-                                                                status
-                                                            )}
+                                                            checked={
+                                                                statusFilter.includes(
+                                                                    status
+                                                                )
+                                                            }
                                                             onChange={() =>
                                                                 toggleStatus(
                                                                     status
@@ -1732,6 +2848,7 @@ export default function Header({
 
                                     <div className="popup-buttons">
 
+                                        {/* HB32 */}
                                         <button
                                             type="button"
                                             className="apply-btn"
@@ -1743,6 +2860,7 @@ export default function Header({
                                         </button>
 
 
+                                        {/* HB33 */}
                                         <button
                                             type="button"
                                             className="reset-btn"
@@ -1754,20 +2872,13 @@ export default function Header({
                                         </button>
 
 
+                                        {/* HB34 */}
                                         <button
                                             type="button"
                                             className="cancel-btn"
-                                            onClick={() => {
-
-                                                setShowFilter(
-                                                    false
-                                                );
-
-                                                setOpenFilterDropdown(
-                                                    null
-                                                );
-
-                                            }}
+                                            onClick={
+                                                cancelFilter
+                                            }
                                         >
                                             Cancel
                                         </button>
@@ -1783,10 +2894,45 @@ export default function Header({
                     )}
 
 
+                    {/* =================================================
+                        HB35 - ROLE TOGGLE
+                    ================================================= */}
+
                     {permissions.canToggleRole && (
-                        <ToggleButton />
+
+                        <div
+                            onClick={() =>
+                                logButtonEvent({
+
+                                    buttonNo:
+                                        "HB35",
+
+                                    buttonName:
+                                        "Toggle Role Button",
+
+                                    request: {
+                                        action:
+                                            "Toggle Role",
+
+                                        currentRole
+                                    },
+
+                                    response: {
+                                        message:
+                                            "Role toggle clicked"
+                                    },
+
+                                    status: 200
+                                })
+                            }
+                        >
+                            <ToggleButton />
+                        </div>
+
                     )}
 
+
+                    {/* USER */}
 
                     <span className="welcome-user">
 
@@ -1799,11 +2945,23 @@ export default function Header({
                     </span>
 
 
+                    {/* =================================================
+                        HB36 - PROFILE
+                    ================================================= */}
+
                     <CgProfile
                         size={24}
                         className="profile-icon"
+                        onClick={
+                            handleProfile
+                        }
+                        title="Profile"
                     />
 
+
+                    {/* =================================================
+                        HB37 - LOGOUT
+                    ================================================= */}
 
                     <button
                         type="button"
@@ -1821,20 +2979,9 @@ export default function Header({
             </header>
 
 
-            {/* ============================================================
+            {/* =====================================================
                 EDITOR TOOLBAR
-
-                IMPORTANT:
-                This entire toolbar is rendered ONLY when pageId exists.
-
-                Therefore:
-                /admin                         -> hidden
-                /user-homepage                 -> hidden
-                /superuser-homepage            -> hidden
-                /admin/create-user             -> hidden
-                /view-user/:userId             -> hidden
-                /pages/:pageId                 -> visible
-                ============================================================ */}
+            ===================================================== */}
 
             {pageId && (
 
@@ -1842,8 +2989,7 @@ export default function Header({
 
                     <div className="editor-toolbar-left">
 
-                        {/* ================= UNDO ================= */}
-
+                        {/* HB38 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -1856,8 +3002,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= REDO ================= */}
-
+                        {/* HB39 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -1873,28 +3018,18 @@ export default function Header({
                         <div className="editor-divider" />
 
 
-                        {/* ================= FONT ================= */}
+                        {/* =================================================
+                            HB40 - FONT FAMILY
+                        ================================================= */}
 
                         <div className="editor-dropdown-container">
 
                             <button
                                 type="button"
                                 className="editor-font-button"
-                                onClick={() => {
-
-                                    setShowFontDropdown(
-                                        prev => !prev
-                                    );
-
-                                    setShowSizeDropdown(
-                                        false
-                                    );
-
-                                    setShowMoreTools(
-                                        false
-                                    );
-
-                                }}
+                                onClick={
+                                    handleFontDropdown
+                                }
                             >
 
                                 <span>
@@ -1915,6 +3050,7 @@ export default function Header({
                                     {fontOptions.map(
                                         font => (
 
+                                            /* HB41 */
                                             <button
                                                 type="button"
                                                 key={
@@ -1946,28 +3082,18 @@ export default function Header({
                         </div>
 
 
-                        {/* ================= FONT SIZE ================= */}
+                        {/* =================================================
+                            HB42 - FONT SIZE
+                        ================================================= */}
 
                         <div className="editor-dropdown-container size-container">
 
                             <button
                                 type="button"
                                 className="editor-size-button"
-                                onClick={() => {
-
-                                    setShowSizeDropdown(
-                                        prev => !prev
-                                    );
-
-                                    setShowFontDropdown(
-                                        false
-                                    );
-
-                                    setShowMoreTools(
-                                        false
-                                    );
-
-                                }}
+                                onClick={
+                                    handleSizeDropdown
+                                }
                             >
 
                                 <span>
@@ -1988,6 +3114,7 @@ export default function Header({
                                     {fontSizeOptions.map(
                                         size => (
 
+                                            /* HB43 */
                                             <button
                                                 type="button"
                                                 key={
@@ -2018,8 +3145,7 @@ export default function Header({
                         <div className="editor-divider" />
 
 
-                        {/* ================= BOLD ================= */}
-
+                        {/* HB44 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2032,8 +3158,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= ITALIC ================= */}
-
+                        {/* HB45 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2046,8 +3171,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= UNDERLINE ================= */}
-
+                        {/* HB46 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2060,8 +3184,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= HIGHLIGHT ================= */}
-
+                        {/* HB47 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2074,8 +3197,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= TEXT COLOR ================= */}
-
+                        {/* HB48 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2091,8 +3213,7 @@ export default function Header({
                         <div className="editor-divider" />
 
 
-                        {/* ================= ALIGN LEFT ================= */}
-
+                        {/* HB49 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2105,8 +3226,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= ALIGN CENTER ================= */}
-
+                        {/* HB50 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2119,8 +3239,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= ALIGN RIGHT ================= */}
-
+                        {/* HB51 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2136,8 +3255,7 @@ export default function Header({
                         <div className="editor-divider" />
 
 
-                        {/* ================= BULLET LIST ================= */}
-
+                        {/* HB52 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2150,8 +3268,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= NUMBER LIST ================= */}
-
+                        {/* HB53 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2164,8 +3281,7 @@ export default function Header({
                         </button>
 
 
-                        {/* ================= TABLE ================= */}
-
+                        {/* HB54 */}
                         <button
                             type="button"
                             className="editor-tool-button"
@@ -2181,7 +3297,9 @@ export default function Header({
                         <div className="editor-divider" />
 
 
-                        {/* ================= MORE ================= */}
+                        {/* =================================================
+                            HB55 - MORE
+                        ================================================= */}
 
                         <div className="editor-dropdown-container">
 
@@ -2189,21 +3307,9 @@ export default function Header({
                                 type="button"
                                 className="editor-tool-button"
                                 data-tooltip="More"
-                                onClick={() => {
-
-                                    setShowMoreTools(
-                                        prev => !prev
-                                    );
-
-                                    setShowFontDropdown(
-                                        false
-                                    );
-
-                                    setShowSizeDropdown(
-                                        false
-                                    );
-
-                                }}
+                                onClick={
+                                    handleMoreTools
+                                }
                             >
                                 <FaEllipsisH />
                             </button>
@@ -2213,53 +3319,43 @@ export default function Header({
 
                                 <div className="editor-more-menu">
 
+                                    {/* HB56 */}
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            dispatchEditorCommand(
-                                                "removeFormat"
-                                            )
+                                        onClick={
+                                            handleClearFormatting
                                         }
                                     >
                                         Clear Formatting
                                     </button>
 
 
+                                    {/* HB57 */}
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            dispatchEditorCommand(
-                                                "strikeThrough"
-                                            )
+                                        onClick={
+                                            handleStrikethrough
                                         }
                                     >
                                         Strikethrough
                                     </button>
 
 
+                                    {/* HB58 */}
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            dispatchEditorCommand(
-                                                "justifyFull"
-                                            )
+                                        onClick={
+                                            handleJustify
                                         }
                                     >
                                         Justify
                                     </button>
-
                                 </div>
-
                             )}
-
                         </div>
-
                     </div>
-
                 </div>
-
             )}
-
         </>
     );
 }

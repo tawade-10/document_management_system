@@ -6,9 +6,11 @@ import com.example.mom.dto.Notebooks.NotebooksRequestDto;
 import com.example.mom.dto.Notebooks.NotebooksResponseDto;
 import com.example.mom.dto.Users.UsersCreationResponseDto;
 import com.example.mom.entity.Notebooks;
+import com.example.mom.entity.Pages;
 import com.example.mom.entity.Status;
 import com.example.mom.entity.Users;
 import com.example.mom.repository.NotebooksRepo;
+import com.example.mom.repository.PagesRepo;
 import com.example.mom.repository.StatusRepo;
 import com.example.mom.repository.UsersRepo;
 import com.example.mom.specification.NotebooksSpecification;
@@ -38,11 +40,14 @@ public class NotebooksServiceImpl implements NotebooksService{
 
     private final CustomIdGenerator customIdGenerator;
 
-    public NotebooksServiceImpl(UsersRepo usersRepo, NotebooksRepo notebooksRepo, StatusRepo statusRepo, CustomIdGenerator customIdGenerator) {
+    private final PagesRepo pagesRepo;
+
+    public NotebooksServiceImpl(UsersRepo usersRepo, NotebooksRepo notebooksRepo, StatusRepo statusRepo, CustomIdGenerator customIdGenerator, PagesRepo pagesRepo) {
         this.usersRepo = usersRepo;
         this.notebooksRepo = notebooksRepo;
         this.statusRepo = statusRepo;
         this.customIdGenerator = customIdGenerator;
+        this.pagesRepo = pagesRepo;
     }
 
     @Override
@@ -219,22 +224,73 @@ public class NotebooksServiceImpl implements NotebooksService{
         Users loggedInUser = usersRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
-        Notebooks notebook = notebooksRepo.findByNotebookIdAndCreatedBy(notebookId, loggedInUser)
+        Notebooks notebook = notebooksRepo
+                .findByNotebookIdAndCreatedBy(notebookId, loggedInUser)
                 .orElseThrow(() -> new RuntimeException("Cannot Archive/Unarchive notebook!"));
 
-        if ("NAC".equals(notebook.getStatus().getStatusId())) {
-            Status archivedStatus = statusRepo.findById("NAR")
-                    .orElseThrow(() -> new RuntimeException("Archived status not found"));
-            notebook.setStatus(archivedStatus);
-        } else if ("NAR".equals(notebook.getStatus().getStatusId())) {
-            Status activeStatus = statusRepo.findById("NAC")
-                    .orElseThrow(() -> new RuntimeException("Active status not found"));
-            notebook.setStatus(activeStatus);
-        } else {
+        String currentNotebookStatus = notebook.getStatus().getStatusId();
+
+        if ("NAC".equals(currentNotebookStatus)) {
+            Status archivedNotebookStatus = statusRepo.findById("NAR")
+                    .orElseThrow(() ->
+                            new RuntimeException("Archived notebook status not found"));
+
+            notebook.setStatus(archivedNotebookStatus);
+
+            List<Pages> pages = pagesRepo.findByNotebooks(notebook);
+
+            Status savedArchivedPageStatus = statusRepo.findById("PSA")
+                    .orElseThrow(() ->
+                            new RuntimeException("Saved archived page status not found"));
+
+            Status publishedArchivedPageStatus = statusRepo.findById("PPA")
+                    .orElseThrow(() ->
+                            new RuntimeException("Published archived page status not found"));
+
+            for (Pages page : pages) {
+                String pageStatus = page.getStatus().getStatusId();
+
+                if ("PSV".equals(pageStatus)) {
+                    page.setStatus(savedArchivedPageStatus);
+                } else if ("PPB".equals(pageStatus)) {
+                    page.setStatus(publishedArchivedPageStatus);
+                }
+                page.setUpdatedAt(LocalDateTime.now());
+            }
+            pagesRepo.saveAll(pages);
+        }
+        else if ("NAR".equals(currentNotebookStatus)) {
+            Status activeNotebookStatus = statusRepo.findById("NAC")
+                    .orElseThrow(() ->
+                            new RuntimeException(
+                                    "Active notebook status not found"
+                            )
+                    );
+            notebook.setStatus(activeNotebookStatus);
+            List<Pages> pages = pagesRepo.findByNotebooks(notebook);
+            Status savedPageStatus = statusRepo.findById("PSV")
+                    .orElseThrow(() -> new RuntimeException("Saved page status not found"));
+
+            Status publishedPageStatus = statusRepo.findById("PPB")
+                    .orElseThrow(() ->
+                            new RuntimeException("Published page status not found"));
+
+            for (Pages page : pages) {
+                String pageStatus = page.getStatus().getStatusId();
+                if ("PSA".equals(pageStatus)) {
+                    page.setStatus(savedPageStatus);
+                } else if ("PPA".equals(pageStatus)) {
+                    page.setStatus(publishedPageStatus);
+                }
+                page.setUpdatedAt(LocalDateTime.now());
+            }
+            pagesRepo.saveAll(pages);
+        }
+        else {
             throw new RuntimeException("Invalid notebook status");
         }
-        notebook.setUpdatedAt(LocalDateTime.now());
 
+        notebook.setUpdatedAt(LocalDateTime.now());
         Notebooks savedNotebook = notebooksRepo.save(notebook);
         return new NotebooksResponseDto(savedNotebook);
     }

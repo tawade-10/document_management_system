@@ -93,7 +93,7 @@ public class NotebooksController {
 
     @PutMapping("/updateStatus/{notebookId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<NotebooksResponseDto> updateNotebookStatus(@PathVariable String notebookId){
+    public ResponseEntity<NotebooksResponseDto> updateNotebookStatus(@PathVariable String notebookId) {
         NotebooksResponseDto updatedNotebookStatus = notebooksFacade.updateNotebookStatus(notebookId);
         return ResponseEntity.ok(updatedNotebookStatus);
     }

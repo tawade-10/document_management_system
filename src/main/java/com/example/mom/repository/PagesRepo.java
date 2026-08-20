@@ -31,4 +31,6 @@ public interface PagesRepo extends JpaRepository<Pages,String>,
     List<Pages> findByCreatedByAndStatusIn(Users loggedInUser, List<Status> savedArchivedStatus);
 
     Page<Pages> findByCreatedByUserId(String userId, Pageable pageable);
+
+    List<Pages> findByNotebooks(Notebooks notebook);
 }

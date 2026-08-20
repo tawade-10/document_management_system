@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
 import "./UnmappedPages.css";
 
 const USER_PAGES_API =
@@ -13,23 +19,49 @@ const USER_NOTEBOOKS_API =
 const MAP_PAGE_API =
     "http://localhost:8080/api/pages";
 
-export default function UnmappedPages({ searchKeyword }) {
+const PAGE_SIZE = 100;
+const MAX_VISIBLE_PAGES = 6;
+
+export default function UnmappedPages({
+    searchKeyword
+}) {
 
     const navigate = useNavigate();
 
     const [pages, setPages] = useState([]);
     const [notebooks, setNotebooks] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingNotebooks, setLoadingNotebooks] = useState(false);
-    const [error, setError] = useState("");
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const [mappingPageId, setMappingPageId] = useState(null);
 
-    const token = localStorage.getItem("token");
+    const [loading, setLoading] =
+        useState(true);
+
+    const [loadingNotebooks, setLoadingNotebooks] =
+        useState(false);
+
+    const [error, setError] =
+        useState("");
+
+    const [openDropdown, setOpenDropdown] =
+        useState(null);
+
+    const [mappingPageId, setMappingPageId] =
+        useState(null);
+
+    const token =
+        localStorage.getItem("token");
+
+    /* =========================================================
+       INITIAL LOAD
+    ========================================================= */
 
     useEffect(() => {
+
         fetchUnmappedPages();
+
     }, []);
+
+    /* =========================================================
+       FETCH UNMAPPED PAGES
+    ========================================================= */
 
     const fetchUnmappedPages = async () => {
 
@@ -38,7 +70,6 @@ export default function UnmappedPages({ searchKeyword }) {
             setLoading(true);
             setError("");
 
-            const pageSize = 100;
             let currentPage = 0;
             let allPages = [];
             let totalPages = 1;
@@ -47,20 +78,22 @@ export default function UnmappedPages({ searchKeyword }) {
 
                 const params = {
                     page: currentPage,
-                    size: pageSize,
+                    size: PAGE_SIZE,
                     sortBy: "createdAt",
                     sortDir: "desc"
                 };
 
-                const response = await axios.get(
-                    USER_PAGES_API,
-                    {
-                        params,
-                        headers: {
-                            Authorization: `Bearer ${token}`
+                const response =
+                    await axios.get(
+                        USER_PAGES_API,
+                        {
+                            params,
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
                         }
-                    }
-                );
+                    );
 
                 console.group(
                     `UH-UP1 - Load My Pages Page ${currentPage + 1}`
@@ -81,7 +114,9 @@ export default function UnmappedPages({ searchKeyword }) {
                 console.groupEnd();
 
                 const content =
-                    Array.isArray(response.data?.content)
+                    Array.isArray(
+                        response.data?.content
+                    )
                         ? response.data.content
                         : [];
 
@@ -91,11 +126,15 @@ export default function UnmappedPages({ searchKeyword }) {
                 ];
 
                 totalPages =
-                    Number(response.data?.totalPages) || 1;
+                    Number(
+                        response.data?.totalPages
+                    ) || 1;
 
                 currentPage++;
 
-            } while (currentPage < totalPages);
+            } while (
+                currentPage < totalPages
+            );
 
             const unmappedPages =
                 allPages.filter(page => {
@@ -106,7 +145,10 @@ export default function UnmappedPages({ searchKeyword }) {
                         page.notebook?.notebookId ||
                         "";
 
-                    return String(notebookId).trim() === "";
+                    return (
+                        String(notebookId)
+                            .trim() === ""
+                    );
                 });
 
             console.log(
@@ -123,11 +165,15 @@ export default function UnmappedPages({ searchKeyword }) {
 
         } catch (error) {
 
-            console.group("UH-UP1 - Load Unmapped Pages Error");
+            console.group(
+                "UH-UP1 - Load Unmapped Pages Error"
+            );
 
             console.log("Response");
 
-            console.log(error.response?.data);
+            console.log(
+                error.response?.data
+            );
 
             console.groupEnd();
 
@@ -143,13 +189,16 @@ export default function UnmappedPages({ searchKeyword }) {
         }
     };
 
+    /* =========================================================
+       FETCH NOTEBOOKS
+    ========================================================= */
+
     const fetchNotebooks = async () => {
 
         try {
 
             setLoadingNotebooks(true);
 
-            const pageSize = 100;
             let currentPage = 0;
             let allNotebooks = [];
             let totalPages = 1;
@@ -158,20 +207,22 @@ export default function UnmappedPages({ searchKeyword }) {
 
                 const params = {
                     page: currentPage,
-                    size: pageSize,
+                    size: PAGE_SIZE,
                     sortBy: "createdAt",
                     sortDir: "desc"
                 };
 
-                const response = await axios.get(
-                    USER_NOTEBOOKS_API,
-                    {
-                        params,
-                        headers: {
-                            Authorization: `Bearer ${token}`
+                const response =
+                    await axios.get(
+                        USER_NOTEBOOKS_API,
+                        {
+                            params,
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
                         }
-                    }
-                );
+                    );
 
                 console.group(
                     `UH-UP2 - Load My Notebooks Page ${currentPage + 1}`
@@ -192,7 +243,9 @@ export default function UnmappedPages({ searchKeyword }) {
                 console.groupEnd();
 
                 const content =
-                    Array.isArray(response.data?.content)
+                    Array.isArray(
+                        response.data?.content
+                    )
                         ? response.data.content
                         : [];
 
@@ -202,11 +255,15 @@ export default function UnmappedPages({ searchKeyword }) {
                 ];
 
                 totalPages =
-                    Number(response.data?.totalPages) || 1;
+                    Number(
+                        response.data?.totalPages
+                    ) || 1;
 
                 currentPage++;
 
-            } while (currentPage < totalPages);
+            } while (
+                currentPage < totalPages
+            );
 
             console.log(
                 "UH-UP2 - Total My Notebooks Loaded:",
@@ -217,11 +274,15 @@ export default function UnmappedPages({ searchKeyword }) {
 
         } catch (error) {
 
-            console.group("UH-UP2 - Load My Notebooks Error");
+            console.group(
+                "UH-UP2 - Load My Notebooks Error"
+            );
 
             console.log("Response");
 
-            console.log(error.response?.data);
+            console.log(
+                error.response?.data
+            );
 
             console.groupEnd();
 
@@ -237,21 +298,53 @@ export default function UnmappedPages({ searchKeyword }) {
         }
     };
 
-    const handleMapButtonClick = async (event, pageId) => {
+    /* =========================================================
+       BB65 - MAP BUTTON
+    ========================================================= */
+
+    const handleMapButtonClick = async (
+        event,
+        pageId
+    ) => {
 
         event.stopPropagation();
 
+        console.group(
+            "BB65 - Map Page Button"
+        );
+
+        console.log("Button Event");
+
+        console.log({
+            buttonNo: "BB65",
+            buttonName: "Map Page",
+            pageId,
+            action:
+                openDropdown === pageId
+                    ? "CLOSE_NOTEBOOK_SELECTION"
+                    : "OPEN_NOTEBOOK_SELECTION"
+        });
+
+        console.groupEnd();
+
         if (openDropdown === pageId) {
+
             setOpenDropdown(null);
+
             return;
         }
 
         setOpenDropdown(pageId);
 
         if (notebooks.length === 0) {
+
             await fetchNotebooks();
         }
     };
+
+    /* =========================================================
+       BB66 - NOTEBOOK SELECTION
+    ========================================================= */
 
     const handleNotebookSelect = async (
         event,
@@ -261,9 +354,29 @@ export default function UnmappedPages({ searchKeyword }) {
 
         event.stopPropagation();
 
-        if (!pageId || !notebookId || mappingPageId) {
+        if (
+            !pageId ||
+            !notebookId ||
+            mappingPageId
+        ) {
             return;
         }
+
+        console.group(
+            "BB66 - Select Notebook Button"
+        );
+
+        console.log("Button Event");
+
+        console.log({
+            buttonNo: "BB66",
+            buttonName: "Select Notebook",
+            pageId,
+            notebookId,
+            action: "MAP_PAGE"
+        });
+
+        console.groupEnd();
 
         try {
 
@@ -272,7 +385,9 @@ export default function UnmappedPages({ searchKeyword }) {
             const requestUrl =
                 `${MAP_PAGE_API}/map/${pageId}/notebook/${notebookId}`;
 
-            console.group("UH-UP3 - Map Page To Notebook");
+            console.group(
+                "BB66 - Map Page To Notebook API"
+            );
 
             console.log("Request");
 
@@ -283,15 +398,17 @@ export default function UnmappedPages({ searchKeyword }) {
                 notebookId
             });
 
-            const response = await axios.put(
-                requestUrl,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
+            const response =
+                await axios.put(
+                    requestUrl,
+                    {},
+                    {
+                        headers: {
+                            Authorization:
+                                `Bearer ${token}`
+                        }
                     }
-                }
-            );
+                );
 
             console.log("Response");
 
@@ -301,7 +418,9 @@ export default function UnmappedPages({ searchKeyword }) {
 
             setPages(prevPages =>
                 prevPages.filter(
-                    page => page.pageId !== pageId
+                    page =>
+                        String(page.pageId) !==
+                        String(pageId)
                 )
             );
 
@@ -313,11 +432,25 @@ export default function UnmappedPages({ searchKeyword }) {
 
         } catch (error) {
 
-            console.group("UH-UP3 - Map Page To Notebook Error");
+            console.group(
+                "BB66 - Map Page To Notebook Error"
+            );
+
+            console.log("Request");
+
+            console.log({
+                method: "PUT",
+                url:
+                    `${MAP_PAGE_API}/map/${pageId}/notebook/${notebookId}`,
+                pageId,
+                notebookId
+            });
 
             console.log("Response");
 
-            console.log(error.response?.data);
+            console.log(
+                error.response?.data
+            );
 
             console.groupEnd();
 
@@ -333,11 +466,16 @@ export default function UnmappedPages({ searchKeyword }) {
         }
     };
 
+    /* =========================================================
+       SEARCH
+    ========================================================= */
+
     const keyword =
         searchKeyword?.trim().toLowerCase() || "";
 
-    const filteredPages =
-        pages.filter(page => {
+    const filteredPages = useMemo(() => {
+
+        return pages.filter(page => {
 
             if (!keyword) {
                 return true;
@@ -369,10 +507,20 @@ export default function UnmappedPages({ searchKeyword }) {
                 pageStatus.includes(keyword) ||
                 participants.includes(keyword)
             );
+
         });
 
+    }, [pages, keyword]);
+
     const visiblePages =
-        filteredPages.slice(0, 6);
+        filteredPages.slice(
+            0,
+            MAX_VISIBLE_PAGES
+        );
+
+    /* =========================================================
+       PAGE CLICK
+    ========================================================= */
 
     const handlePageClick = pageId => {
 
@@ -380,12 +528,40 @@ export default function UnmappedPages({ searchKeyword }) {
             return;
         }
 
+        console.group(
+            "BB67 - View All Unmapped Pages / Page Navigation"
+        );
+
+        console.log("Button Event");
+
+        console.log({
+            buttonNo: "BB67",
+            buttonName:
+                "View All Unmapped Pages",
+            pageId,
+            action: "VIEW_PAGE"
+        });
+
+        console.log("Response");
+
+        console.log({
+            navigationPath:
+                `/user-homepage/view-page/${pageId}`
+        });
+
+        console.groupEnd();
+
         navigate(
             `/user-homepage/view-page/${pageId}`
         );
     };
 
+    /* =========================================================
+       RENDER
+    ========================================================= */
+
     return (
+
         <div className="unmapped-pages-card">
 
             <div className="unmapped-pages-header">
@@ -465,7 +641,9 @@ export default function UnmappedPages({ searchKeyword }) {
                                 <div
                                     className="unmapped-page-row"
                                     onClick={() =>
-                                        handlePageClick(pageId)
+                                        handlePageClick(
+                                            pageId
+                                        )
                                     }
                                 >
 
@@ -503,7 +681,9 @@ export default function UnmappedPages({ searchKeyword }) {
                                         <button
                                             type="button"
                                             className="unmapped-page-map-button"
-                                            disabled={isMapping}
+                                            disabled={
+                                                isMapping
+                                            }
                                             onClick={event =>
                                                 handleMapButtonClick(
                                                     event,
@@ -511,9 +691,11 @@ export default function UnmappedPages({ searchKeyword }) {
                                                 )
                                             }
                                         >
+
                                             {isMapping
                                                 ? "Mapping..."
                                                 : "Map"}
+
                                         </button>
 
                                         <span
@@ -568,7 +750,8 @@ export default function UnmappedPages({ searchKeyword }) {
                                                 {notebooks.map(notebook => {
 
                                                     const notebookId =
-                                                        notebook.notebookId || "";
+                                                        notebook.notebookId ||
+                                                        "";
 
                                                     const notebookName =
                                                         notebook.name ||
@@ -581,7 +764,9 @@ export default function UnmappedPages({ searchKeyword }) {
                                                             type="button"
                                                             className="unmapped-page-notebook-option"
                                                             key={notebookId}
-                                                            disabled={isMapping}
+                                                            disabled={
+                                                                isMapping
+                                                            }
                                                             onClick={event =>
                                                                 handleNotebookSelect(
                                                                     event,
@@ -632,12 +817,41 @@ export default function UnmappedPages({ searchKeyword }) {
             )}
 
             {filteredPages.length > 6 && (
+
                 <button
                     type="button"
                     className="unmapped-pages-view-more"
+                    onClick={() => {
+
+                        console.group(
+                            "BB67 - View All Unmapped Pages Button"
+                        );
+
+                        console.log("Button Event");
+
+                        console.log({
+                            buttonNo: "BB67",
+                            buttonName:
+                                "View All Unmapped Pages",
+                            totalUnmappedPages:
+                                filteredPages.length,
+                            action: "VIEW_ALL"
+                        });
+
+                        console.log("Response");
+
+                        console.log({
+                            message:
+                                "View All Unmapped Pages clicked."
+                        });
+
+                        console.groupEnd();
+
+                    }}
                 >
                     View All Unmapped Pages
                 </button>
+
             )}
 
         </div>

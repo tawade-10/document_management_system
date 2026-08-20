@@ -442,19 +442,11 @@
     }
 }
 
-/* =========================================================
-   PAGE ROW WITH UNMAP ACTION
-========================================================= */
-
 .recent-notebook-page-row {
     display: flex;
     align-items: center;
     gap: 7px;
 }
-
-/* =========================================================
-   PAGE MAIN CLICK AREA
-========================================================= */
 
 .recent-notebook-page-main {
     min-width: 0;
@@ -465,10 +457,6 @@
     gap: 7px;
     cursor: pointer;
 }
-
-/* =========================================================
-   UNMAP BUTTON
-========================================================= */
 
 .recent-notebook-unmap-button {
     flex-shrink: 0;
@@ -511,10 +499,6 @@
     color: #7d8791;
 }
 
-/* =========================================================
-   MOBILE
-========================================================= */
-
 @media (max-width: 500px) {
 
     .recent-notebook-unmap-button {
@@ -523,4 +507,58 @@
         font-size: 6.5px;
     }
 
+}
+
+/* =========================================================
+   NOTEBOOK ARCHIVE / UNARCHIVE BUTTON
+========================================================= */
+
+.recent-notebook-archive-button {
+    flex-shrink: 0;
+
+    height: 24px;
+
+    padding: 0 8px;
+
+    border: 1px solid #e3b5b5;
+    border-radius: 4px;
+
+    background: #fff5f5;
+    color: #dc3545;
+
+    font-size: 7.5px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.recent-notebook-archive-button:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: #ffffff;
+}
+
+.recent-notebook-unarchive-button {
+    border-color: #b8d8c4;
+    background: #f1faf4;
+    color: #198754;
+}
+
+.recent-notebook-unarchive-button:hover {
+    background: #198754;
+    border-color: #198754;
+    color: #ffffff;
+}
+
+@media (max-width: 500px) {
+    .recent-notebook-archive-button {
+        height: 22px;
+        padding: 0 6px;
+        font-size: 6.5px;
+    }
 }
